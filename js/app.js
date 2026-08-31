@@ -1,35 +1,19 @@
 /* =========================================================
-   POSTX — SMART SOCIAL PUBLISHER
+   POSTX
    FULL DARK PREMIUM FRONTEND ENGINE
-   Version 1.2.0
-
-   Platforms:
-   ✓ Facebook
-   ✓ Instagram
-   ✓ X
-
-   Features:
-   ✓ Dashboard
-   ✓ Create Post
-   ✓ Platform selection
-   ✓ Image upload
-   ✓ Hashtags
-   ✓ Drafts
-   ✓ Scheduling
-   ✓ Published posts
-   ✓ Calendar
-   ✓ Edit / Delete
-   ✓ LocalStorage
-   ✓ Responsive mobile navigation
-   ✓ Forced Dark Premium theme
+   Version 2.0.0
    ========================================================= */
 
 (() => {
   "use strict";
 
+  /* =========================================================
+     APP CONFIG
+     ========================================================= */
+
   const APP = {
     name: "PostX",
-    version: "1.2.0",
+    version: "2.0.0",
     storageKey: "postx_state_v2"
   };
 
@@ -55,13 +39,41 @@
   };
 
   const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: "⌂" },
-    { id: "create", label: "Create Post", icon: "+" },
-    { id: "scheduled", label: "Scheduled", icon: "◷" },
-    { id: "drafts", label: "Drafts", icon: "▤" },
-    { id: "published", label: "Published", icon: "✓" },
-    { id: "calendar", label: "Calendar", icon: "▦" }
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: "⌂"
+    },
+    {
+      id: "create",
+      label: "Create Post",
+      icon: "+"
+    },
+    {
+      id: "scheduled",
+      label: "Scheduled",
+      icon: "◷"
+    },
+    {
+      id: "drafts",
+      label: "Drafts",
+      icon: "▤"
+    },
+    {
+      id: "published",
+      label: "Published",
+      icon: "✓"
+    },
+    {
+      id: "calendar",
+      label: "Calendar",
+      icon: "▦"
+    }
   ];
+
+  /* =========================================================
+     DEFAULT STATE
+     ========================================================= */
 
   const DEFAULT_STATE = {
     posts: [],
@@ -69,9 +81,9 @@
     editingPostId: null,
 
     connectedAccounts: {
-      facebook: true,
-      instagram: true,
-      x: true
+      facebook: false,
+      instagram: false,
+      x: false
     },
 
     profile: {
@@ -83,60 +95,12 @@
   let state = loadState();
 
   /* =========================================================
-     STORAGE
+     BASIC HELPERS
      ========================================================= */
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
   }
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(APP.storageKey);
-
-      if (!raw) {
-        return clone(DEFAULT_STATE);
-      }
-
-      const saved = JSON.parse(raw);
-
-      return {
-        ...clone(DEFAULT_STATE),
-        ...saved,
-
-        posts: Array.isArray(saved.posts)
-          ? saved.posts
-          : [],
-
-        connectedAccounts: {
-          ...DEFAULT_STATE.connectedAccounts,
-          ...(saved.connectedAccounts || {})
-        },
-
-        profile: {
-          ...DEFAULT_STATE.profile,
-          ...(saved.profile || {})
-        }
-      };
-    } catch (error) {
-      return clone(DEFAULT_STATE);
-    }
-  }
-
-  function saveState() {
-    try {
-      localStorage.setItem(
-        APP.storageKey,
-        JSON.stringify(state)
-      );
-    } catch (error) {
-      console.warn("PostX storage error:", error);
-    }
-  }
-
-  /* =========================================================
-     HELPERS
-     ========================================================= */
 
   function uid(prefix = "post") {
     return (
@@ -157,12 +121,69 @@
       .replace(/'/g, "&#039;");
   }
 
+  function safeArray(value) {
+    return Array.isArray(value) ? value : [];
+  }
+
+  function normalizePlatformList(value) {
+    return safeArray(value).filter(
+      p => Object.prototype.hasOwnProperty.call(PLATFORM, p)
+    );
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(APP.storageKey);
+
+      if (!raw) {
+        return clone(DEFAULT_STATE);
+      }
+
+      const saved = JSON.parse(raw);
+
+      return {
+        ...clone(DEFAULT_STATE),
+        ...saved,
+
+        posts: safeArray(saved.posts),
+
+        connectedAccounts: {
+          ...DEFAULT_STATE.connectedAccounts,
+          ...(saved.connectedAccounts || {})
+        },
+
+        profile: {
+          ...DEFAULT_STATE.profile,
+          ...(saved.profile || {})
+        }
+      };
+    } catch (error) {
+      console.warn("PostX state recovery:", error);
+      return clone(DEFAULT_STATE);
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(
+        APP.storageKey,
+        JSON.stringify(state)
+      );
+    } catch (error) {
+      console.warn("PostX storage error:", error);
+    }
+  }
+
+  function nowISO() {
+    return new Date().toISOString();
+  }
+
   function formatDateTime(value) {
     if (!value) return "—";
 
     const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    if (isNaN(date.getTime())) {
       return "—";
     }
 
@@ -180,7 +201,7 @@
 
     const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    if (isNaN(date.getTime())) {
       return "—";
     }
 
@@ -191,7 +212,7 @@
     });
   }
 
-  function truncate(value, length = 120) {
+  function truncate(value, length = 100) {
     const text = String(value || "");
 
     if (text.length <= length) {
@@ -212,7 +233,7 @@
       .join(" ");
   }
 
-  function buildCaption(caption, hashtags) {
+  function buildFullCaption(caption, hashtags) {
     const body = String(caption || "").trim();
     const tags = normalizeHashtags(hashtags);
 
@@ -223,26 +244,6 @@
 
   function getPostById(id) {
     return state.posts.find(post => post.id === id) || null;
-  }
-
-  function getPlatforms(post) {
-    if (!post || !Array.isArray(post.platforms)) {
-      return [];
-    }
-
-    return post.platforms
-      .map(id => PLATFORM[id])
-      .filter(Boolean);
-  }
-
-  function closeMobileMenu() {
-    document
-      .getElementById("postxSidebar")
-      ?.classList.remove("open");
-
-    document
-      .getElementById("postxOverlay")
-      ?.classList.remove("show");
   }
 
   /* =========================================================
@@ -259,16 +260,59 @@
     style.id = "postx-runtime-styles";
 
     style.textContent = `
-      html,
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-        min-height: 100% !important;
+      /* =====================================================
+         POSTX DARK PREMIUM
+         ===================================================== */
+
+      :root {
+        --postx-bg: #07111f;
+        --postx-bg-2: #091827;
+        --postx-sidebar: #081321;
+        --postx-surface: #0d1b2a;
+        --postx-surface-2: #10253a;
+        --postx-surface-3: #142c43;
+
+        --postx-text: #f8fafc;
+        --postx-muted: #94a3b8;
+        --postx-muted-2: #64748b;
+
+        --postx-border: rgba(255,255,255,.09);
+
+        --postx-cyan: #00d4ff;
+        --postx-blue: #1687ff;
+        --postx-purple: #7c3aed;
+        --postx-pink: #ec4899;
+
+        --postx-green: #22c55e;
+        --postx-red: #ef4444;
+        --postx-yellow: #f59e0b;
+
+        --postx-radius: 18px;
+      }
+
+      html {
         background: #07111f !important;
-        color: #f5f7fa !important;
       }
 
       body {
+        margin: 0 !important;
+        min-height: 100vh !important;
+
+        background:
+          radial-gradient(
+            circle at 15% 0%,
+            rgba(0,212,255,.12),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 90% 10%,
+            rgba(124,58,237,.16),
+            transparent 30%
+          ),
+          #07111f !important;
+
+        color: #f8fafc !important;
+
         font-family:
           Inter,
           system-ui,
@@ -276,42 +320,20 @@
           BlinkMacSystemFont,
           "Segoe UI",
           sans-serif !important;
-
-        background:
-          radial-gradient(
-            circle at 10% 0%,
-            rgba(0, 212, 255, .12),
-            transparent 30%
-          ),
-          radial-gradient(
-            circle at 90% 5%,
-            rgba(124, 58, 237, .14),
-            transparent 30%
-          ),
-          #07111f !important;
       }
 
       body,
-      body *,
-      #app,
-      #app *,
-      #postx-app,
-      #postx-app * {
-        scrollbar-color: #263c55 #07111f;
-      }
-
       #app,
       #postx-app,
-      main {
-        background: transparent !important;
-        color: #f5f7fa !important;
+      main,
+      .postx-root,
+      .postx-shell,
+      .postx-main,
+      .postx-page {
+        color: #f8fafc !important;
       }
 
-      #postx-app {
-        min-height: 100vh !important;
-      }
-
-      #postx-app * {
+      * {
         box-sizing: border-box;
       }
 
@@ -319,45 +341,48 @@
       input,
       textarea,
       select {
-        font: inherit !important;
+        font: inherit;
       }
 
       button {
-        cursor: pointer !important;
+        cursor: pointer;
+      }
+
+      .postx-root {
+        min-height: 100vh;
+        background: transparent !important;
       }
 
       .postx-shell {
         min-height: 100vh;
         display: flex;
+        background: transparent !important;
       }
 
       /* SIDEBAR */
 
       .postx-sidebar {
-        width: 270px;
-        min-width: 270px;
-
-        position: fixed;
-        inset: 0 auto 0 0;
-
-        z-index: 1000;
-
-        padding: 22px 16px;
-
-        display: flex;
-        flex-direction: column;
+        width: 270px !important;
 
         background:
           linear-gradient(
             180deg,
-            #091625 0%,
-            #07111f 100%
+            rgba(8,19,33,.99),
+            rgba(7,17,31,.99)
           ) !important;
 
-        border-right: 1px solid rgba(255,255,255,.08);
+        border-right: 1px solid var(--postx-border) !important;
 
-        box-shadow:
-          12px 0 40px rgba(0,0,0,.25);
+        padding: 22px 16px !important;
+
+        display: flex;
+        flex-direction: column;
+
+        position: fixed;
+
+        inset: 0 auto 0 0;
+
+        z-index: 100;
 
         overflow-y: auto;
       }
@@ -366,78 +391,46 @@
         display: flex;
         align-items: center;
         gap: 11px;
-        padding: 7px 10px 26px;
+
+        padding: 8px 10px 26px;
       }
 
       .postx-brand-mark {
-        width: 45px;
-        height: 45px;
+        width: 44px;
+        height: 44px;
+
+        border-radius: 13px;
 
         display: grid;
         place-items: center;
 
-        border-radius: 13px;
-
-        font-size: 22px;
         font-weight: 900;
+        font-size: 22px;
 
-        color: #fff;
+        color: #fff !important;
 
         background:
           linear-gradient(
             135deg,
             #8b5cf6,
             #ec4899
-          );
+          ) !important;
 
         box-shadow:
-          0 8px 28px rgba(124,58,237,.4);
+          0 8px 28px rgba(124,58,237,.38);
       }
 
       .postx-brand-name {
         font-size: 20px;
         font-weight: 900;
-        color: #fff;
+        color: #fff !important;
       }
 
       .postx-brand-sub {
+        font-size: 10px;
+        color: #94a3b8 !important;
         margin-top: 2px;
-        font-size: 9px;
-        letter-spacing: .6px;
-        color: #718198;
-      }
-
-      .postx-create-btn {
-        width: 100%;
-        border: 0;
-
-        border-radius: 13px;
-
-        padding: 14px 16px;
-
-        margin-bottom: 18px;
-
-        color: #fff !important;
-
-        font-weight: 850;
-
-        background:
-          linear-gradient(
-            135deg,
-            #00d4ff,
-            #7c3aed
-          ) !important;
-
-        box-shadow:
-          0 10px 28px rgba(0,212,255,.22);
-
-        transition: .2s ease;
-      }
-
-      .postx-create-btn:hover {
-        transform: translateY(-1px);
-        box-shadow:
-          0 13px 32px rgba(0,212,255,.3);
+        letter-spacing: .5px;
       }
 
       .postx-nav {
@@ -448,19 +441,19 @@
       .postx-nav-btn {
         width: 100%;
 
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        border: 0 !important;
 
-        border: 0;
+        background: transparent !important;
+
+        color: #94a3b8 !important;
 
         padding: 12px 13px;
 
         border-radius: 12px;
 
-        background: transparent !important;
-
-        color: #8ea0b5 !important;
+        display: flex;
+        align-items: center;
+        gap: 12px;
 
         text-align: left;
 
@@ -477,73 +470,104 @@
           linear-gradient(
             90deg,
             rgba(0,212,255,.18),
-            rgba(124,58,237,.18)
+            rgba(124,58,237,.20)
           ) !important;
 
         color: #fff !important;
 
         box-shadow:
           inset 3px 0 0 #00d4ff,
-          0 4px 18px rgba(0,0,0,.12);
+          0 8px 20px rgba(0,0,0,.12);
       }
 
-      .postx-nav-icon {
-        width: 22px;
-        text-align: center;
-        font-weight: 900;
+      .postx-create-btn {
+        width: 100%;
+
+        border: 0 !important;
+
+        border-radius: 12px;
+
+        padding: 13px 16px;
+
+        font-weight: 800;
+
+        color: #fff !important;
+
+        background:
+          linear-gradient(
+            135deg,
+            #00d4ff,
+            #7c3aed
+          ) !important;
+
+        box-shadow:
+          0 8px 25px rgba(0,212,255,.22);
+
+        margin-bottom: 18px;
+      }
+
+      .postx-create-btn:hover {
+        transform: translateY(-1px);
+        box-shadow:
+          0 12px 30px rgba(0,212,255,.30);
       }
 
       /* MAIN */
 
       .postx-main {
+        margin-left: 270px;
+
         width: calc(100% - 270px);
 
         min-height: 100vh;
 
-        margin-left: 270px;
-
         background: transparent !important;
       }
 
+      .postx-mobile-header {
+        display: none;
+      }
+
       .postx-page {
-        width: 100%;
         max-width: 1400px;
 
         margin: 0 auto;
 
-        padding: 30px;
+        padding: 28px;
+
+        background: transparent !important;
       }
 
       .postx-page-header {
         display: flex;
+
         justify-content: space-between;
+
         align-items: flex-start;
 
         gap: 20px;
 
         margin-bottom: 26px;
+
+        flex-wrap: wrap;
       }
 
       .postx-page-title {
-        margin: 0;
+        margin: 0 !important;
 
-        color: #fff !important;
+        color: #f8fafc !important;
 
-        font-size: clamp(28px, 4vw, 38px);
-
-        line-height: 1.1;
+        font-size: 36px;
 
         font-weight: 900;
 
-        letter-spacing: -.9px;
+        letter-spacing: -.8px;
       }
 
       .postx-page-subtitle {
-        margin: 8px 0 0;
+        margin: 7px 0 0;
 
-        color: #8fa1b5 !important;
-
-        font-size: 14px;
+        color: #94a3b8 !important;
       }
 
       /* CARDS */
@@ -556,15 +580,14 @@
             rgba(16,37,58,.88)
           ) !important;
 
-        border:
-          1px solid rgba(255,255,255,.08) !important;
+        border: 1px solid rgba(255,255,255,.08) !important;
 
         border-radius: 18px;
 
-        color: #f5f7fa !important;
-
         box-shadow:
-          0 18px 50px rgba(0,0,0,.25);
+          0 15px 45px rgba(0,0,0,.28) !important;
+
+        color: #f8fafc !important;
       }
 
       /* STATS */
@@ -573,7 +596,7 @@
         display: grid;
 
         grid-template-columns:
-          repeat(4, minmax(0, 1fr));
+          repeat(4, 1fr);
 
         gap: 16px;
 
@@ -581,42 +604,64 @@
       }
 
       .postx-stat {
-        padding: 21px;
-        min-height: 145px;
+        padding: 20px;
+
+        position: relative;
+
+        overflow: hidden;
+      }
+
+      .postx-stat::after {
+        content: "";
+
+        position: absolute;
+
+        width: 100px;
+        height: 100px;
+
+        right: -40px;
+        bottom: -40px;
+
+        background:
+          radial-gradient(
+            circle,
+            rgba(0,212,255,.18),
+            transparent 70%
+          );
       }
 
       .postx-stat-label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
         color: #94a3b8 !important;
 
         font-size: 13px;
-        font-weight: 700;
+
+        font-weight: 650;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
       }
 
       .postx-stat-value {
-        margin-top: 11px;
-
         color: #fff !important;
 
-        font-size: 35px;
+        font-size: 34px;
 
         font-weight: 900;
 
-        letter-spacing: -.8px;
+        margin-top: 12px;
 
-        text-shadow:
-          0 0 18px rgba(0,212,255,.18);
+        letter-spacing: -.8px;
       }
 
       .postx-stat-sub {
-        margin-top: 6px;
-
         color: #00d4ff !important;
 
         font-size: 12px;
+
+        margin-top: 6px;
       }
 
       /* DASHBOARD */
@@ -625,7 +670,7 @@
         display: grid;
 
         grid-template-columns:
-          1.35fr .9fr;
+          1.4fr .9fr;
 
         gap: 20px;
       }
@@ -636,53 +681,56 @@
 
       .postx-section-head {
         display: flex;
+
         justify-content: space-between;
+
         align-items: center;
 
-        gap: 12px;
+        gap: 10px;
 
         margin-bottom: 18px;
       }
 
       .postx-section-title {
+        font-size: 17px;
+
+        font-weight: 850;
+
         margin: 0;
 
         color: #fff !important;
-
-        font-size: 17px;
-        font-weight: 850;
       }
 
       /* BUTTONS */
 
+      .postx-actions {
+        display: flex;
+
+        gap: 10px;
+
+        flex-wrap: wrap;
+      }
+
       .postx-btn {
-        border:
-          1px solid rgba(255,255,255,.1) !important;
+        border: 1px solid rgba(255,255,255,.10) !important;
 
-        border-radius: 11px;
+        border-radius: 12px;
 
-        padding: 10px 15px;
-
-        color: #fff !important;
-
-        background:
-          #0d1b2a !important;
+        padding: 11px 16px;
 
         font-weight: 750;
 
-        transition: .18s ease;
+        background: #0d1b2a !important;
+
+        color: #fff !important;
       }
 
       .postx-btn:hover {
-        background: #14283c !important;
-        border-color: rgba(0,212,255,.3) !important;
+        background: #142c43 !important;
+        border-color: rgba(0,212,255,.30) !important;
       }
 
       .postx-btn-primary {
-        border: 0 !important;
-
-        color: #03121d !important;
-
         background:
           linear-gradient(
             135deg,
@@ -690,60 +738,72 @@
             #1687ff
           ) !important;
 
+        color: #03121d !important;
+
+        border: 0 !important;
+
         box-shadow:
           0 8px 22px rgba(0,212,255,.22);
       }
 
-      .postx-btn-danger {
+      .postx-btn-gradient {
+        background:
+          linear-gradient(
+            135deg,
+            #00d4ff,
+            #7c3aed
+          ) !important;
+
         color: #fff !important;
-        background: #991b1b !important;
-        border-color: rgba(239,68,68,.25) !important;
+
+        border: 0 !important;
       }
 
       /* LIST */
 
       .postx-list {
         display: grid;
-        gap: 11px;
+
+        gap: 12px;
       }
 
       .postx-list-item {
         display: flex;
+
         align-items: center;
 
         gap: 13px;
 
         padding: 13px;
 
-        border:
-          1px solid rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.08);
 
         border-radius: 13px;
 
         background:
           rgba(255,255,255,.025);
 
-        min-width: 0;
+        color: #fff;
       }
 
       .postx-list-thumb {
         width: 52px;
         height: 52px;
 
-        flex: 0 0 52px;
+        border-radius: 11px;
+
+        background: #07111f;
 
         display: grid;
+
         place-items: center;
 
         overflow: hidden;
 
-        border-radius: 11px;
+        flex: 0 0 52px;
 
         color: #00d4ff;
-
         font-weight: 900;
-
-        background: #07111f;
       }
 
       .postx-list-thumb img {
@@ -758,7 +818,7 @@
       }
 
       .postx-list-title {
-        color: #fff;
+        color: #fff !important;
 
         font-weight: 750;
 
@@ -770,11 +830,11 @@
       }
 
       .postx-list-meta {
-        margin-top: 4px;
-
-        color: #8192a7;
+        color: #94a3b8 !important;
 
         font-size: 12px;
+
+        margin-top: 4px;
       }
 
       /* STATUS */
@@ -782,9 +842,7 @@
       .postx-status {
         display: inline-flex;
 
-        align-items: center;
-
-        padding: 5px 9px;
+        padding: 5px 8px;
 
         border-radius: 999px;
 
@@ -796,172 +854,59 @@
       }
 
       .postx-status-draft {
-        background: rgba(245,158,11,.14);
-        color: #fbbf24;
+        background: rgba(245,158,11,.15) !important;
+        color: #fbbf24 !important;
       }
 
       .postx-status-scheduled {
-        background: rgba(0,212,255,.14);
-        color: #00d4ff;
+        background: rgba(0,212,255,.15) !important;
+        color: #00d4ff !important;
       }
 
       .postx-status-published {
-        background: rgba(34,197,94,.14);
-        color: #22c55e;
+        background: rgba(34,197,94,.15) !important;
+        color: #22c55e !important;
       }
 
-      /* PLATFORM BADGES */
+      /* PLATFORM */
 
       .postx-platforms {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-
-      .postx-platform-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-
-        padding: 5px 8px;
-
-        border-radius: 999px;
-
-        font-size: 10px;
-
-        font-weight: 800;
-
-        background: rgba(255,255,255,.06);
-
-        border: 1px solid rgba(255,255,255,.07);
-      }
-
-      .postx-platform-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-      }
-
-      /* CREATE */
-
-      .postx-create-grid {
         display: grid;
 
         grid-template-columns:
-          minmax(0,1.3fr)
-          minmax(280px,.8fr);
-
-        gap: 20px;
-      }
-
-      .postx-form-card {
-        padding: 22px;
-      }
-
-      .postx-field {
-        margin-bottom: 18px;
-      }
-
-      .postx-label {
-        display: block;
-
-        margin-bottom: 8px;
-
-        color: #cbd5e1 !important;
-
-        font-size: 13px;
-
-        font-weight: 800;
-      }
-
-      .postx-input,
-      .postx-textarea,
-      .postx-select {
-        width: 100%;
-
-        border:
-          1px solid rgba(255,255,255,.1) !important;
-
-        border-radius: 12px;
-
-        padding: 12px 13px;
-
-        outline: none;
-
-        color: #fff !important;
-
-        background:
-          rgba(255,255,255,.045) !important;
-      }
-
-      .postx-input::placeholder,
-      .postx-textarea::placeholder {
-        color: #667991 !important;
-      }
-
-      .postx-input:focus,
-      .postx-textarea:focus,
-      .postx-select:focus {
-        border-color: #00d4ff !important;
-
-        box-shadow:
-          0 0 0 3px rgba(0,212,255,.09);
-      }
-
-      .postx-textarea {
-        min-height: 190px;
-        resize: vertical;
-      }
-
-      /* PLATFORM SELECTOR */
-
-      .postx-platform-grid {
-        display: grid;
-
-        grid-template-columns:
-          repeat(3, minmax(0,1fr));
+          repeat(3, 1fr);
 
         gap: 10px;
       }
 
-      .postx-platform-option {
-        position: relative;
+      .postx-platform {
+        border: 1px solid rgba(255,255,255,.10);
+
+        border-radius: 14px;
+
+        padding: 13px;
+
+        background: rgba(255,255,255,.035);
+
+        color: #94a3b8;
 
         display: flex;
 
         align-items: center;
 
-        gap: 9px;
-
-        min-height: 58px;
-
-        padding: 12px;
-
-        border-radius: 13px;
-
-        border:
-          1px solid rgba(255,255,255,.09);
-
-        background:
-          rgba(255,255,255,.025);
-
-        color: #94a3b8;
-
-        cursor: pointer;
+        gap: 10px;
 
         transition: .18s ease;
       }
 
-      .postx-platform-option:hover {
-        border-color:
-          rgba(0,212,255,.3);
+      .postx-platform:hover {
+        border-color: rgba(0,212,255,.35);
+
+        background: rgba(0,212,255,.06);
       }
 
-      .postx-platform-option.selected {
-        color: #fff;
-
-        border-color:
-          rgba(0,212,255,.65);
+      .postx-platform.selected {
+        border-color: #00d4ff;
 
         background:
           linear-gradient(
@@ -970,231 +915,166 @@
             rgba(124,58,237,.12)
           );
 
-        box-shadow:
-          0 0 0 1px rgba(0,212,255,.1);
-      }
+        color: #fff;
 
-      .postx-platform-option input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
+        box-shadow:
+          0 0 0 1px rgba(0,212,255,.10),
+          0 8px 25px rgba(0,212,255,.08);
       }
 
       .postx-platform-icon {
-        width: 30px;
-        height: 30px;
+        width: 34px;
+        height: 34px;
+
+        border-radius: 10px;
 
         display: grid;
+
         place-items: center;
-
-        border-radius: 9px;
-
-        color: #fff;
 
         font-weight: 900;
 
-        background: rgba(255,255,255,.08);
+        color: #fff;
+
+        background: #182b3e;
       }
 
       .postx-platform-name {
-        font-size: 12px;
-        font-weight: 800;
+        font-weight: 750;
       }
 
-      .postx-platform-status {
+      .postx-platform-state {
+        display: block;
+
+        color: #64748b;
+
+        font-size: 10px;
+
         margin-top: 2px;
-
-        color: #6f8196;
-
-        font-size: 9px;
       }
 
-      /* UPLOAD */
+      .postx-platform.selected
+      .postx-platform-state {
+        color: #00d4ff;
+      }
+
+      /* FORMS */
+
+      .postx-field {
+        margin-bottom: 18px;
+      }
+
+      .postx-label {
+        display: block;
+
+        font-size: 13px;
+
+        font-weight: 800;
+
+        margin-bottom: 8px;
+
+        color: #cbd5e1 !important;
+      }
+
+      .postx-input,
+      .postx-textarea,
+      .postx-select {
+        width: 100%;
+
+        border: 1px solid rgba(255,255,255,.10) !important;
+
+        border-radius: 12px;
+
+        padding: 12px 13px;
+
+        background: rgba(255,255,255,.045) !important;
+
+        color: #fff !important;
+
+        outline: none;
+
+        color-scheme: dark;
+      }
+
+      .postx-input:focus,
+      .postx-textarea:focus,
+      .postx-select:focus {
+        border-color: #00d4ff !important;
+
+        box-shadow:
+          0 0 0 3px rgba(0,212,255,.10);
+      }
+
+      .postx-input::placeholder,
+      .postx-textarea::placeholder {
+        color: #64748b !important;
+      }
+
+      .postx-textarea {
+        min-height: 170px;
+
+        resize: vertical;
+      }
 
       .postx-upload {
-        display: block;
+        border: 2px dashed rgba(255,255,255,.15);
+
+        border-radius: 14px;
 
         padding: 28px 16px;
 
         text-align: center;
 
-        border:
-          2px dashed rgba(255,255,255,.14);
-
-        border-radius: 14px;
-
-        color: #94a3b8;
-
-        background:
-          rgba(255,255,255,.02);
+        background: rgba(255,255,255,.02);
 
         cursor: pointer;
 
-        transition: .18s ease;
+        display: block;
+
+        color: #94a3b8;
       }
 
       .postx-upload:hover {
         border-color: #00d4ff;
+
         background: rgba(0,212,255,.04);
-      }
-
-      .postx-upload input {
-        display: none;
-      }
-
-      .postx-image-preview {
-        width: 100%;
-
-        max-height: 360px;
-
-        object-fit: cover;
-
-        border-radius: 13px;
-
-        margin-top: 12px;
-
-        border:
-          1px solid rgba(255,255,255,.08);
       }
 
       /* PREVIEW */
 
       .postx-preview-phone {
-        width: 100%;
-        max-width: 370px;
+        max-width: 360px;
 
         margin: 0 auto;
 
+        border: 1px solid rgba(255,255,255,.10);
+
+        border-radius: 22px;
+
         overflow: hidden;
 
-        border-radius: 24px;
-
-        border:
-          1px solid rgba(255,255,255,.09);
-
-        background: #0d1b2a;
+        background: #0d1b2a !important;
 
         box-shadow:
-          0 18px 50px rgba(0,0,0,.35);
+          0 14px 40px rgba(0,0,0,.40);
       }
 
-      .postx-preview-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        padding: 14px;
-
-        border-bottom:
-          1px solid rgba(255,255,255,.07);
-      }
-
-      .postx-preview-avatar {
-        width: 36px;
-        height: 36px;
-
-        display: grid;
-        place-items: center;
-
-        border-radius: 50%;
-
-        color: #fff;
-
-        font-weight: 900;
-
-        background:
-          linear-gradient(
-            135deg,
-            #8b5cf6,
-            #ec4899
-          );
-      }
-
-      .postx-preview-content {
-        padding: 14px;
-
-        color: #e8edf3;
-        white-space: pre-wrap;
-
-        font-size: 14px;
-
-        line-height: 1.55;
-      }
-
-      .postx-preview-image {
-        display: block;
-
-        width: 100%;
-
-        max-height: 330px;
-
-        object-fit: cover;
-      }
-
-      /* CALENDAR */
-
-      .postx-calendar {
-        display: grid;
-
-        grid-template-columns:
-          repeat(7, minmax(0,1fr));
-
-        gap: 8px;
-      }
-
-      .postx-calendar-day {
-        min-height: 100px;
-
-        padding: 10px;
-
-        border-radius: 12px;
-
-        border:
-          1px solid rgba(255,255,255,.07);
-
-        background:
-          rgba(255,255,255,.025);
-      }
-
-      .postx-calendar-number {
-        color: #fff;
-
-        font-size: 12px;
-
-        font-weight: 850;
-      }
-
-      .postx-calendar-post {
-        margin-top: 8px;
-
-        padding: 5px;
-
-        border-radius: 7px;
-
-        color: #00d4ff;
-
-        background:
-          rgba(0,212,255,.08);
-
-        font-size: 9px;
-      }
-
-      /* EMPTY */
+      /* EMPTY STATE */
 
       .postx-empty {
         padding: 45px 20px;
 
         text-align: center;
 
-        color: #72849a;
+        color: #94a3b8;
       }
 
       .postx-empty-icon {
+        font-size: 38px;
+
         margin-bottom: 12px;
 
-        font-size: 36px;
-
-        opacity: .7;
+        color: #00d4ff;
       }
 
       /* TOAST */
@@ -1205,14 +1085,17 @@
         right: 18px;
         bottom: 18px;
 
-        z-index: 99999;
-
-        width:
-          min(360px, calc(100vw - 36px));
+        z-index: 10000;
 
         display: grid;
 
         gap: 9px;
+
+        width:
+          min(
+            360px,
+            calc(100vw - 36px)
+          );
       }
 
       .postx-toast {
@@ -1220,83 +1103,147 @@
 
         border-radius: 12px;
 
-        color: #fff;
+        background: #10253a !important;
 
-        background: #111827;
-
-        box-shadow:
-          0 14px 35px rgba(0,0,0,.35);
+        color: #fff !important;
 
         font-size: 13px;
 
-        font-weight: 700;
+        font-weight: 650;
 
-        animation:
-          postxToastIn .2s ease;
+        border: 1px solid rgba(255,255,255,.10);
+
+        box-shadow:
+          0 12px 30px rgba(0,0,0,.40);
       }
 
       .postx-toast.success {
-        background: #166534;
+        border-color: rgba(34,197,94,.35);
+
+        background: #0d2b20 !important;
       }
 
       .postx-toast.error {
-        background: #991b1b;
+        border-color: rgba(239,68,68,.35);
+
+        background: #35151a !important;
       }
 
-      @keyframes postxToastIn {
-        from {
-          transform: translateY(10px);
-          opacity: 0;
-        }
+      /* MODAL */
 
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
-
-      /* MOBILE */
-
-      .postx-mobile-header {
-        display: none;
-      }
-
-      .postx-overlay {
-        display: none;
-
+      .postx-modal-backdrop {
         position: fixed;
 
         inset: 0;
 
-        z-index: 900;
+        z-index: 20000;
+
+        display: grid;
+
+        place-items: center;
+
+        padding: 20px;
 
         background:
-          rgba(0,0,0,.65);
+          rgba(2,8,18,.78);
 
-        backdrop-filter:
-          blur(3px);
+        backdrop-filter: blur(8px);
+      }
+
+      .postx-modal {
+        width:
+          min(
+            460px,
+            100%
+          );
+
+        background:
+          linear-gradient(
+            145deg,
+            #0d1b2a,
+            #10253a
+          ) !important;
+
+        border:
+          1px solid rgba(255,255,255,.10);
+
+        border-radius: 20px;
+
+        padding: 24px;
+
+        box-shadow:
+          0 30px 80px rgba(0,0,0,.55);
+
+        color: #fff;
+      }
+
+      .postx-modal-title {
+        margin: 0 0 8px;
+
+        font-size: 20px;
+
+        font-weight: 900;
+      }
+
+      .postx-modal-text {
+        color: #94a3b8;
+
+        line-height: 1.6;
+
+        margin: 0 0 20px;
+      }
+
+      .postx-modal-actions {
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+
+        flex-wrap: wrap;
+      }
+
+      /* OVERLAY */
+
+      .postx-overlay {
+        position: fixed;
+
+        inset: 0;
+
+        background:
+          rgba(7,17,31,.70);
+
+        display: none;
+
+        z-index: 90;
       }
 
       .postx-overlay.show {
         display: block;
       }
 
-      @media(max-width:1100px) {
+      /* MOBILE */
+
+      @media(max-width:1050px) {
+
         .postx-stats {
           grid-template-columns:
-            repeat(2, minmax(0,1fr));
+            repeat(2,1fr);
         }
 
-        .postx-dashboard-grid,
-        .postx-create-grid {
+        .postx-dashboard-grid {
           grid-template-columns: 1fr;
         }
       }
 
       @media(max-width:760px) {
+
         .postx-sidebar {
-          transform: translateX(-105%);
-          transition: transform .22s ease;
+          transform: translateX(-100%);
+
+          transition: .22s;
+
+          width: 270px;
         }
 
         .postx-sidebar.open {
@@ -1305,89 +1252,82 @@
 
         .postx-main {
           width: 100%;
+
           margin-left: 0;
         }
 
         .postx-mobile-header {
-          position: sticky;
-
-          top: 0;
-
-          z-index: 800;
+          display: flex;
 
           height: 62px;
-
-          display: flex;
 
           align-items: center;
 
           justify-content: space-between;
 
-          padding: 0 15px;
+          padding: 0 16px;
 
           background:
-            rgba(9,22,37,.96) !important;
-
-          backdrop-filter:
-            blur(14px);
+            rgba(8,19,33,.98) !important;
 
           border-bottom:
             1px solid rgba(255,255,255,.08);
+
+          position: sticky;
+
+          top: 0;
+
+          z-index: 70;
         }
 
         .postx-page {
-          padding: 20px 14px 35px;
-        }
-
-        .postx-page-header {
-          margin-bottom: 20px;
+          padding: 20px 14px;
         }
 
         .postx-page-title {
-          font-size: 30px;
+          font-size: 28px;
         }
 
         .postx-stats {
           grid-template-columns:
-            repeat(2, minmax(0,1fr));
+            repeat(2,1fr);
 
           gap: 10px;
         }
 
         .postx-stat {
           padding: 15px;
-          min-height: 120px;
         }
 
         .postx-stat-value {
           font-size: 28px;
         }
 
-        .postx-platform-grid {
+        .postx-platforms {
           grid-template-columns: 1fr;
         }
 
-        .postx-calendar {
-          grid-template-columns:
-            repeat(2, minmax(0,1fr));
+        .postx-list-item {
+          align-items: flex-start;
+        }
+
+        .postx-status {
+          margin-left: auto;
         }
       }
 
       @media(max-width:430px) {
+
         .postx-stats {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .postx-stat-label {
-          font-size: 11px;
-        }
-
-        .postx-stat-value {
-          font-size: 25px;
-        }
-
-        .postx-calendar {
           grid-template-columns: 1fr;
+        }
+
+        .postx-actions {
+          width: 100%;
+        }
+
+        .postx-actions .postx-btn {
+          flex: 1;
         }
       }
     `;
@@ -1407,7 +1347,6 @@
     if (!root) {
       root = document.createElement("div");
       root.id = "postx-app";
-
       document.body.appendChild(root);
     }
 
@@ -1417,20 +1356,142 @@
   }
 
   /* =========================================================
+     TOAST
+     ========================================================= */
+
+  function toast(message, type = "success") {
+    let container =
+      document.getElementById("postxToastContainer");
+
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "postxToastContainer";
+      container.className = "postx-toast-container";
+      document.body.appendChild(container);
+    }
+
+    const item = document.createElement("div");
+
+    item.className =
+      "postx-toast " +
+      (type === "error" ? "error" : "success");
+
+    item.textContent = message;
+
+    container.appendChild(item);
+
+    setTimeout(() => {
+      item.style.opacity = "0";
+      item.style.transform = "translateY(10px)";
+      item.style.transition = ".25s";
+
+      setTimeout(() => item.remove(), 250);
+    }, 2800);
+  }
+
+  /* =========================================================
+     DARK MODAL
+     ========================================================= */
+
+  function showModal({
+    title,
+    message,
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+    onConfirm
+  }) {
+
+    const existing =
+      document.querySelector(".postx-modal-backdrop");
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const backdrop =
+      document.createElement("div");
+
+    backdrop.className =
+      "postx-modal-backdrop";
+
+    backdrop.innerHTML = `
+      <div class="postx-modal"
+           role="dialog"
+           aria-modal="true">
+
+        <h3 class="postx-modal-title">
+          ${escapeHTML(title)}
+        </h3>
+
+        <p class="postx-modal-text">
+          ${escapeHTML(message)}
+        </p>
+
+        <div class="postx-modal-actions">
+
+          <button
+            type="button"
+            class="postx-btn"
+            data-modal-cancel>
+            ${escapeHTML(cancelText)}
+          </button>
+
+          <button
+            type="button"
+            class="postx-btn postx-btn-gradient"
+            data-modal-confirm>
+            ${escapeHTML(confirmText)}
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(backdrop);
+
+    backdrop
+      .querySelector("[data-modal-cancel]")
+      .addEventListener("click", () => {
+        backdrop.remove();
+      });
+
+    backdrop
+      .querySelector("[data-modal-confirm]")
+      .addEventListener("click", () => {
+
+        backdrop.remove();
+
+        if (typeof onConfirm === "function") {
+          onConfirm();
+        }
+      });
+
+    backdrop.addEventListener("click", event => {
+      if (event.target === backdrop) {
+        backdrop.remove();
+      }
+    });
+  }
+
+  /* =========================================================
      SHELL
      ========================================================= */
 
   function renderShell(root) {
+
     root.innerHTML = `
       <div class="postx-shell">
 
         <aside
           class="postx-sidebar"
-          id="postxSidebar"
-        >
+          id="postxSidebar">
 
           <div class="postx-brand">
-            <div class="postx-brand-mark">P</div>
+
+            <div class="postx-brand-mark">
+              P
+            </div>
 
             <div>
               <div class="postx-brand-name">
@@ -1441,100 +1502,83 @@
                 SMART SOCIAL PUBLISHER
               </div>
             </div>
+
           </div>
 
           <button
             class="postx-create-btn"
-            data-postx-nav="create"
-          >
+            data-postx-nav="create">
             + Create Post
           </button>
 
           <nav class="postx-nav">
+
             ${NAV_ITEMS.map(item => `
               <button
+                type="button"
                 class="postx-nav-btn ${
                   state.activePage === item.id
                     ? "active"
                     : ""
                 }"
-                data-postx-nav="${escapeHTML(item.id)}"
-              >
-                <span class="postx-nav-icon">
+                data-postx-nav="${item.id}">
+
+                <span>
                   ${escapeHTML(item.icon)}
                 </span>
 
                 <span>
                   ${escapeHTML(item.label)}
                 </span>
+
               </button>
             `).join("")}
+
           </nav>
 
           <div
             style="
               margin-top:auto;
               padding:18px 10px 4px;
-              color:#52657a;
-              font-size:10px;
-              line-height:1.6;
-            "
-          >
-            PostX v${APP.version}<br>
-            Dark Premium • Local Storage
+              color:#64748b;
+              font-size:11px;
+            ">
+
+            PostX v${APP.version}
+
+            <br>
+
+            Dark Premium • Local storage
+
           </div>
 
         </aside>
 
         <div
           class="postx-overlay"
-          id="postxOverlay"
-        ></div>
+          id="postxOverlay">
+        </div>
 
         <main class="postx-main">
 
-          <header class="postx-mobile-header">
+          <header
+            class="postx-mobile-header">
 
-            <div
-              style="
-                display:flex;
-                align-items:center;
-                gap:9px;
-                font-weight:900;
-              "
-            >
-              <span
-                style="
-                  width:30px;
-                  height:30px;
-                  display:grid;
-                  place-items:center;
-                  border-radius:9px;
-                  background:linear-gradient(
-                    135deg,
-                    #8b5cf6,
-                    #ec4899
-                  );
-                "
-              >
-                P
-              </span>
-
+            <div style="font-weight:900;">
               PostX
             </div>
 
             <button
+              type="button"
               id="postxMenuButton"
-              aria-label="Open menu"
               style="
                 width:40px;
                 height:40px;
                 border-radius:10px;
-                border:1px solid rgba(255,255,255,.1);
+                border:1px solid rgba(255,255,255,.10);
                 background:#0d1b2a;
                 color:#fff;
-              "
-            >
+              ">
               ☰
             </button>
 
@@ -1548,28 +1592,37 @@
 
       <div
         class="postx-toast-container"
-        id="postxToastContainer"
-      ></div>
+        id="postxToastContainer">
+      </div>
     `;
 
     document
       .querySelectorAll("[data-postx-nav]")
       .forEach(button => {
+
         button.addEventListener("click", () => {
-          navigate(button.dataset.postxNav);
+
+          navigate(
+            button.dataset.postxNav
+          );
+
+          closeMobileMenu();
         });
       });
 
     document
       .getElementById("postxMenuButton")
       ?.addEventListener("click", () => {
-        document
-          .getElementById("postxSidebar")
-          ?.classList.toggle("open");
 
-        document
-          .getElementById("postxOverlay")
-          ?.classList.toggle("show");
+        const sidebar =
+          document.getElementById("postxSidebar");
+
+        const overlay =
+          document.getElementById("postxOverlay");
+
+        sidebar?.classList.toggle("open");
+
+        overlay?.classList.toggle("show");
       });
 
     document
@@ -1577,24 +1630,32 @@
       ?.addEventListener("click", closeMobileMenu);
   }
 
+  function closeMobileMenu() {
+
+    document
+      .getElementById("postxSidebar")
+      ?.classList.remove("open");
+
+    document
+      .getElementById("postxOverlay")
+      ?.classList.remove("show");
+  }
+
   /* =========================================================
      NAVIGATION
      ========================================================= */
 
   function navigate(page) {
+
     if (!NAV_ITEMS.some(item => item.id === page)) {
       page = "dashboard";
     }
 
     state.activePage = page;
 
-    if (page !== "create") {
-      state.editingPostId = null;
-    }
+    state.editingPostId = null;
 
     saveState();
-
-    closeMobileMenu();
 
     render();
 
@@ -1604,48 +1665,48 @@
     });
   }
 
+  /* =========================================================
+     MAIN RENDER
+     ========================================================= */
+
   function render() {
+
     const container =
-      document.getElementById("postxPageContainer");
+      document.getElementById(
+        "postxPageContainer"
+      );
 
     if (!container) return;
 
     document
       .querySelectorAll("[data-postx-nav]")
       .forEach(button => {
+
         button.classList.toggle(
           "active",
-          button.dataset.postxNav === state.activePage
+          button.dataset.postxNav ===
+            state.activePage
         );
       });
 
-    switch (state.activePage) {
-      case "dashboard":
-        renderDashboard(container);
-        break;
+    if (state.activePage === "dashboard") {
 
-      case "create":
-        renderCreate(container);
-        break;
+      renderDashboard(container);
 
-      case "scheduled":
-        renderListPage(container, "scheduled");
-        break;
+    } else if (state.activePage === "create") {
 
-      case "drafts":
-        renderListPage(container, "drafts");
-        break;
+      renderCreate(container);
 
-      case "published":
-        renderListPage(container, "published");
-        break;
+    } else if (state.activePage === "calendar") {
 
-      case "calendar":
-        renderCalendar(container);
-        break;
+      renderCalendar(container);
 
-      default:
-        renderDashboard(container);
+    } else {
+
+      renderListPage(
+        container,
+        state.activePage
+      );
     }
   }
 
@@ -1654,7 +1715,9 @@
      ========================================================= */
 
   function renderDashboard(container) {
-    const total = state.posts.length;
+
+    const total =
+      state.posts.length;
 
     const scheduled =
       state.posts.filter(
@@ -1671,17 +1734,23 @@
         post => post.status === "published"
       ).length;
 
-    const recent = [...state.posts]
-      .sort(
-        (a, b) =>
-          new Date(
-            b.updatedAt || b.createdAt
-          ) -
-          new Date(
-            a.updatedAt || a.createdAt
-          )
-      )
-      .slice(0, 5);
+    const recent =
+      [...state.posts]
+        .sort(
+          (a, b) =>
+            new Date(
+              b.updatedAt || b.createdAt
+            ) -
+            new Date(
+              a.updatedAt || a.createdAt
+            )
+        )
+        .slice(0, 5);
+
+    const connectedCount =
+      Object.values(
+        state.connectedAccounts
+      ).filter(Boolean).length;
 
     container.innerHTML = `
       <div class="postx-page">
@@ -1689,65 +1758,107 @@
         <div class="postx-page-header">
 
           <div>
+
             <h1 class="postx-page-title">
               Dashboard
             </h1>
 
             <p class="postx-page-subtitle">
-              Welcome back, ${escapeHTML(
+              Welcome back,
+              ${escapeHTML(
                 state.profile.name
-              )} • Here's your social media overview
+              )}
+              • Here's your social media overview
             </p>
+
           </div>
 
-          <div>
+          <div class="postx-actions">
+
             <button
-              class="postx-btn postx-btn-primary"
-              data-postx-nav="create"
-            >
+              type="button"
+              class="postx-btn postx-btn-gradient"
+              data-dashboard-create>
               + Create Post
             </button>
+
           </div>
 
         </div>
 
         <section class="postx-stats">
 
-          ${statCard(
-            "📄",
-            "Total Posts",
-            total,
-            "+12% from last month ↗"
-          )}
+          <div class="postx-card postx-stat">
 
-          ${statCard(
-            "◷",
-            "Scheduled",
-            scheduled,
-            "+3 scheduled this week ↗"
-          )}
+            <div class="postx-stat-label">
+              📄 Total Posts
+            </div>
 
-          ${statCard(
-            "✎",
-            "Drafts",
-            drafts,
-            drafts
-              ? "Ready for review"
-              : "No drafts yet"
-          )}
+            <div class="postx-stat-value">
+              ${total}
+            </div>
 
-          ${statCard(
-            "✓",
-            "Published",
-            published,
-            "+8 published this month ↗"
-          )}
+            <div class="postx-stat-sub">
+              All posts created
+            </div>
+
+          </div>
+
+          <div class="postx-card postx-stat">
+
+            <div class="postx-stat-label">
+              ◷ Scheduled
+            </div>
+
+            <div class="postx-stat-value">
+              ${scheduled}
+            </div>
+
+            <div class="postx-stat-sub">
+              Waiting to publish
+            </div>
+
+          </div>
+
+          <div class="postx-card postx-stat">
+
+            <div class="postx-stat-label">
+              ✎ Drafts
+            </div>
+
+            <div class="postx-stat-value">
+              ${drafts}
+            </div>
+
+            <div class="postx-stat-sub">
+              Saved for later
+            </div>
+
+          </div>
+
+          <div class="postx-card postx-stat">
+
+            <div class="postx-stat-label">
+              ✓ Published
+            </div>
+
+            <div class="postx-stat-value">
+              ${published}
+            </div>
+
+            <div class="postx-stat-sub">
+              Successfully published
+            </div>
+
+          </div>
 
         </section>
 
-        <section class="postx-dashboard-grid">
+        <section
+          class="postx-dashboard-grid">
 
-          <div class="postx-card postx-section-card">
+          <div
+            class="postx-card postx-section-card">
 
             <div class="postx-section-head">
 
@@ -1756,13 +1867,13 @@
               </h2>
 
               <button
+                type="button"
                 class="postx-btn"
                 style="
-                  padding:7px 10px;
-                  font-size:11px;
+                  padding:6px 10px;
+                  font-size:12px;
                 "
-                data-postx-nav="published"
-              >
+                data-dashboard-published>
                 See all →
               </button>
 
@@ -1772,23 +1883,45 @@
               recent.length
                 ? `
                   <div class="postx-list">
-                    ${recent
-                      .map(postListItem)
-                      .join("")}
+
+                    ${recent.map(post =>
+                      postCardHTML(
+                        post,
+                        true
+                      )
+                    ).join("")}
+
                   </div>
                 `
-                : emptyState(
-                    "✦",
-                    "No posts yet",
-                    "Create your first social media post."
-                  )
+                : `
+                  <div class="postx-empty">
+
+                    <div class="postx-empty-icon">
+                      ✨
+                    </div>
+
+                    <div>
+                      No posts yet.
+                    </div>
+
+                    <div
+                      style="
+                        margin-top:6px;
+                        font-size:12px;
+                      ">
+                      Create your first social post.
+                    </div>
+
+                  </div>
+                `
             }
 
           </div>
 
           <div style="display:grid;gap:20px">
 
-            <div class="postx-card postx-section-card">
+            <div
+              class="postx-card postx-section-card">
 
               <h2 class="postx-section-title">
                 Performance Overview
@@ -1796,53 +1929,51 @@
 
               <p
                 style="
-                  color:#8294a9;
+                  color:#94a3b8;
                   font-size:13px;
                   margin:6px 0 14px;
-                "
-              >
+                ">
                 Last 7 days engagement
               </p>
 
               <div
                 style="
-                  height:145px;
+                  height:140px;
+                  border-radius:14px;
+                  padding:15px;
                   display:flex;
                   align-items:flex-end;
                   gap:8px;
-                  padding:15px;
-                  border-radius:13px;
                   background:
                     linear-gradient(
                       to top,
                       rgba(0,212,255,.12),
-                      rgba(0,212,255,.015)
+                      transparent
                     );
                   border:
-                    1px solid rgba(0,212,255,.1);
-                "
-              >
-                ${[38,55,44,76,62,88,72]
-                  .map(
-                    height => `
-                      <div
-                        style="
-                          flex:1;
-                          height:${height}%;
-                          min-height:8px;
-                          border-radius:5px 5px 2px 2px;
-                          background:
-                            linear-gradient(
-                              to top,
-                              #00d4ff,
-                              #7c3aed
-                            );
-                          opacity:.85;
-                        "
-                      ></div>
-                    `
-                  )
+                    1px solid rgba(0,212,255,.10);
+                ">
+
+                ${[42,65,50,82,60,91,76]
+                  .map(height => `
+                    <div
+                      style="
+                        flex:1;
+                        height:${height}%;
+                        min-height:10px;
+                        border-radius:6px 6px 2px 2px;
+                        background:
+                          linear-gradient(
+                            to top,
+                            #00d4ff,
+                            #7c3aed
+                          );
+                        opacity:.85;
+                      ">
+                    </div>
+                  `)
                   .join("")}
+
               </div>
 
               <div
@@ -1850,70 +1981,74 @@
                   display:flex;
                   justify-content:space-between;
                   margin-top:14px;
-                "
-              >
+                  gap:10px;
+                ">
+
                 <div>
                   <div
                     style="
                       color:#00d4ff;
-                      font-size:19px;
+                      font-size:20px;
                       font-weight:900;
-                    "
-                  >
+                    ">
                     4.8%
                   </div>
 
                   <div
                     style="
-                      color:#718399;
-                      font-size:10px;
-                    "
-                  >
+                      color:#64748b;
+                      font-size:11px;
+                    ">
                     Engagement Rate
                   </div>
                 </div>
 
                 <div style="text-align:right">
+
                   <div
                     style="
                       color:#fff;
-                      font-size:19px;
+                      font-size:20px;
                       font-weight:900;
-                    "
-                  >
-                    12.4k
+                    ">
+                    12.4K
                   </div>
 
                   <div
                     style="
-                      color:#718399;
-                      font-size:10px;
-                    "
-                  >
+                      color:#64748b;
+                      font-size:11px;
+                    ">
                     Avg Reach
                   </div>
+
                 </div>
+
               </div>
 
             </div>
 
-            <div class="postx-card postx-section-card">
+            <div
+              class="postx-card postx-section-card">
 
-              <h2 class="postx-section-title">
-                Connected Platforms
-              </h2>
+              <div class="postx-section-head">
 
-              <div
-                style="
-                  display:grid;
-                  gap:9px;
-                  margin-top:14px;
-                "
-              >
-                ${Object.values(PLATFORM)
-                  .map(platformRow)
-                  .join("")}
+                <h2 class="postx-section-title">
+                  Platforms
+                </h2>
+
+                <span
+                  style="
+                    color:#00d4ff;
+                    font-size:12px;
+                    font-weight:800;
+                  ">
+                  ${connectedCount}/3 connected
+                </span>
+
               </div>
+
+              ${platformSummaryHTML()}
 
             </div>
 
@@ -1924,99 +2059,123 @@
       </div>
     `;
 
-    bindNavigationButtons(container);
+    container
+      .querySelector("[data-dashboard-create]")
+      ?.addEventListener(
+        "click",
+        () => navigate("create")
+      );
+
+    container
+      .querySelector("[data-dashboard-published]")
+      ?.addEventListener(
+        "click",
+        () => navigate("published")
+      );
+
+    attachPostActions(container);
   }
 
-  function statCard(icon, label, value, sub) {
-    return `
-      <div class="postx-card postx-stat">
+  /* =========================================================
+     PLATFORM SUMMARY
+     ========================================================= */
 
-        <div class="postx-stat-label">
-          <span>${icon}</span>
-          ${escapeHTML(label)}
-        </div>
-
-        <div class="postx-stat-value">
-          ${value}
-        </div>
-
-        <div class="postx-stat-sub">
-          ${escapeHTML(sub)}
-        </div>
-
-      </div>
-    `;
-  }
-
-  function platformRow(platform) {
-    const connected =
-      !!state.connectedAccounts[platform.id];
+  function platformSummaryHTML() {
 
     return `
       <div
         style="
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
+          display:grid;
           gap:10px;
-          padding:10px;
-          border-radius:11px;
-          background:rgba(255,255,255,.025);
-          border:1px solid rgba(255,255,255,.06);
-        "
-      >
+        ">
 
-        <div
-          style="
-            display:flex;
-            align-items:center;
-            gap:10px;
-          "
-        >
+        ${Object.values(PLATFORM)
+          .map(platform => {
 
-          <span
-            class="postx-platform-icon"
-            style="
-              background:${platform.color};
-            "
-          >
-            ${platform.icon}
-          </span>
+            const connected =
+              !!state.connectedAccounts[
+                platform.id
+              ];
 
-          <div>
-            <div
-              style="
-                color:#fff;
-                font-size:12px;
-                font-weight:800;
-              "
-            >
-              ${platform.name}
-            </div>
+            return `
+              <div
+                style="
+                  display:flex;
+                  align-items:center;
+                  gap:10px;
+                  padding:10px;
+                  border:
+                    1px solid rgba(255,255,255,.07);
+                  border-radius:12px;
+                  background:
+                    rgba(255,255,255,.025);
+                ">
 
-            <div
-              style="
-                color:#718399;
-                font-size:9px;
-              "
-            >
-              ${connected ? "Connected" : "Not connected"}
-            </div>
-          </div>
+                <div
+                  style="
+                    width:34px;
+                    height:34px;
+                    border-radius:10px;
+                    display:grid;
+                    place-items:center;
+                    font-weight:900;
+                    color:#fff;
+                    background:${platform.color};
+                  ">
+                  ${escapeHTML(platform.icon)}
+                </div>
 
-        </div>
+                <div style="flex:1">
 
-        <span
-          style="
-            width:8px;
-            height:8px;
-            border-radius:50%;
-            background:${connected ? "#22c55e" : "#64748b"};
-            box-shadow:${connected
-              ? "0 0 10px rgba(34,197,94,.5)"
-              : "none"};
-          "
-        ></span>
+                  <div
+                    style="
+                      color:#fff;
+                      font-size:13px;
+                      font-weight:800;
+                    ">
+                    ${escapeHTML(
+                      platform.name
+                    )}
+                  </div>
+
+                  <div
+                    style="
+                      color:${
+                        connected
+                          ? "#22c55e"
+                          : "#64748b"
+                      };
+                      font-size:10px;
+                      margin-top:2px;
+                    ">
+                    ${
+                      connected
+                        ? "Connected"
+                        : "Not connected"
+                    }
+                  </div>
+
+                </div>
+
+                <button
+                  type="button"
+                  class="postx-btn"
+                  style="
+                    padding:7px 10px;
+                    font-size:11px;
+                  "
+                  data-platform-toggle="${platform.id}">
+                  ${
+                    connected
+                      ? "Disconnect"
+                      : "Connect"
+                  }
+                </button>
+
+              </div>
+            `;
+          })
+          .join("")}
 
       </div>
     `;
@@ -2027,23 +2186,27 @@
      ========================================================= */
 
   function renderCreate(container) {
+
     const editing =
       state.editingPostId
-        ? getPostById(state.editingPostId)
+        ? getPostById(
+            state.editingPostId
+          )
         : null;
 
-    const post = editing || {
-      caption: "",
-      hashtags: "",
-      platforms: [],
-      imageData: "",
-      scheduledAt: ""
-    };
+    const post =
+      editing || {
+        caption: "",
+        hashtags: "",
+        imageData: "",
+        platforms: [],
+        scheduledAt: ""
+      };
 
     const selectedPlatforms =
-      Array.isArray(post.platforms)
-        ? post.platforms
-        : [];
+      normalizePlatformList(
+        post.platforms
+      );
 
     container.innerHTML = `
       <div class="postx-page">
@@ -2051,312 +2214,291 @@
         <div class="postx-page-header">
 
           <div>
+
             <h1 class="postx-page-title">
-              ${editing ? "Edit Post" : "Create Post"}
+              ${
+                editing
+                  ? "Edit Post"
+                  : "Create Post"
+              }
             </h1>
 
             <p class="postx-page-subtitle">
-              Create content and choose exactly where it should be published.
+              Create once and publish across your connected social platforms.
             </p>
+
           </div>
 
         </div>
 
-        <div class="postx-create-grid">
+        <div
+          style="
+            display:grid;
+            grid-template-columns:
+              minmax(0,1.15fr)
+              minmax(280px,.85fr);
+            gap:20px;
+          "
+          class="postx-create-grid">
 
-          <!-- FORM -->
+          <div
+            class="postx-card"
+            style="padding:22px">
 
-          <div class="postx-card postx-form-card">
+            <form id="postxCreateForm">
 
-            <div class="postx-field">
+              <div class="postx-field">
 
-              <label class="postx-label">
-                Publish to
-              </label>
+                <label class="postx-label">
+                  Platforms
+                </label>
 
-              <div class="postx-platform-grid">
+                <div class="postx-platforms">
 
-                ${Object.values(PLATFORM)
-                  .map(platform => {
-                    const selected =
-                      selectedPlatforms.includes(
-                        platform.id
-                      );
+                  ${Object.values(PLATFORM)
+                    .map(platform => {
 
-                    const connected =
-                      !!state.connectedAccounts[
-                        platform.id
-                      ];
+                      const selected =
+                        selectedPlatforms.includes(
+                          platform.id
+                        );
 
-                    return `
-                      <label
-                        class="
-                          postx-platform-option
-                          ${selected ? "selected" : ""}
-                          ${!connected ? "disabled" : ""}
-                        "
-                        data-platform-label="${platform.id}"
-                        style="
-                          opacity:${connected ? "1" : ".45"};
-                        "
-                      >
+                      const connected =
+                        !!state.connectedAccounts[
+                          platform.id
+                        ];
 
-                        <input
-                          type="checkbox"
-                          name="postx-platform"
-                          value="${platform.id}"
-                          ${selected ? "checked" : ""}
-                          ${!connected ? "disabled" : ""}
-                        >
-
-                        <span
-                          class="postx-platform-icon"
-                          style="
-                            background:${platform.color};
-                          "
-                        >
-                          ${platform.icon}
-                        </span>
-
-                        <span>
-                          <span
-                            class="postx-platform-name"
-                          >
-                            ${platform.name}
-                          </span>
+                      return `
+                        <button
+                          type="button"
+                          class="postx-platform ${
+                            selected
+                              ? "selected"
+                              : ""
+                          }"
+                          data-platform-select="${
+                            platform.id
+                          }"
+                          ${!connected
+                            ? "disabled"
+                            : ""}>
 
                           <span
-                            class="postx-platform-status"
-                            style="display:block"
-                          >
-                            ${
-                              connected
-                                ? "Connected"
-                                : "Not connected"
-                            }
+                            class="postx-platform-icon"
+                            style="
+                              background:
+                                ${
+                                  connected
+                                    ? platform.color
+                                    : "#182b3e"
+                                };
+                            ">
+                            ${escapeHTML(
+                              platform.icon
+                            )}
                           </span>
-                        </span>
 
-                      </label>
-                    `;
-                  })
-                  .join("")}
+                          <span style="text-align:left">
+
+                            <span
+                              class="postx-platform-name">
+                              ${escapeHTML(
+                                platform.name
+                              )}
+                            </span>
+
+                            <span
+                              class="postx-platform-state">
+                              ${
+                                connected
+                                  ? selected
+                                    ? "Selected"
+                                    : "Connected"
+                                  : "Connect first"
+                              }
+                            </span>
+
+                          </span>
+
+                        </button>
+                      `;
+                    })
+                    .join("")}
+
+                </div>
+
+                <div
+                  id="postxPlatformHelp"
+                  style="
+                    color:#64748b;
+                    font-size:11px;
+                    margin-top:8px;
+                  ">
+                  Select one or more connected platforms.
+                </div>
 
               </div>
 
-              <div
-                style="
-                  margin-top:8px;
-                  color:#63758a;
-                  font-size:10px;
-                "
-              >
-                Select one or more connected platforms.
+              <div class="postx-field">
+
+                <label class="postx-label">
+                  Post Caption
+                </label>
+
+                <textarea
+                  id="postxCaption"
+                  class="postx-textarea"
+                  placeholder="Write your social media post..."
+                  maxlength="5000"
+                  required>${escapeHTML(
+                    post.caption || ""
+                  )}</textarea>
+
+                <div
+                  id="postxCharCount"
+                  style="
+                    text-align:right;
+                    color:#64748b;
+                    font-size:11px;
+                    margin-top:5px;
+                  ">
+                  0 / 5000
+                </div>
+
               </div>
 
-            </div>
+              <div class="postx-field">
 
-            <div class="postx-field">
+                <label class="postx-label">
+                  Hashtags
+                </label>
 
-              <label class="postx-label">
-                Caption
-              </label>
+                <input
+                  id="postxHashtags"
+                  class="postx-input"
+                  placeholder="#marketing #business #postx"
+                  value="${escapeHTML(
+                    post.hashtags || ""
+                  )}">
+              </div>
 
-              <textarea
-                id="postxCaption"
-                class="postx-textarea"
-                placeholder="Write your post here..."
-              >${escapeHTML(
-                post.caption || ""
-              )}</textarea>
+              <div class="postx-field">
+
+                <label class="postx-label">
+                  Image
+                </label>
+
+                <label
+                  class="postx-upload">
+
+                  <input
+                    type="file"
+                    id="postxImage"
+                    accept="image/*"
+                    hidden>
+
+                  <div
+                    style="
+                      font-size:30px;
+                      margin-bottom:8px;
+                    ">
+                    🖼️
+                  </div>
+
+                  <div
+                    style="
+                      color:#fff;
+                      font-weight:800;
+                    ">
+                    Choose an image
+                  </div>
+
+                  <div
+                    style="
+                      margin-top:4px;
+                      font-size:11px;
+                      color:#64748b;
+                    ">
+                    JPG, PNG or WEBP
+                  </div>
+
+                </label>
+
+                <div
+                  id="postxImagePreview"
+                  style="margin-top:10px">
+                </div>
+
+              </div>
+
+              <div class="postx-field">
+
+                <label class="postx-label">
+                  Schedule
+                </label>
+
+                <input
+                  type="datetime-local"
+                  id="postxSchedule"
+                  class="postx-input"
+                  value="${toDateTimeLocal(
+                    post.scheduledAt
+                  )}">
+              </div>
 
               <div
                 style="
                   display:flex;
-                  justify-content:flex-end;
-                  margin-top:5px;
-                  color:#63758a;
-                  font-size:10px;
-                "
-                id="postxCharacterCount"
-              >
-                0 characters
-              </div>
+                  gap:10px;
+                  flex-wrap:wrap;
+                  margin-top:22px;
+                ">
 
-            </div>
+                <button
+                  type="button"
+                  class="postx-btn"
+                  id="postxSaveDraft">
+                  Save Draft
+                </button>
 
-            <div class="postx-field">
-
-              <label class="postx-label">
-                Hashtags
-              </label>
-
-              <input
-                id="postxHashtags"
-                class="postx-input"
-                value="${escapeHTML(
-                  post.hashtags || ""
-                )}"
-                placeholder="marketing socialmedia PostX"
-              >
-
-            </div>
-
-            <div class="postx-field">
-
-              <label class="postx-label">
-                Image
-              </label>
-
-              <label class="postx-upload">
-
-                <input
-                  type="file"
-                  id="postxImageInput"
-                  accept="image/*"
-                >
-
-                <div style="font-size:28px">
-                  ${post.imageData ? "🖼️" : "＋"}
-                </div>
-
-                <div
-                  style="
-                    color:#cbd5e1;
-                    font-weight:800;
-                    margin-top:7px;
-                  "
-                >
+                <button
+                  type="submit"
+                  class="postx-btn postx-btn-gradient">
                   ${
-                    post.imageData
-                      ? "Change image"
-                      : "Upload image"
+                    editing
+                      ? "Update Post"
+                      : "Create Post"
                   }
-                </div>
+                </button>
 
-                <div
-                  style="
-                    margin-top:4px;
-                    font-size:10px;
-                  "
-                >
-                  JPG, PNG or WEBP
-                </div>
-
-              </label>
-
-              <div id="postxImagePreview">
-                ${
-                  post.imageData
-                    ? `
-                      <img
-                        class="postx-image-preview"
-                        src="${escapeHTML(
-                          post.imageData
-                        )}"
-                        alt="Post image"
-                      >
-                    `
-                    : ""
-                }
               </div>
 
-            </div>
-
-            <div class="postx-field">
-
-              <label class="postx-label">
-                Schedule
-              </label>
-
-              <input
-                type="datetime-local"
-                id="postxSchedule"
-                class="postx-input"
-                value="${escapeHTML(
-                  toDateTimeLocal(
-                    post.scheduledAt
-                  )
-                )}"
-              >
-
-              <div
-                style="
-                  margin-top:6px;
-                  color:#63758a;
-                  font-size:10px;
-                "
-              >
-                Leave empty to publish immediately.
-              </div>
-
-            </div>
-
-            <div
-              style="
-                display:flex;
-                gap:10px;
-                flex-wrap:wrap;
-                margin-top:24px;
-              "
-            >
-
-              <button
-                class="postx-btn"
-                id="postxSaveDraft"
-              >
-                Save Draft
-              </button>
-
-              <button
-                class="postx-btn"
-                id="postxSchedulePost"
-              >
-                Schedule
-              </button>
-
-              <button
-                class="postx-btn postx-btn-primary"
-                id="postxPublishPost"
-              >
-                Publish Now
-              </button>
-
-            </div>
+            </form>
 
           </div>
 
-          <!-- PREVIEW -->
+          <div
+            class="postx-card"
+            style="padding:22px">
 
-          <div>
+            <h2 class="postx-section-title">
+              Live Preview
+            </h2>
+
+            <p
+              style="
+                color:#94a3b8;
+                font-size:12px;
+                margin-top:5px;
+              ">
+              Preview how your post will look.
+            </p>
 
             <div
-              class="postx-card postx-section-card"
-              style="position:sticky;top:85px"
-            >
+              class="postx-preview-phone"
+              id="postxPreview">
 
-              <div class="postx-section-head">
-
-                <h2 class="postx-section-title">
-                  Live Preview
-                </h2>
-
-                <span
-                  style="
-                    color:#00d4ff;
-                    font-size:10px;
-                    font-weight:800;
-                  "
-                >
-                  POSTX
-                </span>
-
-              </div>
-
-              <div
-                id="postxPreview"
-                class="postx-preview-phone"
-              ></div>
+              ${previewHTML(post)}
 
             </div>
 
@@ -2367,31 +2509,34 @@
       </div>
     `;
 
-    bindCreateEvents();
+    /* RESPONSIVE CREATE GRID */
 
-    updateCreatePreview();
+    const gridStyle =
+      document.createElement("style");
+
+    gridStyle.textContent = `
+      @media(max-width:850px) {
+        .postx-create-grid {
+          grid-template-columns:1fr !important;
+        }
+      }
+    `;
+
+    document.head.appendChild(gridStyle);
+
+    attachCreateEvents(editing);
   }
 
-  function bindCreateEvents() {
-    document
-      .querySelectorAll(
-        'input[name="postx-platform"]'
-      )
-      .forEach(input => {
-        input.addEventListener("change", () => {
-          const label =
-            input.closest(
-              ".postx-platform-option"
-            );
+  /* =========================================================
+     CREATE EVENTS
+     ========================================================= */
 
-          label?.classList.toggle(
-            "selected",
-            input.checked
-          );
+  function attachCreateEvents(editing) {
 
-          updateCreatePreview();
-        });
-      });
+    const form =
+      document.getElementById(
+        "postxCreateForm"
+      );
 
     const caption =
       document.getElementById(
@@ -2402,446 +2547,1508 @@
       document.getElementById(
         "postxHashtags"
       );
-
-    caption?.addEventListener(
-      "input",
-      updateCreatePreview
-    );
-
-    hashtags?.addEventListener(
-      "input",
-      updateCreatePreview
-    );
-
-    document
-      .getElementById("postxSchedule")
-      ?.addEventListener(
-        "input",
-        updateCreatePreview
-      );
-
-    document
-      .getElementById("postxImageInput")
-      ?.addEventListener(
-        "change",
-        handleImageUpload
-      );
-
-    document
-      .getElementById("postxSaveDraft")
-      ?.addEventListener(
-        "click",
-        () => savePost("draft")
-      );
-
-    document
-      .getElementById("postxSchedulePost")
-      ?.addEventListener(
-        "click",
-        () => savePost("scheduled")
-      );
-
-    document
-      .getElementById("postxPublishPost")
-      ?.addEventListener(
-        "click",
-        () => savePost("published")
-      );
-  }
-
-  function getCreateFormData() {
-    const platforms = [
-      ...document.querySelectorAll(
-        'input[name="postx-platform"]:checked'
-      )
-    ].map(input => input.value);
-
-    const caption =
-      document.getElementById(
-        "postxCaption"
-      )?.value || "";
-
-    const hashtags =
-      document.getElementById(
-        "postxHashtags"
-      )?.value || "";
 
     const schedule =
       document.getElementById(
         "postxSchedule"
-      )?.value || "";
-
-    const preview =
-      document.querySelector(
-        "#postxImagePreview img"
       );
 
-    return {
-      platforms,
-      caption: caption.trim(),
-      hashtags: hashtags.trim(),
-      scheduledAt: schedule
-        ? new Date(schedule).toISOString()
-        : "",
-      imageData:
-        preview?.src || ""
-    };
-  }
-
-  function validatePost(data, status) {
-    if (!data.platforms.length) {
-      toast(
-        "Select at least one platform.",
-        "error"
+    const imageInput =
+      document.getElementById(
+        "postxImage"
       );
 
-      return false;
-    }
+    let imageData =
+      editing?.imageData || "";
 
-    if (!data.caption && !data.imageData) {
-      toast(
-        "Add a caption or image first.",
-        "error"
+    let selectedPlatforms =
+      normalizePlatformList(
+        editing?.platforms
       );
 
-      return false;
-    }
+    function updatePreview() {
 
-    if (
-      status === "scheduled" &&
-      !data.scheduledAt
-    ) {
-      toast(
-        "Choose a date and time for scheduling.",
-        "error"
-      );
-
-      return false;
-    }
-
-    if (
-      status === "scheduled" &&
-      new Date(data.scheduledAt) <= new Date()
-    ) {
-      toast(
-        "Scheduled time must be in the future.",
-        "error"
-      );
-
-      return false;
-    }
-
-    return true;
-  }
-
-  function savePost(status) {
-    const data = getCreateFormData();
-
-    if (!validatePost(data, status)) {
-      return;
-    }
-
-    const now =
-      new Date().toISOString();
-
-    if (state.editingPostId) {
-      const existing =
-        getPostById(
-          state.editingPostId
+      const preview =
+        document.getElementById(
+          "postxPreview"
         );
 
-      if (!existing) {
-        state.editingPostId = null;
-      } else {
-        existing.platforms =
-          data.platforms;
+      if (!preview) return;
 
-        existing.caption =
-          data.caption;
+      preview.innerHTML =
+        previewHTML({
+          caption:
+            caption?.value || "",
 
-        existing.hashtags =
-          data.hashtags;
+          hashtags:
+            hashtags?.value || "",
 
-        existing.imageData =
-          data.imageData;
+          imageData,
 
-        existing.status =
-          status;
+          platforms:
+            selectedPlatforms
+        });
+    }
 
-        existing.updatedAt =
-          now;
+    function updateCharCount() {
 
-        existing.scheduledAt =
-          status === "scheduled"
-            ? data.scheduledAt
-            : "";
-
-        existing.publishedAt =
-          status === "published"
-            ? now
-            : "";
-
-        state.editingPostId = null;
-
-        saveState();
-
-        toast(
-          statusMessage(status, true),
-          "success"
+      const counter =
+        document.getElementById(
+          "postxCharCount"
         );
 
-        navigate(statusPage(status));
-
+      if (!counter || !caption) {
         return;
       }
+
+      counter.textContent =
+        `${caption.value.length} / 5000`;
     }
 
-    const post = {
-      id: uid(),
+    document
+      .querySelectorAll(
+        "[data-platform-select]"
+      )
+      .forEach(button => {
 
-      platforms:
-        data.platforms,
+        button.addEventListener(
+          "click",
+          () => {
 
-      caption:
-        data.caption,
+            const platform =
+              button.dataset
+                .platformSelect;
 
-      hashtags:
-        data.hashtags,
+            if (
+              !state.connectedAccounts[
+                platform
+              ]
+            ) {
 
-      imageData:
-        data.imageData,
+              toast(
+                `Connect ${PLATFORM[platform].name} first.`,
+                "error"
+              );
 
-      status,
+              return;
+            }
 
-      scheduledAt:
-        status === "scheduled"
-          ? data.scheduledAt
-          : "",
+            if (
+              selectedPlatforms.includes(
+                platform
+              )
+            ) {
 
-      publishedAt:
-        status === "published"
-          ? now
-          : "",
+              selectedPlatforms =
+                selectedPlatforms.filter(
+                  item => item !== platform
+                );
 
-      createdAt:
-        now,
+            } else {
 
-      updatedAt:
-        now
-    };
+              selectedPlatforms.push(
+                platform
+              );
+            }
 
-    state.posts.unshift(post);
+            document
+              .querySelectorAll(
+                "[data-platform-select]"
+              )
+              .forEach(item => {
 
-    saveState();
+                const selected =
+                  selectedPlatforms.includes(
+                    item.dataset
+                      .platformSelect
+                  );
 
-    toast(
-      statusMessage(status, false),
-      "success"
+                item.classList.toggle(
+                  "selected",
+                  selected
+                );
+
+                const stateText =
+                  item.querySelector(
+                    ".postx-platform-state"
+                  );
+
+                if (stateText) {
+
+                  stateText.textContent =
+                    selected
+                      ? "Selected"
+                      : "Connected";
+                }
+              });
+
+            updatePreview();
+          }
+        );
+      });
+
+    caption?.addEventListener(
+      "input",
+      () => {
+
+        updateCharCount();
+
+        updatePreview();
+      }
     );
 
-    navigate(statusPage(status));
-  }
+    hashtags?.addEventListener(
+      "input",
+      updatePreview
+    );
 
-  function statusMessage(status, editing) {
-    if (status === "draft") {
-      return editing
-        ? "Draft updated successfully."
-        : "Post saved as draft.";
-    }
+    schedule?.addEventListener(
+      "change",
+      updatePreview
+    );
 
-    if (status === "scheduled") {
-      return editing
-        ? "Post rescheduled successfully."
-        : "Post scheduled successfully.";
-    }
+    imageInput?.addEventListener(
+      "change",
+      event => {
 
-    return editing
-      ? "Post published successfully."
-      : "Post published successfully.";
-  }
+        const file =
+          event.target.files?.[0];
 
-  function statusPage(status) {
-    if (status === "draft") {
-      return "drafts";
-    }
+        if (!file) return;
 
-    if (status === "scheduled") {
-      return "scheduled";
-    }
+        if (
+          !file.type.startsWith(
+            "image/"
+          )
+        ) {
 
-    return "published";
-  }
+          toast(
+            "Please choose an image file.",
+            "error"
+          );
 
-  function handleImageUpload(event) {
-    const file =
-      event.target.files?.[0];
+          return;
+        }
 
-    if (!file) return;
+        if (
+          file.size >
+          5 * 1024 * 1024
+        ) {
 
-    if (!file.type.startsWith("image/")) {
-      toast(
-        "Please select an image file.",
-        "error"
+          toast(
+            "Image must be smaller than 5 MB.",
+            "error"
+          );
+
+          return;
+        }
+
+        const reader =
+          new FileReader();
+
+        reader.onload = () => {
+
+          imageData =
+            reader.result;
+
+          const imagePreview =
+            document.getElementById(
+              "postxImagePreview"
+            );
+
+          if (imagePreview) {
+
+            imagePreview.innerHTML = `
+              <img
+                src="${escapeHTML(imageData)}"
+                style="
+                  width:100%;
+                  max-height:220px;
+                  object-fit:cover;
+                  border-radius:12px;
+                  border:1px solid rgba(255,255,255,.10);
+                ">
+            `;
+          }
+
+          updatePreview();
+        };
+
+        reader.readAsDataURL(file);
+      }
+    );
+
+    document
+      .getElementById(
+        "postxSaveDraft"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+
+          savePost({
+            editing,
+            caption,
+            hashtags,
+            schedule,
+            imageData,
+            selectedPlatforms,
+            forceStatus: "draft"
+          });
+        }
       );
 
-      return;
-    }
+    form?.addEventListener(
+      "submit",
+      event => {
 
-    const reader =
-      new FileReader();
+        event.preventDefault();
 
-    reader.onload = () => {
-      const preview =
+        savePost({
+          editing,
+          caption,
+          hashtags,
+          schedule,
+          imageData,
+          selectedPlatforms
+        });
+      }
+    );
+
+    updateCharCount();
+
+    if (imageData) {
+
+      const imagePreview =
         document.getElementById(
           "postxImagePreview"
         );
 
-      if (preview) {
-        preview.innerHTML = `
+      if (imagePreview) {
+
+        imagePreview.innerHTML = `
           <img
-            class="postx-image-preview"
-            src="${escapeHTML(
-              reader.result
-            )}"
-            alt="Post image preview"
-          >
+            src="${escapeHTML(imageData)}"
+            style="
+              width:100%;
+              max-height:220px;
+              object-fit:cover;
+              border-radius:12px;
+            ">
         `;
       }
-
-      updateCreatePreview();
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  function updateCreatePreview() {
-    const caption =
-      document.getElementById(
-        "postxCaption"
-      )?.value || "";
-
-    const hashtags =
-      document.getElementById(
-        "postxHashtags"
-      )?.value || "";
-
-    const fullCaption =
-      buildCaption(
-        caption,
-        hashtags
-      );
-
-    const image =
-      document.querySelector(
-        "#postxImagePreview img"
-      )?.src || "";
-
-    const platforms = [
-      ...document.querySelectorAll(
-        'input[name="postx-platform"]:checked'
-      )
-    ].map(input => input.value);
-
-    const count =
-      document.getElementById(
-        "postxCharacterCount"
-      );
-
-    if (count) {
-      count.textContent =
-        `${caption.length} characters`;
     }
 
-    const preview =
-      document.getElementById(
-        "postxPreview"
+    updatePreview();
+  }
+
+  /* =========================================================
+     SAVE POST
+     ========================================================= */
+
+  function savePost({
+    editing,
+    caption,
+    hashtags,
+    schedule,
+    imageData,
+    selectedPlatforms,
+    forceStatus
+  }) {
+
+    const body =
+      String(
+        caption?.value || ""
+      ).trim();
+
+    const tags =
+      normalizeHashtags(
+        hashtags?.value || ""
       );
 
-    if (!preview) return;
+    const scheduledAt =
+      schedule?.value
+        ? new Date(
+            schedule.value
+          ).toISOString()
+        : "";
 
-    const platform =
-      PLATFORM[platforms[0]] ||
-      PLATFORM.facebook;
+    if (!body) {
 
-    preview.innerHTML = `
-      <div class="postx-preview-header">
+      toast(
+        "Please write a caption first.",
+        "error"
+      );
 
-        <div
-          class="postx-preview-avatar"
-          style="
-            background:${platform.color};
-          "
-        >
-          ${platform.icon}
-        </div>
+      return;
+    }
 
-        <div>
-          <div
-            style="
-              color:#fff;
-              font-weight:800;
-              font-size:12px;
-            "
-          >
-            PostX
-          </div>
+    if (
+      !forceStatus &&
+      selectedPlatforms.length === 0
+    ) {
 
-          <div
-            style="
-              color:#718399;
-              font-size:9px;
-            "
-          >
-            ${platform.name}
-          </div>
-        </div>
+      toast(
+        "Select at least one connected platform.",
+        "error"
+      );
 
-      </div>
+      return;
+    }
 
-      ${
-        image
-          ? `
-            <img
-              class="postx-preview-image"
-              src="${escapeHTML(image)}"
-              alt="Preview"
-            >
-          `
-          : ""
+    let status =
+      forceStatus || "published";
+
+    if (
+      !forceStatus &&
+      scheduledAt
+    ) {
+
+      const scheduleDate =
+        new Date(
+          scheduledAt
+        );
+
+      if (
+        scheduleDate.getTime() >
+        Date.now()
+      ) {
+
+        status = "scheduled";
+
+      } else {
+
+        status = "published";
+      }
+    }
+
+    const fullCaption =
+      buildFullCaption(
+        body,
+        tags
+      );
+
+    const timestamp =
+      nowISO();
+
+    if (editing) {
+
+      const post =
+        getPostById(
+          editing.id
+        );
+
+      if (!post) {
+
+        toast(
+          "Post could not be found.",
+          "error"
+        );
+
+        return;
       }
 
-      <div class="postx-preview-content">
-        ${
-          fullCaption
-            ? escapeHTML(fullCaption)
-            : "Your post preview will appear here..."
-        }
-      </div>
+      post.caption = body;
 
+      post.hashtags = tags;
+
+      post.fullCaption =
+        fullCaption;
+
+      post.platforms =
+        selectedPlatforms;
+
+      post.imageData =
+        imageData || "";
+
+      post.scheduledAt =
+        status === "scheduled"
+          ? scheduledAt
+          : "";
+
+      post.status =
+        status;
+
+      post.updatedAt =
+        timestamp;
+
+      if (
+        status === "published"
+      ) {
+
+        post.publishedAt =
+          timestamp;
+      }
+
+      saveState();
+
+      state.editingPostId = null;
+
+      toast(
+        status === "scheduled"
+          ? "Post updated and scheduled."
+          : "Post updated successfully."
+      );
+
+    } else {
+
+      const post = {
+
+        id: uid(),
+
+        caption: body,
+
+        hashtags: tags,
+
+        fullCaption,
+
+        imageData:
+          imageData || "",
+
+        platforms:
+          selectedPlatforms,
+
+        status,
+
+        scheduledAt:
+          status === "scheduled"
+            ? scheduledAt
+            : "",
+
+        publishedAt:
+          status === "published"
+            ? timestamp
+            : "",
+
+        createdAt:
+          timestamp,
+
+        updatedAt:
+          timestamp
+      };
+
+      state.posts.unshift(post);
+
+      saveState();
+
+      toast(
+        status === "scheduled"
+          ? "Post scheduled successfully."
+          : status === "draft"
+            ? "Draft saved successfully."
+            : "Post published successfully."
+      );
+    }
+
+    if (status === "draft") {
+
+      navigate("drafts");
+
+    } else if (status === "scheduled") {
+
+      navigate("scheduled");
+
+    } else {
+
+      navigate("published");
+    }
+  }
+
+  /* =========================================================
+     PREVIEW
+     ========================================================= */
+
+  function previewHTML(post) {
+
+    const platforms =
+      normalizePlatformList(
+        post.platforms
+      );
+
+    const caption =
+      buildFullCaption(
+        post.caption || "",
+        post.hashtags || ""
+      );
+
+    return `
       <div
         style="
-          padding:0 14px 14px;
-          display:flex;
-          gap:14px;
-          color:#65778c;
-          font-size:11px;
-        "
-      >
-        ♡ Like
-       　💬 Comment
-       　↗ Share
+          background:#0d1b2a;
+          color:#fff;
+        ">
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:14px;
+            border-bottom:
+              1px solid rgba(255,255,255,.08);
+          ">
+
+          <div
+            style="
+              width:38px;
+              height:38px;
+              border-radius:50%;
+              display:grid;
+              place-items:center;
+              font-weight:900;
+              color:#fff;
+              background:
+                linear-gradient(
+                  135deg,
+                  #00d4ff,
+                  #7c3aed
+                );
+            ">
+            P
+          </div>
+
+          <div>
+
+            <div
+              style="
+                font-weight:850;
+                font-size:13px;
+              ">
+              PostX
+            </div>
+
+            <div
+              style="
+                color:#64748b;
+                font-size:10px;
+              ">
+              Social Preview
+            </div>
+
+          </div>
+
+        </div>
+
+        ${
+          post.imageData
+            ? `
+              <img
+                src="${escapeHTML(
+                  post.imageData
+                )}"
+                style="
+                  width:100%;
+                  max-height:280px;
+                  object-fit:cover;
+                  display:block;
+                ">
+            `
+            : `
+              <div
+                style="
+                  height:160px;
+                  display:grid;
+                  place-items:center;
+                  background:
+                    linear-gradient(
+                      135deg,
+                      rgba(0,212,255,.10),
+                      rgba(124,58,237,.16)
+                    );
+                  color:#00d4ff;
+                  font-size:36px;
+                ">
+                ✨
+              </div>
+            `
+        }
+
+        <div style="padding:15px">
+
+          <div
+            style="
+              color:#f8fafc;
+              white-space:pre-wrap;
+              line-height:1.55;
+              font-size:13px;
+            ">
+            ${escapeHTML(
+              caption ||
+              "Your post preview will appear here."
+            )}
+          </div>
+
+          ${
+            platforms.length
+              ? `
+                <div
+                  style="
+                    display:flex;
+                    gap:6px;
+                    margin-top:15px;
+                  ">
+
+                  ${platforms
+                    .map(id => {
+
+                      const platform =
+                        PLATFORM[id];
+
+                      return `
+                        <span
+                          style="
+                            width:28px;
+                            height:28px;
+                            border-radius:8px;
+                            display:grid;
+                            place-items:center;
+                            background:${platform.color};
+                            color:#fff;
+                            font-size:12px;
+                            font-weight:900;
+                          ">
+                          ${escapeHTML(
+                            platform.icon
+                          )}
+                        </span>
+                      `;
+                    })
+                    .join("")}
+
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
       </div>
     `;
   }
 
+  /* =========================================================
+     LIST PAGE
+     ========================================================= */
+
+  function renderListPage(
+    container,
+    page
+  ) {
+
+    const statusMap = {
+
+      scheduled: "scheduled",
+
+      drafts: "draft",
+
+      published: "published"
+    };
+
+    const status =
+      statusMap[page];
+
+    const posts =
+      state.posts
+        .filter(
+          post =>
+            post.status === status
+        )
+        .sort(
+          (a, b) =>
+            new Date(
+              b.updatedAt
+            ) -
+            new Date(
+              a.updatedAt
+            )
+        );
+
+    const titleMap = {
+
+      scheduled:
+        "Scheduled Posts",
+
+      drafts:
+        "Drafts",
+
+      published:
+        "Published Posts"
+    };
+
+    const subtitleMap = {
+
+      scheduled:
+        "Posts waiting to be published.",
+
+      drafts:
+        "Posts saved for later.",
+
+      published:
+        "Your published social media posts."
+    };
+
+    container.innerHTML = `
+      <div class="postx-page">
+
+        <div class="postx-page-header">
+
+          <div>
+
+            <h1 class="postx-page-title">
+              ${escapeHTML(
+                titleMap[page] ||
+                "Posts"
+              )}
+            </h1>
+
+            <p class="postx-page-subtitle">
+              ${escapeHTML(
+                subtitleMap[page] || ""
+              )}
+            </p>
+
+          </div>
+
+          <div class="postx-actions">
+
+            <button
+              type="button"
+              class="postx-btn postx-btn-gradient"
+              data-list-create>
+              + Create Post
+            </button>
+
+          </div>
+
+        </div>
+
+        <div
+          class="postx-card"
+          style="padding:20px">
+
+          ${
+            posts.length
+              ? `
+                <div class="postx-list">
+
+                  ${posts
+                    .map(post =>
+                      postCardHTML(
+                        post,
+                        false
+                      )
+                    )
+                    .join("")}
+
+                </div>
+              `
+              : `
+                <div class="postx-empty">
+
+                  <div class="postx-empty-icon">
+                    ${
+                      page === "scheduled"
+                        ? "◷"
+                        : page === "drafts"
+                          ? "▤"
+                          : "✓"
+                    }
+                  </div>
+
+                  <div
+                    style="
+                      color:#fff;
+                      font-weight:800;
+                    ">
+                    No ${
+                      page === "scheduled"
+                        ? "scheduled"
+                        : page
+                    } posts
+                  </div>
+
+                  <div
+                    style="
+                      margin-top:6px;
+                      font-size:12px;
+                    ">
+                    Create a post to get started.
+                  </div>
+
+                </div>
+              `
+          }
+
+        </div>
+
+      </div>
+    `;
+
+    container
+      .querySelector("[data-list-create]")
+      ?.addEventListener(
+        "click",
+        () => navigate("create")
+      );
+
+    attachPostActions(container);
+  }
+
+  /* =========================================================
+     POST CARD
+     ========================================================= */
+
+  function postCardHTML(
+    post,
+    compact
+  ) {
+
+    const platforms =
+      normalizePlatformList(
+        post.platforms
+      );
+
+    return `
+      <div
+        class="postx-list-item"
+        data-post-card="${post.id}"
+        style="
+          ${
+            compact
+              ? ""
+              : "padding:16px;"
+          }
+        ">
+
+        <div class="postx-list-thumb">
+
+          ${
+            post.imageData
+              ? `
+                <img
+                  src="${escapeHTML(
+                    post.imageData
+                  )}"
+                  alt="">
+              `
+              : "P"
+          }
+
+        </div>
+
+        <div class="postx-list-body">
+
+          <div class="postx-list-title">
+            ${escapeHTML(
+              truncate(
+                post.caption ||
+                  "Untitled post",
+                compact ? 55 : 120
+              )
+            )}
+          </div>
+
+          <div
+            class="postx-list-meta">
+
+            ${escapeHTML(
+              formatDateTime(
+                post.scheduledAt ||
+                post.publishedAt ||
+                post.updatedAt
+              )
+            )}
+
+            ${
+              platforms.length
+                ? " • " +
+                  platforms
+                    .map(
+                      id =>
+                        PLATFORM[id].name
+                    )
+                    .join(", ")
+                : ""
+            }
+
+          </div>
+
+        </div>
+
+        <span
+          class="
+            postx-status
+            postx-status-${escapeHTML(
+              post.status
+            )}
+          ">
+          ${escapeHTML(
+            post.status
+          )}
+        </span>
+
+        ${
+          compact
+            ? ""
+            : `
+              <div
+                style="
+                  display:flex;
+                  gap:6px;
+                  margin-left:6px;
+                ">
+
+                ${
+                  post.status === "draft"
+                    ? `
+                      <button
+                        type="button"
+                        class="postx-btn"
+                        style="
+                          padding:7px 10px;
+                          font-size:11px;
+                        "
+                        data-post-edit="${post.id}">
+                        Edit
+                      </button>
+                    `
+                    : ""
+                }
+
+                ${
+                  post.status === "scheduled"
+                    ? `
+                      <button
+                        type="button"
+                        class="postx-btn postx-btn-primary"
+                        style="
+                          padding:7px 10px;
+                          font-size:11px;
+                        "
+                        data-post-publish="${post.id}">
+                        Publish
+                      </button>
+                    `
+                    : ""
+                }
+
+                <button
+                  type="button"
+                  class="postx-btn"
+                  style="
+                    padding:7px 10px;
+                    font-size:11px;
+                  "
+                  data-post-delete="${post.id}">
+                  Delete
+                </button>
+
+              </div>
+            `
+        }
+
+      </div>
+    `;
+  }
+
+  /* =========================================================
+     POST ACTIONS
+     ========================================================= */
+
+  function attachPostActions(
+    container
+  ) {
+
+    container
+      .querySelectorAll(
+        "[data-post-edit]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const post =
+              getPostById(
+                button.dataset.postEdit
+              );
+
+            if (!post) return;
+
+            state.editingPostId =
+              post.id;
+
+            state.activePage =
+              "create";
+
+            saveState();
+
+            render();
+          }
+        );
+      });
+
+    container
+      .querySelectorAll(
+        "[data-post-delete]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const id =
+              button.dataset.postDelete;
+
+            showModal({
+              title:
+                "Delete this post?",
+
+              message:
+                "This action cannot be undone.",
+
+              confirmText:
+                "Delete",
+
+              onConfirm: () => {
+
+                state.posts =
+                  state.posts.filter(
+                    post =>
+                      post.id !== id
+                  );
+
+                saveState();
+
+                toast(
+                  "Post deleted successfully."
+                );
+
+                render();
+              }
+            });
+          }
+        );
+      });
+
+    container
+      .querySelectorAll(
+        "[data-post-publish]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const id =
+              button.dataset.postPublish;
+
+            const post =
+              getPostById(id);
+
+            if (!post) return;
+
+            showModal({
+              title:
+                "Publish this post now?",
+
+              message:
+                "The scheduled post will be moved to Published.",
+
+              confirmText:
+                "Publish Now",
+
+              onConfirm: () => {
+
+                const timestamp =
+                  nowISO();
+
+                post.status =
+                  "published";
+
+                post.publishedAt =
+                  timestamp;
+
+                post.scheduledAt =
+                  "";
+
+                post.updatedAt =
+                  timestamp;
+
+                saveState();
+
+                toast(
+                  "Post published successfully."
+                );
+
+                render();
+              }
+            });
+          }
+        );
+      });
+  }
+
+  /* =========================================================
+     CALENDAR
+     ========================================================= */
+
+  function renderCalendar(container) {
+
+    const scheduled =
+      state.posts
+        .filter(
+          post =>
+            post.status ===
+              "scheduled" &&
+            post.scheduledAt
+        )
+        .sort(
+          (a, b) =>
+            new Date(
+              a.scheduledAt
+            ) -
+            new Date(
+              b.scheduledAt
+            )
+        );
+
+    container.innerHTML = `
+      <div class="postx-page">
+
+        <div class="postx-page-header">
+
+          <div>
+
+            <h1 class="postx-page-title">
+              Calendar
+            </h1>
+
+            <p class="postx-page-subtitle">
+              View your upcoming scheduled content.
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="postx-btn postx-btn-gradient"
+            data-calendar-create>
+            + Create Post
+          </button>
+
+        </div>
+
+        <div
+          class="postx-card"
+          style="padding:20px">
+
+          ${
+            scheduled.length
+              ? `
+                <div
+                  style="
+                    display:grid;
+                    gap:12px;
+                  ">
+
+                  ${scheduled
+                    .map(post => `
+
+                      <div
+                        style="
+                          display:grid;
+                          grid-template-columns:
+                            120px 1fr auto;
+                          gap:15px;
+                          align-items:center;
+                          padding:15px;
+                          border:
+                            1px solid rgba(255,255,255,.08);
+                          border-radius:14px;
+                          background:
+                            rgba(255,255,255,.025);
+                        ">
+
+                        <div>
+
+                          <div
+                            style="
+                              color:#00d4ff;
+                              font-weight:900;
+                              font-size:13px;
+                            ">
+                            ${escapeHTML(
+                              formatDate(
+                                post.scheduledAt
+                              )
+                            )}
+                          </div>
+
+                          <div
+                            style="
+                              color:#64748b;
+                              font-size:11px;
+                              margin-top:3px;
+                            ">
+                            ${escapeHTML(
+                              new Date(
+                                post.scheduledAt
+                              ).toLocaleTimeString(
+                                undefined,
+                                {
+                                  hour:
+                                    "2-digit",
+                                  minute:
+                                    "2-digit"
+                                }
+                              )
+                            )}
+                          </div>
+
+                        </div>
+
+                        <div>
+
+                          <div
+                            style="
+                              color:#fff;
+                              font-weight:800;
+                            ">
+                            ${escapeHTML(
+                              truncate(
+                                post.caption,
+                                100
+                              )
+                            )}
+                          </div>
+
+                          <div
+                            style="
+                              color:#64748b;
+                              font-size:11px;
+                              margin-top:4px;
+                            ">
+                            ${escapeHTML(
+                              normalizePlatformList(
+                                post.platforms
+                              )
+                                .map(
+                                  id =>
+                                    PLATFORM[id]
+                                      .name
+                                )
+                                .join(", ")
+                            )}
+                          </div>
+
+                        </div>
+
+                        <button
+                          type="button"
+                          class="postx-btn postx-btn-primary"
+                          data-calendar-publish="${post.id}"
+                          style="
+                            padding:8px 11px;
+                            font-size:11px;
+                          ">
+                          Publish
+                        </button>
+
+                      </div>
+
+                    `)
+                    .join("")}
+
+                </div>
+              `
+              : `
+                <div class="postx-empty">
+
+                  <div class="postx-empty-icon">
+                    ▦
+                  </div>
+
+                  <div
+                    style="
+                      color:#fff;
+                      font-weight:800;
+                    ">
+                    Your calendar is empty
+                  </div>
+
+                  <div
+                    style="
+                      margin-top:6px;
+                      font-size:12px;
+                    ">
+                    Schedule a post to see it here.
+                  </div>
+
+                </div>
+              `
+          }
+
+        </div>
+
+      </div>
+    `;
+
+    container
+      .querySelector(
+        "[data-calendar-create]"
+      )
+      ?.addEventListener(
+        "click",
+        () => navigate("create")
+      );
+
+    container
+      .querySelectorAll(
+        "[data-calendar-publish]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const post =
+              getPostById(
+                button.dataset
+                  .calendarPublish
+              );
+
+            if (!post) return;
+
+            showModal({
+
+              title:
+                "Publish this post now?",
+
+              message:
+                "This will move the scheduled post to Published.",
+
+              confirmText:
+                "Publish Now",
+
+              onConfirm: () => {
+
+                const timestamp =
+                  nowISO();
+
+                post.status =
+                  "published";
+
+                post.publishedAt =
+                  timestamp;
+
+                post.scheduledAt =
+                  "";
+
+                post.updatedAt =
+                  timestamp;
+
+                saveState();
+
+                toast(
+                  "Post published successfully."
+                );
+
+                render();
+              }
+            });
+          }
+        );
+      });
+  }
+
+  /* =========================================================
+     PLATFORM CONNECTIONS
+     ========================================================= */
+
+  function togglePlatform(
+    platformId
+  ) {
+
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        PLATFORM,
+        platformId
+      )
+    ) {
+      return;
+    }
+
+    const platform =
+      PLATFORM[platformId];
+
+    const connected =
+      !!state.connectedAccounts[
+        platformId
+      ];
+
+    if (connected) {
+
+      showModal({
+
+        title:
+          `Disconnect ${platform.name}?`,
+
+        message:
+          `You will no longer be able to select ${platform.name} when creating posts.`,
+
+        confirmText:
+          "Disconnect",
+
+        onConfirm: () => {
+
+          state.connectedAccounts[
+            platformId
+          ] = false;
+
+          saveState();
+
+          toast(
+            `${platform.name} disconnected.`
+          );
+
+          render();
+        }
+      });
+
+    } else {
+
+      state.connectedAccounts[
+        platformId
+      ] = true;
+
+      saveState();
+
+      toast(
+        `${platform.name} connected successfully.`
+      );
+
+      render();
+    }
+  }
+
+  /* =========================================================
+     DATE HELPERS
+     ========================================================= */
+
   function toDateTimeLocal(value) {
+
     if (!value) return "";
 
     const date =
       new Date(value);
 
     if (
-      Number.isNaN(
+      isNaN(
         date.getTime()
       )
     ) {
@@ -2867,618 +4074,37 @@
   }
 
   /* =========================================================
-     LIST PAGES
+     GLOBAL CLICK HANDLER
      ========================================================= */
 
-  function renderListPage(container, status) {
-    const posts =
-      state.posts
-        .filter(
-          post =>
-            post.status === status
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              b.updatedAt || b.createdAt
-            ) -
-            new Date(
-              a.updatedAt || a.createdAt
-            )
-        );
+  function attachGlobalHandlers() {
 
-    const titles = {
-      scheduled: "Scheduled Posts",
-      drafts: "Drafts",
-      published: "Published Posts"
-    };
+    document.addEventListener(
+      "click",
+      event => {
 
-    const subtitles = {
-      scheduled:
-        "Posts waiting to be published.",
-      drafts:
-        "Posts saved for later editing.",
-      published:
-        "Your published social media posts."
-    };
-
-    container.innerHTML = `
-      <div class="postx-page">
-
-        <div class="postx-page-header">
-
-          <div>
-            <h1 class="postx-page-title">
-              ${titles[status]}
-            </h1>
-
-            <p class="postx-page-subtitle">
-              ${subtitles[status]}
-            </p>
-          </div>
-
-          <button
-            class="postx-btn postx-btn-primary"
-            data-postx-nav="create"
-          >
-            + Create Post
-          </button>
-
-        </div>
-
-        ${
-          posts.length
-            ? `
-              <div class="postx-card postx-section-card">
-
-                <div class="postx-list">
-
-                  ${posts
-                    .map(
-                      post =>
-                        postListItem(
-                          post,
-                          true
-                        )
-                    )
-                    .join("")}
-
-                </div>
-
-              </div>
-            `
-            : emptyState(
-                status === "draft"
-                  ? "▤"
-                  : status === "scheduled"
-                  ? "◷"
-                  : "✓",
-                `No ${status} posts`,
-                "Create a post to get started."
-              )
-        }
-
-      </div>
-    `;
-
-    bindNavigationButtons(container);
-
-    bindPostActions(container);
-  }
-
-  function postListItem(post, withActions = false) {
-    const platforms =
-      getPlatforms(post);
-
-    const date =
-      post.status === "scheduled"
-        ? post.scheduledAt
-        : post.status === "published"
-        ? post.publishedAt
-        : post.updatedAt;
-
-    return `
-      <div
-        class="postx-list-item"
-        data-post-id="${escapeHTML(post.id)}"
-        style="
-          align-items:flex-start;
-          flex-wrap:wrap;
-        "
-      >
-
-        <div class="postx-list-thumb">
-          ${
-            post.imageData
-              ? `
-                <img
-                  src="${escapeHTML(
-                    post.imageData
-                  )}"
-                  alt=""
-                >
-              `
-              : "P"
-          }
-        </div>
-
-        <div class="postx-list-body">
-
-          <div class="postx-list-title">
-            ${escapeHTML(
-              truncate(
-                post.caption ||
-                "Untitled post",
-                80
-              )
-            )}
-          </div>
-
-          <div
-            class="postx-list-meta"
-          >
-            ${escapeHTML(
-              formatDateTime(date)
-            )}
-          </div>
-
-          <div
-            class="postx-platforms"
-            style="margin-top:7px"
-          >
-            ${
-              platforms.length
-                ? platforms
-                    .map(
-                      platform => `
-                        <span
-                          class="postx-platform-badge"
-                        >
-                          <span
-                            class="postx-platform-dot"
-                            style="
-                              background:${platform.color};
-                            "
-                          ></span>
-
-                          ${escapeHTML(
-                            platform.name
-                          )}
-                        </span>
-                      `
-                    )
-                    .join("")
-                : ""
-            }
-          </div>
-
-        </div>
-
-        <div
-          style="
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin-left:auto;
-          "
-        >
-
-          <span
-            class="
-              postx-status
-              postx-status-${escapeHTML(
-                post.status
-              )}
-            "
-          >
-            ${escapeHTML(post.status)}
-          </span>
-
-          ${
-            withActions
-              ? `
-                <button
-                  class="postx-btn"
-                  data-postx-edit="${escapeHTML(
-                    post.id
-                  )}"
-                  style="
-                    padding:6px 9px;
-                    font-size:11px;
-                  "
-                >
-                  Edit
-                </button>
-
-                <button
-                  class="postx-btn postx-btn-danger"
-                  data-postx-delete="${escapeHTML(
-                    post.id
-                  )}"
-                  style="
-                    padding:6px 9px;
-                    font-size:11px;
-                  "
-                >
-                  Delete
-                </button>
-              `
-              : ""
-          }
-
-        </div>
-
-      </div>
-    `;
-  }
-
-  /* =========================================================
-     CALENDAR
-     ========================================================= */
-
-  function renderCalendar(container) {
-    const now =
-      new Date();
-
-    const year =
-      now.getFullYear();
-
-    const month =
-      now.getMonth();
-
-    const firstDay =
-      new Date(
-        year,
-        month,
-        1
-      ).getDay();
-
-    const daysInMonth =
-      new Date(
-        year,
-        month + 1,
-        0
-      ).getDate();
-
-    const postsByDay = {};
-
-    state.posts
-      .filter(
-        post =>
-          post.status === "scheduled" &&
-          post.scheduledAt
-      )
-      .forEach(post => {
-        const date =
-          new Date(
-            post.scheduledAt
+        const toggle =
+          event.target.closest(
+            "[data-platform-toggle]"
           );
 
-        if (
-          date.getFullYear() === year &&
-          date.getMonth() === month
-        ) {
-          const day =
-            date.getDate();
+        if (toggle) {
 
-          if (!postsByDay[day]) {
-            postsByDay[day] = [];
-          }
-
-          postsByDay[day].push(post);
+          togglePlatform(
+            toggle.dataset
+              .platformToggle
+          );
         }
-      });
-
-    const weekdayLabels = [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat"
-    ];
-
-    const cells = [];
-
-    for (
-      let i = 0;
-      i < firstDay;
-      i++
-    ) {
-      cells.push(
-        `<div></div>`
-      );
-    }
-
-    for (
-      let day = 1;
-      day <= daysInMonth;
-      day++
-    ) {
-      const posts =
-        postsByDay[day] || [];
-
-      cells.push(`
-        <div
-          class="postx-calendar-day"
-        >
-
-          <div
-            class="postx-calendar-number"
-          >
-            ${day}
-          </div>
-
-          ${
-            posts.length
-              ? posts
-                  .map(
-                    post => `
-                      <div
-                        class="postx-calendar-post"
-                      >
-                        ${escapeHTML(
-                          truncate(
-                            post.caption ||
-                            "Scheduled post",
-                            28
-                          )
-                        )}
-                      </div>
-                    `
-                  )
-                  .join("")
-              : ""
-          }
-
-        </div>
-      `);
-    }
-
-    container.innerHTML = `
-      <div class="postx-page">
-
-        <div class="postx-page-header">
-
-          <div>
-            <h1 class="postx-page-title">
-              Calendar
-            </h1>
-
-            <p class="postx-page-subtitle">
-              ${now.toLocaleString(
-                undefined,
-                {
-                  month: "long",
-                  year: "numeric"
-                }
-              )}
-            </p>
-          </div>
-
-          <button
-            class="postx-btn postx-btn-primary"
-            data-postx-nav="create"
-          >
-            + Schedule Post
-          </button>
-
-        </div>
-
-        <div class="postx-card postx-section-card">
-
-          <div
-            class="postx-calendar"
-            style="margin-bottom:8px"
-          >
-            ${weekdayLabels
-              .map(
-                day => `
-                  <div
-                    style="
-                      padding:7px;
-                      color:#65788d;
-                      font-size:10px;
-                      font-weight:800;
-                      text-align:center;
-                    "
-                  >
-                    ${day}
-                  </div>
-                `
-              )
-              .join("")}
-          </div>
-
-          <div class="postx-calendar">
-            ${cells.join("")}
-          </div>
-
-        </div>
-
-      </div>
-    `;
-
-    bindNavigationButtons(container);
+      }
+    );
   }
 
   /* =========================================================
-     EDIT / DELETE
+     INITIALIZATION
      ========================================================= */
 
-  function bindPostActions(container) {
-    container
-      .querySelectorAll(
-        "[data-postx-edit]"
-      )
-      .forEach(button => {
-        button.addEventListener(
-          "click",
-          () => {
-            const id =
-              button.dataset.postxEdit;
+  function init() {
 
-            if (!getPostById(id)) {
-              return;
-            }
-
-            state.editingPostId = id;
-
-            state.activePage = "create";
-
-            saveState();
-
-            render();
-          }
-        );
-      });
-
-    container
-      .querySelectorAll(
-        "[data-postx-delete]"
-      )
-      .forEach(button => {
-        button.addEventListener(
-          "click",
-          () => {
-            const id =
-              button.dataset.postxDelete;
-
-            const post =
-              getPostById(id);
-
-            if (!post) return;
-
-            const confirmed =
-              window.confirm(
-                "Delete this post?"
-              );
-
-            if (!confirmed) return;
-
-            state.posts =
-              state.posts.filter(
-                item =>
-                  item.id !== id
-              );
-
-            saveState();
-
-            toast(
-              "Post deleted.",
-              "success"
-            );
-
-            render();
-          }
-        );
-      });
-  }
-
-  /* =========================================================
-     EMPTY STATE
-     ========================================================= */
-
-  function emptyState(
-    icon,
-    title,
-    message
-  ) {
-    return `
-      <div class="postx-card postx-empty">
-
-        <div class="postx-empty-icon">
-          ${icon}
-        </div>
-
-        <div
-          style="
-            color:#dbe5ef;
-            font-weight:850;
-            margin-bottom:5px;
-          "
-        >
-          ${escapeHTML(title)}
-        </div>
-
-        <div
-          style="
-            font-size:12px;
-            margin-bottom:18px;
-          "
-        >
-          ${escapeHTML(message)}
-        </div>
-
-        <button
-          class="postx-btn postx-btn-primary"
-          data-postx-nav="create"
-        >
-          + Create Post
-        </button>
-
-      </div>
-    `;
-  }
-
-  /* =========================================================
-     EVENT HELPERS
-     ========================================================= */
-
-  function bindNavigationButtons(root) {
-    root
-      .querySelectorAll(
-        "[data-postx-nav]"
-      )
-      .forEach(button => {
-        button.addEventListener(
-          "click",
-          () => {
-            navigate(
-              button.dataset.postxNav
-            );
-          }
-        );
-      });
-  }
-
-  /* =========================================================
-     TOAST
-     ========================================================= */
-
-  function toast(
-    message,
-    type = "success"
-  ) {
-    const container =
-      document.getElementById(
-        "postxToastContainer"
-      );
-
-    if (!container) return;
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      `postx-toast ${type}`;
-
-    item.textContent =
-      message;
-
-    container.appendChild(item);
-
-    setTimeout(() => {
-      item.remove();
-    }, 3200);
-  }
-
-  /* =========================================================
-     START APPLICATION
-     ========================================================= */
-
-  function start() {
     injectStyles();
 
     const root =
@@ -3486,26 +4112,40 @@
 
     renderShell(root);
 
+    attachGlobalHandlers();
+
     render();
 
-    saveState();
-
     console.log(
-      `PostX ${APP.version} started successfully.`
+      `%cPostX ${APP.version} loaded`,
+      `
+        color:#00d4ff;
+        font-size:14px;
+        font-weight:bold;
+      `
     );
   }
+
+  /* =========================================================
+     START
+     ========================================================= */
 
   if (
     document.readyState ===
     "loading"
   ) {
+
     document.addEventListener(
       "DOMContentLoaded",
-      start,
-      { once: true }
+      init,
+      {
+        once: true
+      }
     );
+
   } else {
-    start();
+
+    init();
   }
 
 })();
