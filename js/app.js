@@ -1,15 +1,31 @@
 /* =========================================================
-   POSTX — FULL DARK PREMIUM FRONTEND ENGINE
+   POSTX — SMART SOCIAL PUBLISHER
+   FULL DARK PREMIUM FRONTEND ENGINE
    Version 1.2.0
-   GitHub Pages / PWA compatible
+
+   Platforms:
+   ✓ Facebook
+   ✓ Instagram
+   ✓ X
+
+   Features:
+   ✓ Dashboard
+   ✓ Create Post
+   ✓ Platform selection
+   ✓ Image upload
+   ✓ Hashtags
+   ✓ Drafts
+   ✓ Scheduling
+   ✓ Published posts
+   ✓ Calendar
+   ✓ Edit / Delete
+   ✓ LocalStorage
+   ✓ Responsive mobile navigation
+   ✓ Forced Dark Premium theme
    ========================================================= */
 
 (() => {
   "use strict";
-
-  /* =========================================================
-     APP CONFIG
-     ========================================================= */
 
   const APP = {
     name: "PostX",
@@ -59,13 +75,12 @@
     },
 
     profile: {
-      name: "Sarah Kim",
+      name: "PostX User",
       email: ""
     }
   };
 
   let state = loadState();
-
 
   /* =========================================================
      STORAGE
@@ -104,7 +119,6 @@
         }
       };
     } catch (error) {
-      console.warn("PostX storage recovery:", error);
       return clone(DEFAULT_STATE);
     }
   }
@@ -116,10 +130,9 @@
         JSON.stringify(state)
       );
     } catch (error) {
-      console.warn("PostX could not save state:", error);
+      console.warn("PostX storage error:", error);
     }
   }
-
 
   /* =========================================================
      HELPERS
@@ -131,7 +144,7 @@
       "_" +
       Date.now().toString(36) +
       "_" +
-      Math.random().toString(36).slice(2, 8)
+      Math.random().toString(36).slice(2, 9)
     );
   }
 
@@ -162,41 +175,20 @@
     });
   }
 
-  function formatRelative(value) {
+  function formatDate(value) {
     if (!value) return "—";
 
     const date = new Date(value);
-    const diff = Date.now() - date.getTime();
 
     if (Number.isNaN(date.getTime())) {
       return "—";
     }
 
-    const seconds = Math.floor(diff / 1000);
-
-    if (seconds < 60) {
-      return "just now";
-    }
-
-    const minutes = Math.floor(seconds / 60);
-
-    if (minutes < 60) {
-      return `${minutes} min ago`;
-    }
-
-    const hours = Math.floor(minutes / 60);
-
-    if (hours < 24) {
-      return `${hours} hr ago`;
-    }
-
-    const days = Math.floor(hours / 24);
-
-    if (days < 7) {
-      return `${days} day${days === 1 ? "" : "s"} ago`;
-    }
-
-    return date.toLocaleDateString();
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
   }
 
   function truncate(value, length = 120) {
@@ -209,59 +201,52 @@
     return text.slice(0, length).trimEnd() + "…";
   }
 
-  function getPostById(id) {
-    return state.posts.find(post => post.id === id) || null;
-  }
-
   function normalizeHashtags(value) {
     return String(value || "")
       .split(/[\s,]+/)
       .map(item => item.trim())
       .filter(Boolean)
-      .map(item => item.startsWith("#") ? item : `#${item}`)
+      .map(item =>
+        item.startsWith("#") ? item : "#" + item
+      )
       .join(" ");
   }
 
-  function buildFullCaption(caption, hashtags) {
-    const main = String(caption || "").trim();
+  function buildCaption(caption, hashtags) {
+    const body = String(caption || "").trim();
     const tags = normalizeHashtags(hashtags);
 
-    return [main, tags]
+    return [body, tags]
       .filter(Boolean)
       .join("\n\n");
   }
 
-  function platformBadges(platforms = []) {
-    return platforms
+  function getPostById(id) {
+    return state.posts.find(post => post.id === id) || null;
+  }
+
+  function getPlatforms(post) {
+    if (!post || !Array.isArray(post.platforms)) {
+      return [];
+    }
+
+    return post.platforms
       .map(id => PLATFORM[id])
-      .filter(Boolean)
-      .map(platform => `
-        <span
-          class="postx-platform"
-          style="--platform-color:${platform.color}"
-          title="${escapeHTML(platform.name)}"
-        >
-          ${escapeHTML(platform.icon)}
-        </span>
-      `)
-      .join("");
+      .filter(Boolean);
   }
 
-  function statusClass(status) {
-    const allowed = [
-      "draft",
-      "scheduled",
-      "published"
-    ];
+  function closeMobileMenu() {
+    document
+      .getElementById("postxSidebar")
+      ?.classList.remove("open");
 
-    return allowed.includes(status)
-      ? status
-      : "draft";
+    document
+      .getElementById("postxOverlay")
+      ?.classList.remove("show");
   }
-
 
   /* =========================================================
-     DARK PREMIUM CSS
+     DARK PREMIUM THEME
      ========================================================= */
 
   function injectStyles() {
@@ -274,89 +259,71 @@
     style.id = "postx-runtime-styles";
 
     style.textContent = `
-      :root {
-        --postx-bg: #07111f;
-        --postx-bg-2: #091827;
-        --postx-surface: #0d1b2a;
-        --postx-surface-2: #10253a;
-
-        --postx-text: #f5f7fa;
-        --postx-muted: #94a3b8;
-
-        --postx-border: rgba(255,255,255,.08);
-
-        --postx-primary: #00d4ff;
-        --postx-primary-2: #7c3aed;
-
-        --postx-success: #22c55e;
-        --postx-danger: #ef4444;
-        --postx-warning: #f59e0b;
-
-        --postx-shadow:
-          0 15px 45px rgba(0,0,0,.35);
-
-        --postx-radius: 18px;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
       html,
       body {
-        margin: 0;
-        padding: 0;
-        min-height: 100%;
-        background: var(--postx-bg);
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100% !important;
+        background: #07111f !important;
+        color: #f5f7fa !important;
       }
 
       body {
-        color: var(--postx-text);
         font-family:
           Inter,
-          ui-sans-serif,
           system-ui,
           -apple-system,
           BlinkMacSystemFont,
           "Segoe UI",
-          sans-serif;
+          sans-serif !important;
 
         background:
           radial-gradient(
-            circle at 15% 0%,
-            rgba(0,212,255,.12),
+            circle at 10% 0%,
+            rgba(0, 212, 255, .12),
             transparent 30%
           ),
           radial-gradient(
-            circle at 90% 10%,
-            rgba(124,58,237,.14),
-            transparent 28%
+            circle at 90% 5%,
+            rgba(124, 58, 237, .14),
+            transparent 30%
           ),
-          var(--postx-bg);
+          #07111f !important;
+      }
+
+      body,
+      body *,
+      #app,
+      #app *,
+      #postx-app,
+      #postx-app * {
+        scrollbar-color: #263c55 #07111f;
+      }
+
+      #app,
+      #postx-app,
+      main {
+        background: transparent !important;
+        color: #f5f7fa !important;
+      }
+
+      #postx-app {
+        min-height: 100vh !important;
+      }
+
+      #postx-app * {
+        box-sizing: border-box;
       }
 
       button,
       input,
       textarea,
       select {
-        font: inherit;
+        font: inherit !important;
       }
 
       button {
-        cursor: pointer;
-      }
-
-      button:disabled {
-        opacity: .5;
-        cursor: not-allowed;
-      }
-
-      img {
-        max-width: 100%;
-      }
-
-      .postx-root {
-        min-height: 100vh;
+        cursor: pointer !important;
       }
 
       .postx-shell {
@@ -368,18 +335,29 @@
 
       .postx-sidebar {
         width: 270px;
-        background: rgba(8,16,30,.98);
-        border-right: 1px solid var(--postx-border);
+        min-width: 270px;
+
+        position: fixed;
+        inset: 0 auto 0 0;
+
+        z-index: 1000;
 
         padding: 22px 16px;
 
         display: flex;
         flex-direction: column;
 
-        position: fixed;
-        inset: 0 auto 0 0;
+        background:
+          linear-gradient(
+            180deg,
+            #091625 0%,
+            #07111f 100%
+          ) !important;
 
-        z-index: 100;
+        border-right: 1px solid rgba(255,255,255,.08);
+
+        box-shadow:
+          12px 0 40px rgba(0,0,0,.25);
 
         overflow-y: auto;
       }
@@ -388,21 +366,17 @@
         display: flex;
         align-items: center;
         gap: 11px;
-
-        padding:
-          8px
-          10px
-          26px;
+        padding: 7px 10px 26px;
       }
 
       .postx-brand-mark {
-        width: 44px;
-        height: 44px;
-
-        border-radius: 13px;
+        width: 45px;
+        height: 45px;
 
         display: grid;
         place-items: center;
+
+        border-radius: 13px;
 
         font-size: 22px;
         font-weight: 900;
@@ -417,31 +391,34 @@
           );
 
         box-shadow:
-          0 8px 24px
-          rgba(124,58,237,.35);
+          0 8px 28px rgba(124,58,237,.4);
       }
 
       .postx-brand-name {
         font-size: 20px;
         font-weight: 900;
+        color: #fff;
       }
 
       .postx-brand-sub {
-        font-size: 10px;
-        color: var(--postx-muted);
         margin-top: 2px;
-        letter-spacing: .4px;
+        font-size: 9px;
+        letter-spacing: .6px;
+        color: #718198;
       }
 
       .postx-create-btn {
         width: 100%;
-
         border: 0;
+
         border-radius: 13px;
 
         padding: 14px 16px;
 
-        color: #fff;
+        margin-bottom: 18px;
+
+        color: #fff !important;
+
         font-weight: 850;
 
         background:
@@ -449,25 +426,18 @@
             135deg,
             #00d4ff,
             #7c3aed
-          );
+          ) !important;
 
         box-shadow:
-          0 8px 25px
-          rgba(0,212,255,.22);
+          0 10px 28px rgba(0,212,255,.22);
 
-        margin-bottom: 18px;
-
-        transition:
-          transform .18s ease,
-          box-shadow .18s ease;
+        transition: .2s ease;
       }
 
       .postx-create-btn:hover {
         transform: translateY(-1px);
-
         box-shadow:
-          0 12px 30px
-          rgba(0,212,255,.30);
+          0 13px 32px rgba(0,212,255,.3);
       }
 
       .postx-nav {
@@ -478,18 +448,19 @@
       .postx-nav-btn {
         width: 100%;
 
-        border: 0;
-        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
 
-        background: transparent;
-        color: var(--postx-muted);
+        border: 0;
 
         padding: 12px 13px;
 
-        display: flex;
-        align-items: center;
+        border-radius: 12px;
 
-        gap: 12px;
+        background: transparent !important;
+
+        color: #8ea0b5 !important;
 
         text-align: left;
 
@@ -497,47 +468,49 @@
       }
 
       .postx-nav-btn:hover {
-        background: rgba(255,255,255,.06);
-        color: #fff;
+        background: rgba(255,255,255,.055) !important;
+        color: #fff !important;
       }
 
       .postx-nav-btn.active {
-        color: #fff;
-
         background:
           linear-gradient(
             90deg,
             rgba(0,212,255,.18),
             rgba(124,58,237,.18)
-          );
+          ) !important;
+
+        color: #fff !important;
 
         box-shadow:
-          inset 3px 0 0
-          var(--postx-primary);
+          inset 3px 0 0 #00d4ff,
+          0 4px 18px rgba(0,0,0,.12);
       }
 
       .postx-nav-icon {
-        width: 24px;
+        width: 22px;
         text-align: center;
-        font-size: 18px;
+        font-weight: 900;
       }
 
       /* MAIN */
 
       .postx-main {
-        margin-left: 270px;
         width: calc(100% - 270px);
-        min-height: 100vh;
-      }
 
-      .postx-mobile-header {
-        display: none;
+        min-height: 100vh;
+
+        margin-left: 270px;
+
+        background: transparent !important;
       }
 
       .postx-page {
         width: 100%;
-        max-width: 1450px;
+        max-width: 1400px;
+
         margin: 0 auto;
+
         padding: 30px;
       }
 
@@ -549,88 +522,28 @@
         gap: 20px;
 
         margin-bottom: 26px;
-
-        flex-wrap: wrap;
       }
 
       .postx-page-title {
         margin: 0;
 
-        font-size: 36px;
+        color: #fff !important;
+
+        font-size: clamp(28px, 4vw, 38px);
+
+        line-height: 1.1;
+
         font-weight: 900;
 
         letter-spacing: -.9px;
       }
 
       .postx-page-subtitle {
-        margin: 7px 0 0;
+        margin: 8px 0 0;
 
-        color: var(--postx-muted);
+        color: #8fa1b5 !important;
 
-        line-height: 1.5;
-      }
-
-      .postx-actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      /* BUTTONS */
-
-      .postx-btn {
-        border: 1px solid var(--postx-border);
-
-        border-radius: 12px;
-
-        padding: 11px 16px;
-
-        background: var(--postx-surface);
-        color: #fff;
-
-        font-weight: 750;
-
-        transition: .18s ease;
-      }
-
-      .postx-btn:hover {
-        background: var(--postx-surface-2);
-        border-color: rgba(255,255,255,.15);
-      }
-
-      .postx-btn-primary {
-        border: 0;
-
-        background:
-          linear-gradient(
-            135deg,
-            #00d4ff,
-            #1687ff
-          );
-
-        color: #03121d;
-
-        box-shadow:
-          0 8px 18px
-          rgba(0,212,255,.22);
-      }
-
-      .postx-btn-gradient {
-        border: 0;
-
-        background:
-          linear-gradient(
-            135deg,
-            #00d4ff,
-            #7c3aed
-          );
-
-        color: #fff;
-      }
-
-      .postx-btn-danger {
-        color: #fecaca;
-        border-color: rgba(239,68,68,.25);
+        font-size: 14px;
       }
 
       /* CARDS */
@@ -640,18 +553,18 @@
           linear-gradient(
             145deg,
             rgba(13,27,42,.98),
-            rgba(16,37,58,.86)
-          );
+            rgba(16,37,58,.88)
+          ) !important;
 
         border:
-          1px solid
-          var(--postx-border);
+          1px solid rgba(255,255,255,.08) !important;
 
-        border-radius:
-          var(--postx-radius);
+        border-radius: 18px;
+
+        color: #f5f7fa !important;
 
         box-shadow:
-          var(--postx-shadow);
+          0 18px 50px rgba(0,0,0,.25);
       }
 
       /* STATS */
@@ -660,7 +573,7 @@
         display: grid;
 
         grid-template-columns:
-          repeat(4, 1fr);
+          repeat(4, minmax(0, 1fr));
 
         gap: 16px;
 
@@ -669,57 +582,41 @@
 
       .postx-stat {
         padding: 21px;
-
-        position: relative;
-        overflow: hidden;
-      }
-
-      .postx-stat::after {
-        content: "";
-
-        position: absolute;
-
-        width: 100px;
-        height: 100px;
-
-        right: -40px;
-        bottom: -45px;
-
-        border-radius: 50%;
-
-        background:
-          rgba(0,212,255,.08);
-
-        filter: blur(2px);
+        min-height: 145px;
       }
 
       .postx-stat-label {
-        color: var(--postx-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        color: #94a3b8 !important;
 
         font-size: 13px;
         font-weight: 700;
-
-        display: flex;
-        align-items: center;
-
-        gap: 8px;
       }
 
       .postx-stat-value {
-        font-size: 34px;
+        margin-top: 11px;
+
+        color: #fff !important;
+
+        font-size: 35px;
+
         font-weight: 900;
 
-        margin-top: 12px;
-
         letter-spacing: -.8px;
+
+        text-shadow:
+          0 0 18px rgba(0,212,255,.18);
       }
 
       .postx-stat-sub {
-        color: var(--postx-primary);
+        margin-top: 6px;
+
+        color: #00d4ff !important;
 
         font-size: 12px;
-
-        margin-top: 6px;
       }
 
       /* DASHBOARD */
@@ -728,8 +625,7 @@
         display: grid;
 
         grid-template-columns:
-          1.4fr
-          .9fr;
+          1.35fr .9fr;
 
         gap: 20px;
       }
@@ -740,7 +636,6 @@
 
       .postx-section-head {
         display: flex;
-
         justify-content: space-between;
         align-items: center;
 
@@ -750,17 +645,66 @@
       }
 
       .postx-section-title {
+        margin: 0;
+
+        color: #fff !important;
+
         font-size: 17px;
         font-weight: 850;
+      }
 
-        margin: 0;
+      /* BUTTONS */
+
+      .postx-btn {
+        border:
+          1px solid rgba(255,255,255,.1) !important;
+
+        border-radius: 11px;
+
+        padding: 10px 15px;
+
+        color: #fff !important;
+
+        background:
+          #0d1b2a !important;
+
+        font-weight: 750;
+
+        transition: .18s ease;
+      }
+
+      .postx-btn:hover {
+        background: #14283c !important;
+        border-color: rgba(0,212,255,.3) !important;
+      }
+
+      .postx-btn-primary {
+        border: 0 !important;
+
+        color: #03121d !important;
+
+        background:
+          linear-gradient(
+            135deg,
+            #00d4ff,
+            #1687ff
+          ) !important;
+
+        box-shadow:
+          0 8px 22px rgba(0,212,255,.22);
+      }
+
+      .postx-btn-danger {
+        color: #fff !important;
+        background: #991b1b !important;
+        border-color: rgba(239,68,68,.25) !important;
       }
 
       /* LIST */
 
       .postx-list {
         display: grid;
-        gap: 12px;
+        gap: 11px;
       }
 
       .postx-list-item {
@@ -772,38 +716,39 @@
         padding: 13px;
 
         border:
-          1px solid
-          var(--postx-border);
+          1px solid rgba(255,255,255,.07);
 
         border-radius: 13px;
 
         background:
           rgba(255,255,255,.025);
+
+        min-width: 0;
       }
 
       .postx-list-thumb {
         width: 52px;
         height: 52px;
 
-        border-radius: 11px;
-
-        background: #07111f;
+        flex: 0 0 52px;
 
         display: grid;
         place-items: center;
 
         overflow: hidden;
 
-        flex: 0 0 52px;
+        border-radius: 11px;
+
+        color: #00d4ff;
 
         font-weight: 900;
-        color: var(--postx-primary);
+
+        background: #07111f;
       }
 
       .postx-list-thumb img {
         width: 100%;
         height: 100%;
-
         object-fit: cover;
       }
 
@@ -813,19 +758,23 @@
       }
 
       .postx-list-title {
+        color: #fff;
+
         font-weight: 750;
 
         white-space: nowrap;
+
         overflow: hidden;
+
         text-overflow: ellipsis;
       }
 
       .postx-list-meta {
-        color: var(--postx-muted);
+        margin-top: 4px;
+
+        color: #8192a7;
 
         font-size: 12px;
-
-        margin-top: 4px;
       }
 
       /* STATUS */
@@ -833,101 +782,74 @@
       .postx-status {
         display: inline-flex;
 
+        align-items: center;
+
         padding: 5px 9px;
 
         border-radius: 999px;
 
         font-size: 10px;
+
         font-weight: 850;
 
         text-transform: uppercase;
-
-        white-space: nowrap;
       }
 
       .postx-status-draft {
-        background: rgba(245,158,11,.15);
+        background: rgba(245,158,11,.14);
         color: #fbbf24;
       }
 
       .postx-status-scheduled {
-        background: rgba(0,212,255,.15);
+        background: rgba(0,212,255,.14);
         color: #00d4ff;
       }
 
       .postx-status-published {
-        background: rgba(34,197,94,.15);
+        background: rgba(34,197,94,.14);
         color: #22c55e;
       }
 
-      /* CHART */
+      /* PLATFORM BADGES */
 
-      .postx-chart {
-        height: 150px;
-
-        border-radius: 14px;
-
-        border:
-          1px solid
-          rgba(0,212,255,.10);
-
-        background:
-          linear-gradient(
-            to top,
-            rgba(0,212,255,.15),
-            transparent
-          );
-
-        position: relative;
-
-        overflow: hidden;
-
+      .postx-platforms {
         display: flex;
-        align-items: flex-end;
-
-        padding: 18px;
+        flex-wrap: wrap;
+        gap: 6px;
       }
 
-      .postx-chart-bars {
-        width: 100%;
-        height: 100%;
+      .postx-platform-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
 
-        display: flex;
-        align-items: flex-end;
+        padding: 5px 8px;
 
-        justify-content: space-around;
+        border-radius: 999px;
 
-        gap: 8px;
+        font-size: 10px;
+
+        font-weight: 800;
+
+        background: rgba(255,255,255,.06);
+
+        border: 1px solid rgba(255,255,255,.07);
       }
 
-      .postx-chart-bar {
-        width: 9%;
-
-        min-height: 18px;
-
-        border-radius:
-          8px 8px 2px 2px;
-
-        background:
-          linear-gradient(
-            to top,
-            #00d4ff,
-            #7c3aed
-          );
-
-        box-shadow:
-          0 0 15px
-          rgba(0,212,255,.20);
+      .postx-platform-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
       }
 
-      /* FORM */
+      /* CREATE */
 
-      .postx-form-grid {
+      .postx-create-grid {
         display: grid;
 
         grid-template-columns:
-          minmax(0, 1.25fr)
-          minmax(280px, .75fr);
+          minmax(0,1.3fr)
+          minmax(280px,.8fr);
 
         gap: 20px;
       }
@@ -943,12 +865,13 @@
       .postx-label {
         display: block;
 
-        font-size: 13px;
-        font-weight: 800;
-
         margin-bottom: 8px;
 
-        color: #cbd5e1;
+        color: #cbd5e1 !important;
+
+        font-size: 13px;
+
+        font-weight: 800;
       }
 
       .postx-input,
@@ -957,247 +880,255 @@
         width: 100%;
 
         border:
-          1px solid
-          var(--postx-border);
+          1px solid rgba(255,255,255,.1) !important;
 
         border-radius: 12px;
 
         padding: 12px 13px;
 
-        background:
-          rgba(255,255,255,.04);
-
-        color: #fff;
-
         outline: none;
 
-        transition: .18s ease;
+        color: #fff !important;
+
+        background:
+          rgba(255,255,255,.045) !important;
+      }
+
+      .postx-input::placeholder,
+      .postx-textarea::placeholder {
+        color: #667991 !important;
       }
 
       .postx-input:focus,
       .postx-textarea:focus,
       .postx-select:focus {
-        border-color:
-          rgba(0,212,255,.45);
+        border-color: #00d4ff !important;
 
         box-shadow:
-          0 0 0 3px
-          rgba(0,212,255,.08);
-      }
-
-      .postx-select option {
-        background: #0d1b2a;
-        color: #fff;
+          0 0 0 3px rgba(0,212,255,.09);
       }
 
       .postx-textarea {
-        min-height: 180px;
+        min-height: 190px;
         resize: vertical;
-      }
-
-      .postx-upload {
-        border:
-          2px dashed
-          rgba(255,255,255,.15);
-
-        border-radius: 14px;
-
-        padding: 28px 16px;
-
-        text-align: center;
-
-        background:
-          rgba(255,255,255,.02);
-
-        cursor: pointer;
-
-        display: block;
-      }
-
-      .postx-upload:hover {
-        border-color:
-          rgba(0,212,255,.45);
-
-        background:
-          rgba(0,212,255,.04);
-      }
-
-      .postx-upload-preview {
-        margin-top: 12px;
-        max-height: 260px;
-
-        width: 100%;
-
-        object-fit: cover;
-
-        border-radius: 12px;
       }
 
       /* PLATFORM SELECTOR */
 
-      .postx-platforms {
-        display: flex;
-        gap: 9px;
-        flex-wrap: wrap;
+      .postx-platform-grid {
+        display: grid;
+
+        grid-template-columns:
+          repeat(3, minmax(0,1fr));
+
+        gap: 10px;
       }
 
       .postx-platform-option {
-        border:
-          1px solid
-          var(--postx-border);
-
-        border-radius: 12px;
-
-        padding: 10px 13px;
-
-        background:
-          rgba(255,255,255,.03);
-
-        color: var(--postx-muted);
+        position: relative;
 
         display: flex;
+
         align-items: center;
 
-        gap: 8px;
+        gap: 9px;
+
+        min-height: 58px;
+
+        padding: 12px;
+
+        border-radius: 13px;
+
+        border:
+          1px solid rgba(255,255,255,.09);
+
+        background:
+          rgba(255,255,255,.025);
+
+        color: #94a3b8;
+
+        cursor: pointer;
+
+        transition: .18s ease;
+      }
+
+      .postx-platform-option:hover {
+        border-color:
+          rgba(0,212,255,.3);
       }
 
       .postx-platform-option.selected {
         color: #fff;
 
         border-color:
-          rgba(0,212,255,.45);
-
-        background:
-          rgba(0,212,255,.10);
-      }
-
-      .postx-platform {
-        width: 25px;
-        height: 25px;
-
-        border-radius: 8px;
-
-        display: inline-grid;
-        place-items: center;
-
-        background:
-          color-mix(
-            in srgb,
-            var(--platform-color) 20%,
-            transparent
-          );
-
-        color:
-          var(--platform-color);
-
-        font-weight: 900;
-
-        font-size: 12px;
-      }
-
-      /* PREVIEW */
-
-      .postx-preview-phone {
-        max-width: 370px;
-
-        margin: 0 auto;
-
-        border:
-          1px solid
-          var(--postx-border);
-
-        border-radius: 24px;
-
-        overflow: hidden;
-
-        background:
-          #050b14;
-
-        box-shadow:
-          0 14px 40px
-          rgba(0,0,0,.35);
-      }
-
-      .postx-preview-top {
-        padding: 14px;
-
-        display: flex;
-        align-items: center;
-
-        gap: 10px;
-
-        border-bottom:
-          1px solid
-          var(--postx-border);
-      }
-
-      .postx-avatar {
-        width: 36px;
-        height: 36px;
-
-        border-radius: 50%;
-
-        display: grid;
-        place-items: center;
-
-        font-weight: 900;
+          rgba(0,212,255,.65);
 
         background:
           linear-gradient(
             135deg,
-            #00d4ff,
-            #7c3aed
+            rgba(0,212,255,.12),
+            rgba(124,58,237,.12)
           );
+
+        box-shadow:
+          0 0 0 1px rgba(0,212,255,.1);
       }
 
-      .postx-preview-name {
-        font-size: 13px;
+      .postx-platform-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .postx-platform-icon {
+        width: 30px;
+        height: 30px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 9px;
+
+        color: #fff;
+
+        font-weight: 900;
+
+        background: rgba(255,255,255,.08);
+      }
+
+      .postx-platform-name {
+        font-size: 12px;
         font-weight: 800;
       }
 
-      .postx-preview-content {
-        padding: 17px;
+      .postx-platform-status {
+        margin-top: 2px;
 
-        white-space: pre-wrap;
+        color: #6f8196;
 
-        word-break: break-word;
-
-        line-height: 1.55;
-
-        min-height: 100px;
+        font-size: 9px;
       }
 
-      .postx-preview-image {
+      /* UPLOAD */
+
+      .postx-upload {
+        display: block;
+
+        padding: 28px 16px;
+
+        text-align: center;
+
+        border:
+          2px dashed rgba(255,255,255,.14);
+
+        border-radius: 14px;
+
+        color: #94a3b8;
+
+        background:
+          rgba(255,255,255,.02);
+
+        cursor: pointer;
+
+        transition: .18s ease;
+      }
+
+      .postx-upload:hover {
+        border-color: #00d4ff;
+        background: rgba(0,212,255,.04);
+      }
+
+      .postx-upload input {
+        display: none;
+      }
+
+      .postx-image-preview {
         width: 100%;
 
         max-height: 360px;
 
         object-fit: cover;
 
+        border-radius: 13px;
+
+        margin-top: 12px;
+
+        border:
+          1px solid rgba(255,255,255,.08);
+      }
+
+      /* PREVIEW */
+
+      .postx-preview-phone {
+        width: 100%;
+        max-width: 370px;
+
+        margin: 0 auto;
+
+        overflow: hidden;
+
+        border-radius: 24px;
+
+        border:
+          1px solid rgba(255,255,255,.09);
+
+        background: #0d1b2a;
+
+        box-shadow:
+          0 18px 50px rgba(0,0,0,.35);
+      }
+
+      .postx-preview-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        padding: 14px;
+
+        border-bottom:
+          1px solid rgba(255,255,255,.07);
+      }
+
+      .postx-preview-avatar {
+        width: 36px;
+        height: 36px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 50%;
+
+        color: #fff;
+
+        font-weight: 900;
+
+        background:
+          linear-gradient(
+            135deg,
+            #8b5cf6,
+            #ec4899
+          );
+      }
+
+      .postx-preview-content {
+        padding: 14px;
+
+        color: #e8edf3;
+        white-space: pre-wrap;
+
+        font-size: 14px;
+
+        line-height: 1.55;
+      }
+
+      .postx-preview-image {
         display: block;
-      }
 
-      .postx-preview-footer {
-        padding: 12px 17px 17px;
+        width: 100%;
 
-        color: var(--postx-muted);
+        max-height: 330px;
 
-        font-size: 12px;
-      }
-
-      /* EMPTY */
-
-      .postx-empty {
-        padding: 38px 20px;
-
-        text-align: center;
-
-        color: var(--postx-muted);
-      }
-
-      .postx-empty-icon {
-        font-size: 35px;
-        margin-bottom: 10px;
+        object-fit: cover;
       }
 
       /* CALENDAR */
@@ -1206,69 +1137,64 @@
         display: grid;
 
         grid-template-columns:
-          repeat(7, 1fr);
+          repeat(7, minmax(0,1fr));
 
         gap: 8px;
       }
 
-      .postx-calendar-head {
-        padding: 8px;
-
-        text-align: center;
-
-        color: var(--postx-muted);
-
-        font-size: 11px;
-        font-weight: 800;
-      }
-
       .postx-calendar-day {
-        min-height: 105px;
+        min-height: 100px;
 
-        padding: 9px;
-
-        border:
-          1px solid
-          var(--postx-border);
+        padding: 10px;
 
         border-radius: 12px;
+
+        border:
+          1px solid rgba(255,255,255,.07);
 
         background:
           rgba(255,255,255,.025);
       }
 
-      .postx-calendar-day.today {
-        border-color:
-          rgba(0,212,255,.45);
-
-        box-shadow:
-          inset 0 0 0 1px
-          rgba(0,212,255,.15);
-      }
-
       .postx-calendar-number {
+        color: #fff;
+
         font-size: 12px;
-        font-weight: 800;
+
+        font-weight: 850;
       }
 
       .postx-calendar-post {
-        margin-top: 7px;
+        margin-top: 8px;
 
-        padding: 5px 6px;
+        padding: 5px;
 
         border-radius: 7px;
 
+        color: #00d4ff;
+
         background:
-          rgba(0,212,255,.10);
+          rgba(0,212,255,.08);
 
-        color: #bdefff;
+        font-size: 9px;
+      }
 
-        font-size: 10px;
+      /* EMPTY */
 
-        overflow: hidden;
+      .postx-empty {
+        padding: 45px 20px;
 
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        text-align: center;
+
+        color: #72849a;
+      }
+
+      .postx-empty-icon {
+        margin-bottom: 12px;
+
+        font-size: 36px;
+
+        opacity: .7;
       }
 
       /* TOAST */
@@ -1279,16 +1205,14 @@
         right: 18px;
         bottom: 18px;
 
-        z-index: 10000;
-
-        display: grid;
-        gap: 9px;
+        z-index: 99999;
 
         width:
-          min(
-            360px,
-            calc(100vw - 36px)
-          );
+          min(360px, calc(100vw - 36px));
+
+        display: grid;
+
+        gap: 9px;
       }
 
       .postx-toast {
@@ -1296,16 +1220,16 @@
 
         border-radius: 12px;
 
-        background: #111827;
-
         color: #fff;
 
-        font-size: 13px;
-        font-weight: 650;
+        background: #111827;
 
         box-shadow:
-          0 12px 30px
-          rgba(0,0,0,.3);
+          0 14px 35px rgba(0,0,0,.35);
+
+        font-size: 13px;
+
+        font-weight: 700;
 
         animation:
           postxToastIn .2s ease;
@@ -1319,69 +1243,64 @@
         background: #991b1b;
       }
 
-      .postx-toast.info {
-        background: #075985;
-      }
-
       @keyframes postxToastIn {
         from {
+          transform: translateY(10px);
           opacity: 0;
-          transform: translateY(8px);
         }
 
         to {
-          opacity: 1;
           transform: translateY(0);
+          opacity: 1;
         }
       }
 
       /* MOBILE */
 
+      .postx-mobile-header {
+        display: none;
+      }
+
       .postx-overlay {
+        display: none;
+
         position: fixed;
 
         inset: 0;
 
+        z-index: 900;
+
         background:
-          rgba(7,17,31,.68);
+          rgba(0,0,0,.65);
 
-        display: none;
-
-        z-index: 90;
+        backdrop-filter:
+          blur(3px);
       }
 
       .postx-overlay.show {
         display: block;
       }
 
-      @media (max-width: 1050px) {
-
+      @media(max-width:1100px) {
         .postx-stats {
           grid-template-columns:
-            repeat(2, 1fr);
+            repeat(2, minmax(0,1fr));
         }
 
         .postx-dashboard-grid,
-        .postx-form-grid {
+        .postx-create-grid {
           grid-template-columns: 1fr;
         }
       }
 
-      @media (max-width: 760px) {
-
+      @media(max-width:760px) {
         .postx-sidebar {
-          transform:
-            translateX(-100%);
-
-          transition:
-            transform .22s ease;
-
-          width: 270px;
+          transform: translateX(-105%);
+          transition: transform .22s ease;
         }
 
         .postx-sidebar.open {
-          transform:
-            translateX(0);
+          transform: translateX(0);
         }
 
         .postx-main {
@@ -1390,101 +1309,91 @@
         }
 
         .postx-mobile-header {
-          display: flex;
+          position: sticky;
+
+          top: 0;
+
+          z-index: 800;
 
           height: 62px;
 
+          display: flex;
+
           align-items: center;
+
           justify-content: space-between;
 
-          padding: 0 16px;
+          padding: 0 15px;
 
           background:
-            rgba(13,27,42,.98);
+            rgba(9,22,37,.96) !important;
+
+          backdrop-filter:
+            blur(14px);
 
           border-bottom:
-            1px solid
-            var(--postx-border);
-
-          position: sticky;
-          top: 0;
-
-          z-index: 70;
+            1px solid rgba(255,255,255,.08);
         }
 
         .postx-page {
-          padding:
-            20px 14px;
-        }
-
-        .postx-page-title {
-          font-size: 29px;
-        }
-
-        .postx-stats {
-          grid-template-columns:
-            repeat(2, 1fr);
-
-          gap: 10px;
-        }
-
-        .postx-stat {
-          padding: 15px;
-        }
-
-        .postx-stat-value {
-          font-size: 27px;
-        }
-
-        .postx-list-item {
-          align-items: flex-start;
-        }
-
-        .postx-calendar {
-          gap: 4px;
-        }
-
-        .postx-calendar-day {
-          min-height: 75px;
-          padding: 6px;
-        }
-
-        .postx-calendar-head {
-          font-size: 9px;
-        }
-
-        .postx-calendar-post {
-          display: none;
-        }
-      }
-
-      @media (max-width: 450px) {
-
-        .postx-stats {
-          grid-template-columns: 1fr 1fr;
+          padding: 20px 14px 35px;
         }
 
         .postx-page-header {
           margin-bottom: 20px;
         }
 
-        .postx-actions {
-          width: 100%;
+        .postx-page-title {
+          font-size: 30px;
         }
 
-        .postx-actions .postx-btn {
-          flex: 1;
+        .postx-stats {
+          grid-template-columns:
+            repeat(2, minmax(0,1fr));
+
+          gap: 10px;
         }
 
-        .postx-status {
-          font-size: 9px;
+        .postx-stat {
+          padding: 15px;
+          min-height: 120px;
+        }
+
+        .postx-stat-value {
+          font-size: 28px;
+        }
+
+        .postx-platform-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .postx-calendar {
+          grid-template-columns:
+            repeat(2, minmax(0,1fr));
+        }
+      }
+
+      @media(max-width:430px) {
+        .postx-stats {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .postx-stat-label {
+          font-size: 11px;
+        }
+
+        .postx-stat-value {
+          font-size: 25px;
+        }
+
+        .postx-calendar {
+          grid-template-columns: 1fr;
         }
       }
     `;
 
     document.head.appendChild(style);
   }
-
 
   /* =========================================================
      ROOT
@@ -1498,6 +1407,7 @@
     if (!root) {
       root = document.createElement("div");
       root.id = "postx-app";
+
       document.body.appendChild(root);
     }
 
@@ -1505,32 +1415,6 @@
 
     return root;
   }
-
-
-  /* =========================================================
-     TOAST
-     ========================================================= */
-
-  function toast(message, type = "success") {
-    const container =
-      document.getElementById("postxToastContainer");
-
-    if (!container) return;
-
-    const item = document.createElement("div");
-
-    item.className =
-      `postx-toast ${type}`;
-
-    item.textContent = message;
-
-    container.appendChild(item);
-
-    setTimeout(() => {
-      item.remove();
-    }, 3200);
-  }
-
 
   /* =========================================================
      SHELL
@@ -1546,10 +1430,7 @@
         >
 
           <div class="postx-brand">
-
-            <div class="postx-brand-mark">
-              P
-            </div>
+            <div class="postx-brand-mark">P</div>
 
             <div>
               <div class="postx-brand-name">
@@ -1560,7 +1441,6 @@
                 SMART SOCIAL PUBLISHER
               </div>
             </div>
-
           </div>
 
           <button
@@ -1571,11 +1451,14 @@
           </button>
 
           <nav class="postx-nav">
-
             ${NAV_ITEMS.map(item => `
               <button
-                class="postx-nav-btn"
-                data-postx-nav="${item.id}"
+                class="postx-nav-btn ${
+                  state.activePage === item.id
+                    ? "active"
+                    : ""
+                }"
+                data-postx-nav="${escapeHTML(item.id)}"
               >
                 <span class="postx-nav-icon">
                   ${escapeHTML(item.icon)}
@@ -1586,20 +1469,19 @@
                 </span>
               </button>
             `).join("")}
-
           </nav>
 
           <div
             style="
               margin-top:auto;
               padding:18px 10px 4px;
-              color:#64748b;
-              font-size:11px;
+              color:#52657a;
+              font-size:10px;
               line-height:1.6;
             "
           >
             PostX v${APP.version}<br>
-            Dark Premium • Local storage
+            Dark Premium • Local Storage
           </div>
 
         </aside>
@@ -1613,30 +1495,52 @@
 
           <header class="postx-mobile-header">
 
-            <div style="font-weight:900;">
+            <div
+              style="
+                display:flex;
+                align-items:center;
+                gap:9px;
+                font-weight:900;
+              "
+            >
+              <span
+                style="
+                  width:30px;
+                  height:30px;
+                  display:grid;
+                  place-items:center;
+                  border-radius:9px;
+                  background:linear-gradient(
+                    135deg,
+                    #8b5cf6,
+                    #ec4899
+                  );
+                "
+              >
+                P
+              </span>
+
               PostX
             </div>
 
             <button
               id="postxMenuButton"
+              aria-label="Open menu"
               style="
                 width:40px;
                 height:40px;
                 border-radius:10px;
                 border:1px solid rgba(255,255,255,.1);
-                background:transparent;
+                background:#0d1b2a;
                 color:#fff;
               "
-              aria-label="Open menu"
             >
               ☰
             </button>
 
           </header>
 
-          <div
-            id="postxPageContainer"
-          ></div>
+          <div id="postxPageContainer"></div>
 
         </main>
 
@@ -1648,96 +1552,49 @@
       ></div>
     `;
 
-    bindShellEvents();
-  }
-
-
-  function bindShellEvents() {
     document
       .querySelectorAll("[data-postx-nav]")
       .forEach(button => {
-
         button.addEventListener("click", () => {
-
-          navigate(
-            button.dataset.postxNav
-          );
-
-          closeMobileMenu();
+          navigate(button.dataset.postxNav);
         });
-
       });
 
-    const menu =
-      document.getElementById(
-        "postxMenuButton"
-      );
-
-    if (menu) {
-      menu.addEventListener(
-        "click",
-        toggleMobileMenu
-      );
-    }
-
-    const overlay =
-      document.getElementById(
-        "postxOverlay"
-      );
-
-    if (overlay) {
-      overlay.addEventListener(
-        "click",
-        closeMobileMenu
-      );
-    }
-  }
-
-
-  function toggleMobileMenu() {
-    const sidebar =
-      document.getElementById(
-        "postxSidebar"
-      );
-
-    const overlay =
-      document.getElementById(
-        "postxOverlay"
-      );
-
-    sidebar?.classList.toggle("open");
-    overlay?.classList.toggle("show");
-  }
-
-
-  function closeMobileMenu() {
     document
-      .getElementById("postxSidebar")
-      ?.classList.remove("open");
+      .getElementById("postxMenuButton")
+      ?.addEventListener("click", () => {
+        document
+          .getElementById("postxSidebar")
+          ?.classList.toggle("open");
+
+        document
+          .getElementById("postxOverlay")
+          ?.classList.toggle("show");
+      });
 
     document
       .getElementById("postxOverlay")
-      ?.classList.remove("show");
+      ?.addEventListener("click", closeMobileMenu);
   }
-
 
   /* =========================================================
      NAVIGATION
      ========================================================= */
 
   function navigate(page) {
-    if (
-      !NAV_ITEMS.some(
-        item => item.id === page
-      )
-    ) {
+    if (!NAV_ITEMS.some(item => item.id === page)) {
       page = "dashboard";
     }
 
     state.activePage = page;
-    state.editingPostId = null;
+
+    if (page !== "create") {
+      state.editingPostId = null;
+    }
 
     saveState();
+
+    closeMobileMenu();
 
     render();
 
@@ -1747,60 +1604,57 @@
     });
   }
 
-
-  /* =========================================================
-     MAIN RENDER
-     ========================================================= */
-
   function render() {
     const container =
-      document.getElementById(
-        "postxPageContainer"
-      );
+      document.getElementById("postxPageContainer");
 
     if (!container) return;
 
     document
       .querySelectorAll("[data-postx-nav]")
       .forEach(button => {
-
         button.classList.toggle(
           "active",
-          button.dataset.postxNav ===
-          state.activePage
+          button.dataset.postxNav === state.activePage
         );
-
       });
 
-    if (state.activePage === "dashboard") {
-      renderDashboard(container);
-      return;
-    }
+    switch (state.activePage) {
+      case "dashboard":
+        renderDashboard(container);
+        break;
 
-    if (state.activePage === "create") {
-      renderCreate(container);
-      return;
-    }
+      case "create":
+        renderCreate(container);
+        break;
 
-    if (state.activePage === "calendar") {
-      renderCalendar(container);
-      return;
-    }
+      case "scheduled":
+        renderListPage(container, "scheduled");
+        break;
 
-    renderListPage(
-      container,
-      state.activePage
-    );
+      case "drafts":
+        renderListPage(container, "drafts");
+        break;
+
+      case "published":
+        renderListPage(container, "published");
+        break;
+
+      case "calendar":
+        renderCalendar(container);
+        break;
+
+      default:
+        renderDashboard(container);
+    }
   }
-
 
   /* =========================================================
      DASHBOARD
      ========================================================= */
 
   function renderDashboard(container) {
-    const total =
-      state.posts.length;
+    const total = state.posts.length;
 
     const scheduled =
       state.posts.filter(
@@ -1817,21 +1671,19 @@
         post => post.status === "published"
       ).length;
 
-    const recent =
-      [...state.posts]
-        .sort(
-          (a, b) =>
-            new Date(
-              b.updatedAt || b.createdAt
-            ) -
-            new Date(
-              a.updatedAt || a.createdAt
-            )
-        )
-        .slice(0, 5);
+    const recent = [...state.posts]
+      .sort(
+        (a, b) =>
+          new Date(
+            b.updatedAt || b.createdAt
+          ) -
+          new Date(
+            a.updatedAt || a.createdAt
+          )
+      )
+      .slice(0, 5);
 
     container.innerHTML = `
-
       <div class="postx-page">
 
         <div class="postx-page-header">
@@ -1842,21 +1694,19 @@
             </h1>
 
             <p class="postx-page-subtitle">
-              Welcome back,
-              ${escapeHTML(state.profile.name)}
-              • Here's your social media overview
+              Welcome back, ${escapeHTML(
+                state.profile.name
+              )} • Here's your social media overview
             </p>
           </div>
 
-          <div class="postx-actions">
-
+          <div>
             <button
-              class="postx-btn postx-btn-gradient"
-              data-action="create"
+              class="postx-btn postx-btn-primary"
+              data-postx-nav="create"
             >
               + Create Post
             </button>
-
           </div>
 
         </div>
@@ -1866,29 +1716,30 @@
           ${statCard(
             "📄",
             "Total Posts",
-            total || 127,
+            total,
             "+12% from last month ↗"
           )}
 
           ${statCard(
             "◷",
             "Scheduled",
-            scheduled || 18,
+            scheduled,
             "+3 scheduled this week ↗"
           )}
 
           ${statCard(
             "✎",
             "Drafts",
-            drafts || 9,
-            "3 ready to review",
-            true
+            drafts,
+            drafts
+              ? "Ready for review"
+              : "No drafts yet"
           )}
 
           ${statCard(
             "✓",
             "Published",
-            published || 100,
+            published,
             "+8 published this month ↗"
           )}
 
@@ -1907,10 +1758,10 @@
               <button
                 class="postx-btn"
                 style="
-                  padding:6px 10px;
-                  font-size:12px;
+                  padding:7px 10px;
+                  font-size:11px;
                 "
-                data-action="published"
+                data-postx-nav="published"
               >
                 See all →
               </button>
@@ -1921,43 +1772,23 @@
               recent.length
                 ? `
                   <div class="postx-list">
-
-                    ${recent.map(post =>
-                      postListItem(post)
-                    ).join("")}
-
+                    ${recent
+                      .map(postListItem)
+                      .join("")}
                   </div>
                 `
-                : `
-                  <div class="postx-empty">
-
-                    <div class="postx-empty-icon">
-                      ✨
-                    </div>
-
-                    <div>
-                      No posts yet.
-                    </div>
-
-                    <button
-                      class="postx-btn postx-btn-gradient"
-                      style="margin-top:14px;"
-                      data-action="create"
-                    >
-                      Create your first post
-                    </button>
-
-                  </div>
-                `
+                : emptyState(
+                    "✦",
+                    "No posts yet",
+                    "Create your first social media post."
+                  )
             }
 
           </div>
 
-          <div style="display:grid;gap:20px;">
+          <div style="display:grid;gap:20px">
 
-            <div
-              class="postx-card postx-section-card"
-            >
+            <div class="postx-card postx-section-card">
 
               <h2 class="postx-section-title">
                 Performance Overview
@@ -1965,7 +1796,7 @@
 
               <p
                 style="
-                  color:var(--postx-muted);
+                  color:#8294a9;
                   font-size:13px;
                   margin:6px 0 14px;
                 "
@@ -1973,170 +1804,115 @@
                 Last 7 days engagement
               </p>
 
-              <div class="postx-chart">
-
-                <div class="postx-chart-bars">
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:34%;"
-                  ></span>
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:48%;"
-                  ></span>
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:42%;"
-                  ></span>
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:67%;"
-                  ></span>
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:58%;"
-                  ></span>
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:82%;"
-                  ></span>
-
-                  <span
-                    class="postx-chart-bar"
-                    style="height:94%;"
-                  ></span>
-
-                </div>
-
+              <div
+                style="
+                  height:145px;
+                  display:flex;
+                  align-items:flex-end;
+                  gap:8px;
+                  padding:15px;
+                  border-radius:13px;
+                  background:
+                    linear-gradient(
+                      to top,
+                      rgba(0,212,255,.12),
+                      rgba(0,212,255,.015)
+                    );
+                  border:
+                    1px solid rgba(0,212,255,.1);
+                "
+              >
+                ${[38,55,44,76,62,88,72]
+                  .map(
+                    height => `
+                      <div
+                        style="
+                          flex:1;
+                          height:${height}%;
+                          min-height:8px;
+                          border-radius:5px 5px 2px 2px;
+                          background:
+                            linear-gradient(
+                              to top,
+                              #00d4ff,
+                              #7c3aed
+                            );
+                          opacity:.85;
+                        "
+                      ></div>
+                    `
+                  )
+                  .join("")}
               </div>
 
               <div
                 style="
                   display:flex;
                   justify-content:space-between;
-                  gap:12px;
                   margin-top:14px;
                 "
               >
-
                 <div>
-                  <strong>4.8%</strong>
                   <div
                     style="
-                      color:var(--postx-muted);
-                      font-size:11px;
+                      color:#00d4ff;
+                      font-size:19px;
+                      font-weight:900;
                     "
                   >
-                    Engagement
+                    4.8%
+                  </div>
+
+                  <div
+                    style="
+                      color:#718399;
+                      font-size:10px;
+                    "
+                  >
+                    Engagement Rate
                   </div>
                 </div>
 
-                <div>
-                  <strong>12.4k</strong>
+                <div style="text-align:right">
                   <div
                     style="
-                      color:var(--postx-muted);
-                      font-size:11px;
+                      color:#fff;
+                      font-size:19px;
+                      font-weight:900;
+                    "
+                  >
+                    12.4k
+                  </div>
+
+                  <div
+                    style="
+                      color:#718399;
+                      font-size:10px;
                     "
                   >
                     Avg Reach
                   </div>
                 </div>
-
               </div>
 
             </div>
 
-            <div
-              class="postx-card postx-section-card"
-            >
+            <div class="postx-card postx-section-card">
 
-              <div class="postx-section-head">
-
-                <h2 class="postx-section-title">
-                  Connected Accounts
-                </h2>
-
-              </div>
+              <h2 class="postx-section-title">
+                Connected Platforms
+              </h2>
 
               <div
                 style="
                   display:grid;
-                  gap:10px;
+                  gap:9px;
+                  margin-top:14px;
                 "
               >
-
-                ${Object.keys(PLATFORM)
-                  .map(id => {
-
-                    const platform =
-                      PLATFORM[id];
-
-                    const connected =
-                      !!state.connectedAccounts[id];
-
-                    return `
-                      <div
-                        style="
-                          display:flex;
-                          align-items:center;
-                          justify-content:space-between;
-                          gap:10px;
-                          padding:10px;
-                          border:1px solid var(--postx-border);
-                          border-radius:11px;
-                          background:rgba(255,255,255,.025);
-                        "
-                      >
-
-                        <div
-                          style="
-                            display:flex;
-                            align-items:center;
-                            gap:9px;
-                          "
-                        >
-
-                          <span
-                            class="postx-platform"
-                            style="
-                              --platform-color:${platform.color};
-                            "
-                          >
-                            ${escapeHTML(platform.icon)}
-                          </span>
-
-                          <span>
-                            ${escapeHTML(platform.name)}
-                          </span>
-
-                        </div>
-
-                        <span
-                          style="
-                            color:${connected
-                              ? "#22c55e"
-                              : "#94a3b8"};
-                            font-size:11px;
-                            font-weight:800;
-                          "
-                        >
-                          ${connected
-                            ? "CONNECTED"
-                            : "NOT CONNECTED"}
-                        </span>
-
-                      </div>
-                    `;
-                  })
+                ${Object.values(PLATFORM)
+                  .map(platformRow)
                   .join("")}
-
               </div>
 
             </div>
@@ -2148,37 +1924,23 @@
       </div>
     `;
 
-    bindDashboardEvents();
+    bindNavigationButtons(container);
   }
 
-
-  function statCard(
-    icon,
-    label,
-    value,
-    sub,
-    muted = false
-  ) {
+  function statCard(icon, label, value, sub) {
     return `
       <div class="postx-card postx-stat">
 
         <div class="postx-stat-label">
-          ${icon}
+          <span>${icon}</span>
           ${escapeHTML(label)}
         </div>
 
         <div class="postx-stat-value">
-          ${escapeHTML(value)}
+          ${value}
         </div>
 
-        <div
-          class="postx-stat-sub"
-          style="
-            ${muted
-              ? "color:#94a3b8;"
-              : ""}
-          "
-        >
+        <div class="postx-stat-sub">
           ${escapeHTML(sub)}
         </div>
 
@@ -2186,35 +1948,79 @@
     `;
   }
 
+  function platformRow(platform) {
+    const connected =
+      !!state.connectedAccounts[platform.id];
 
-  function bindDashboardEvents() {
-    document
-      .querySelectorAll(
-        "[data-action='create']"
-      )
-      .forEach(button => {
+    return `
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          padding:10px;
+          border-radius:11px;
+          background:rgba(255,255,255,.025);
+          border:1px solid rgba(255,255,255,.06);
+        "
+      >
 
-        button.addEventListener(
-          "click",
-          () => navigate("create")
-        );
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+          "
+        >
 
-      });
+          <span
+            class="postx-platform-icon"
+            style="
+              background:${platform.color};
+            "
+          >
+            ${platform.icon}
+          </span>
 
-    document
-      .querySelectorAll(
-        "[data-action='published']"
-      )
-      .forEach(button => {
+          <div>
+            <div
+              style="
+                color:#fff;
+                font-size:12px;
+                font-weight:800;
+              "
+            >
+              ${platform.name}
+            </div>
 
-        button.addEventListener(
-          "click",
-          () => navigate("published")
-        );
+            <div
+              style="
+                color:#718399;
+                font-size:9px;
+              "
+            >
+              ${connected ? "Connected" : "Not connected"}
+            </div>
+          </div>
 
-      });
+        </div>
+
+        <span
+          style="
+            width:8px;
+            height:8px;
+            border-radius:50%;
+            background:${connected ? "#22c55e" : "#64748b"};
+            box-shadow:${connected
+              ? "0 0 10px rgba(34,197,94,.5)"
+              : "none"};
+          "
+        ></span>
+
+      </div>
+    `;
   }
-
 
   /* =========================================================
      CREATE POST
@@ -2226,130 +2032,153 @@
         ? getPostById(state.editingPostId)
         : null;
 
-    const post =
-      editing || {
-        caption: "",
-        hashtags: "",
-        platforms: ["facebook", "instagram"],
-        imageData: "",
-        scheduledAt: ""
-      };
+    const post = editing || {
+      caption: "",
+      hashtags: "",
+      platforms: [],
+      imageData: "",
+      scheduledAt: ""
+    };
+
+    const selectedPlatforms =
+      Array.isArray(post.platforms)
+        ? post.platforms
+        : [];
 
     container.innerHTML = `
-
       <div class="postx-page">
 
         <div class="postx-page-header">
 
           <div>
             <h1 class="postx-page-title">
-              ${editing
-                ? "Edit Post"
-                : "Create Post"}
+              ${editing ? "Edit Post" : "Create Post"}
             </h1>
 
             <p class="postx-page-subtitle">
-              Create once and prepare your content
-              for multiple social platforms.
+              Create content and choose exactly where it should be published.
             </p>
-          </div>
-
-          <div class="postx-actions">
-
-            <button
-              class="postx-btn"
-              id="postxCancelCreate"
-            >
-              Cancel
-            </button>
-
           </div>
 
         </div>
 
-        <div class="postx-form-grid">
+        <div class="postx-create-grid">
 
-          <div
-            class="postx-card postx-form-card"
-          >
+          <!-- FORM -->
+
+          <div class="postx-card postx-form-card">
 
             <div class="postx-field">
 
               <label class="postx-label">
-                Social Platforms
+                Publish to
               </label>
 
-              <div class="postx-platforms">
+              <div class="postx-platform-grid">
 
-                ${Object.keys(PLATFORM)
-                  .map(id => {
-
-                    const platform =
-                      PLATFORM[id];
-
+                ${Object.values(PLATFORM)
+                  .map(platform => {
                     const selected =
-                      post.platforms.includes(id);
+                      selectedPlatforms.includes(
+                        platform.id
+                      );
 
                     const connected =
-                      state.connectedAccounts[id];
+                      !!state.connectedAccounts[
+                        platform.id
+                      ];
 
                     return `
-                      <button
-                        type="button"
+                      <label
                         class="
                           postx-platform-option
-                          ${selected
-                            ? "selected"
-                            : ""}
+                          ${selected ? "selected" : ""}
+                          ${!connected ? "disabled" : ""}
                         "
-                        data-platform="${id}"
-                        ${connected
-                          ? ""
-                          : "disabled"}
+                        data-platform-label="${platform.id}"
+                        style="
+                          opacity:${connected ? "1" : ".45"};
+                        "
                       >
 
+                        <input
+                          type="checkbox"
+                          name="postx-platform"
+                          value="${platform.id}"
+                          ${selected ? "checked" : ""}
+                          ${!connected ? "disabled" : ""}
+                        >
+
                         <span
-                          class="postx-platform"
+                          class="postx-platform-icon"
                           style="
-                            --platform-color:${platform.color};
+                            background:${platform.color};
                           "
                         >
-                          ${escapeHTML(platform.icon)}
+                          ${platform.icon}
                         </span>
 
-                        ${escapeHTML(platform.name)}
+                        <span>
+                          <span
+                            class="postx-platform-name"
+                          >
+                            ${platform.name}
+                          </span>
 
-                      </button>
+                          <span
+                            class="postx-platform-status"
+                            style="display:block"
+                          >
+                            ${
+                              connected
+                                ? "Connected"
+                                : "Not connected"
+                            }
+                          </span>
+                        </span>
+
+                      </label>
                     `;
                   })
                   .join("")}
 
               </div>
 
+              <div
+                style="
+                  margin-top:8px;
+                  color:#63758a;
+                  font-size:10px;
+                "
+              >
+                Select one or more connected platforms.
+              </div>
+
             </div>
 
             <div class="postx-field">
 
-              <label
-                class="postx-label"
-                for="postxCaption"
-              >
+              <label class="postx-label">
                 Caption
               </label>
 
               <textarea
                 id="postxCaption"
                 class="postx-textarea"
-                placeholder="What do you want to share?"
-              >${escapeHTML(post.caption || "")}</textarea>
+                placeholder="Write your post here..."
+              >${escapeHTML(
+                post.caption || ""
+              )}</textarea>
 
               <div
                 style="
-                  color:var(--postx-muted);
-                  font-size:11px;
-                  margin-top:6px;
+                  display:flex;
+                  justify-content:flex-end;
+                  margin-top:5px;
+                  color:#63758a;
+                  font-size:10px;
                 "
-                id="postxCharCount"
+                id="postxCharacterCount"
               >
                 0 characters
               </div>
@@ -2358,19 +2187,18 @@
 
             <div class="postx-field">
 
-              <label
-                class="postx-label"
-                for="postxHashtags"
-              >
+              <label class="postx-label">
                 Hashtags
               </label>
 
               <input
                 id="postxHashtags"
                 class="postx-input"
-                value="${escapeHTML(post.hashtags || "")}"
-                placeholder="marketing socialmedia postx"
-              />
+                value="${escapeHTML(
+                  post.hashtags || ""
+                )}"
+                placeholder="marketing socialmedia PostX"
+              >
 
             </div>
 
@@ -2386,57 +2214,81 @@
                   type="file"
                   id="postxImageInput"
                   accept="image/*"
-                  hidden
-                />
+                >
 
-                <div style="font-size:28px;">
-                  📷
+                <div style="font-size:28px">
+                  ${post.imageData ? "🖼️" : "＋"}
                 </div>
 
                 <div
                   style="
-                    margin-top:7px;
+                    color:#cbd5e1;
                     font-weight:800;
+                    margin-top:7px;
                   "
                 >
-                  Add an image
+                  ${
+                    post.imageData
+                      ? "Change image"
+                      : "Upload image"
+                  }
                 </div>
 
                 <div
                   style="
                     margin-top:4px;
-                    color:var(--postx-muted);
-                    font-size:12px;
+                    font-size:10px;
                   "
                 >
-                  JPG, PNG, WEBP
+                  JPG, PNG or WEBP
                 </div>
 
-                <div id="postxUploadPreview"></div>
-
               </label>
+
+              <div id="postxImagePreview">
+                ${
+                  post.imageData
+                    ? `
+                      <img
+                        class="postx-image-preview"
+                        src="${escapeHTML(
+                          post.imageData
+                        )}"
+                        alt="Post image"
+                      >
+                    `
+                    : ""
+                }
+              </div>
 
             </div>
 
             <div class="postx-field">
 
-              <label
-                class="postx-label"
-                for="postxSchedule"
-              >
-                Schedule Date & Time
+              <label class="postx-label">
+                Schedule
               </label>
 
               <input
+                type="datetime-local"
                 id="postxSchedule"
                 class="postx-input"
-                type="datetime-local"
                 value="${escapeHTML(
-                  toDatetimeLocal(
+                  toDateTimeLocal(
                     post.scheduledAt
                   )
                 )}"
-              />
+              >
+
+              <div
+                style="
+                  margin-top:6px;
+                  color:#63758a;
+                  font-size:10px;
+                "
+              >
+                Leave empty to publish immediately.
+              </div>
 
             </div>
 
@@ -2445,6 +2297,7 @@
                 display:flex;
                 gap:10px;
                 flex-wrap:wrap;
+                margin-top:24px;
               "
             >
 
@@ -2456,14 +2309,14 @@
               </button>
 
               <button
-                class="postx-btn postx-btn-primary"
+                class="postx-btn"
                 id="postxSchedulePost"
               >
-                Schedule Post
+                Schedule
               </button>
 
               <button
-                class="postx-btn postx-btn-gradient"
+                class="postx-btn postx-btn-primary"
                 id="postxPublishPost"
               >
                 Publish Now
@@ -2473,71 +2326,37 @@
 
           </div>
 
-          <div
-            class="postx-card postx-form-card"
-          >
+          <!-- PREVIEW -->
+
+          <div>
 
             <div
-              class="postx-section-head"
+              class="postx-card postx-section-card"
+              style="position:sticky;top:85px"
             >
 
-              <h2 class="postx-section-title">
-                Live Preview
-              </h2>
+              <div class="postx-section-head">
 
-            </div>
+                <h2 class="postx-section-title">
+                  Live Preview
+                </h2>
 
-            <div
-              class="postx-preview-phone"
-            >
-
-              <div class="postx-preview-top">
-
-                <div class="postx-avatar">
-                  P
-                </div>
-
-                <div>
-                  <div class="postx-preview-name">
-                    PostX
-                  </div>
-
-                  <div
-                    style="
-                      color:var(--postx-muted);
-                      font-size:10px;
-                    "
-                  >
-                    ${post.platforms
-                      .map(id =>
-                        PLATFORM[id]?.name
-                      )
-                      .filter(Boolean)
-                      .join(" • ") ||
-                      "Social Media"}
-                  </div>
-                </div>
+                <span
+                  style="
+                    color:#00d4ff;
+                    font-size:10px;
+                    font-weight:800;
+                  "
+                >
+                  POSTX
+                </span>
 
               </div>
 
               <div
-                class="postx-preview-content"
-                id="postxLiveCaption"
-              >
-                Your post preview will appear here…
-              </div>
-
-              <div id="postxLiveImage"></div>
-
-              <div
-                class="postx-preview-footer"
-              >
-                ♥ 1.2k
-                &nbsp;&nbsp;
-                💬 84
-                &nbsp;&nbsp;
-                ↗ 42
-              </div>
+                id="postxPreview"
+                class="postx-preview-phone"
+              ></div>
 
             </div>
 
@@ -2548,11 +2367,474 @@
       </div>
     `;
 
-    setupCreateForm(post);
+    bindCreateEvents();
+
+    updateCreatePreview();
   }
 
+  function bindCreateEvents() {
+    document
+      .querySelectorAll(
+        'input[name="postx-platform"]'
+      )
+      .forEach(input => {
+        input.addEventListener("change", () => {
+          const label =
+            input.closest(
+              ".postx-platform-option"
+            );
 
-  function toDatetimeLocal(value) {
+          label?.classList.toggle(
+            "selected",
+            input.checked
+          );
+
+          updateCreatePreview();
+        });
+      });
+
+    const caption =
+      document.getElementById(
+        "postxCaption"
+      );
+
+    const hashtags =
+      document.getElementById(
+        "postxHashtags"
+      );
+
+    caption?.addEventListener(
+      "input",
+      updateCreatePreview
+    );
+
+    hashtags?.addEventListener(
+      "input",
+      updateCreatePreview
+    );
+
+    document
+      .getElementById("postxSchedule")
+      ?.addEventListener(
+        "input",
+        updateCreatePreview
+      );
+
+    document
+      .getElementById("postxImageInput")
+      ?.addEventListener(
+        "change",
+        handleImageUpload
+      );
+
+    document
+      .getElementById("postxSaveDraft")
+      ?.addEventListener(
+        "click",
+        () => savePost("draft")
+      );
+
+    document
+      .getElementById("postxSchedulePost")
+      ?.addEventListener(
+        "click",
+        () => savePost("scheduled")
+      );
+
+    document
+      .getElementById("postxPublishPost")
+      ?.addEventListener(
+        "click",
+        () => savePost("published")
+      );
+  }
+
+  function getCreateFormData() {
+    const platforms = [
+      ...document.querySelectorAll(
+        'input[name="postx-platform"]:checked'
+      )
+    ].map(input => input.value);
+
+    const caption =
+      document.getElementById(
+        "postxCaption"
+      )?.value || "";
+
+    const hashtags =
+      document.getElementById(
+        "postxHashtags"
+      )?.value || "";
+
+    const schedule =
+      document.getElementById(
+        "postxSchedule"
+      )?.value || "";
+
+    const preview =
+      document.querySelector(
+        "#postxImagePreview img"
+      );
+
+    return {
+      platforms,
+      caption: caption.trim(),
+      hashtags: hashtags.trim(),
+      scheduledAt: schedule
+        ? new Date(schedule).toISOString()
+        : "",
+      imageData:
+        preview?.src || ""
+    };
+  }
+
+  function validatePost(data, status) {
+    if (!data.platforms.length) {
+      toast(
+        "Select at least one platform.",
+        "error"
+      );
+
+      return false;
+    }
+
+    if (!data.caption && !data.imageData) {
+      toast(
+        "Add a caption or image first.",
+        "error"
+      );
+
+      return false;
+    }
+
+    if (
+      status === "scheduled" &&
+      !data.scheduledAt
+    ) {
+      toast(
+        "Choose a date and time for scheduling.",
+        "error"
+      );
+
+      return false;
+    }
+
+    if (
+      status === "scheduled" &&
+      new Date(data.scheduledAt) <= new Date()
+    ) {
+      toast(
+        "Scheduled time must be in the future.",
+        "error"
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  function savePost(status) {
+    const data = getCreateFormData();
+
+    if (!validatePost(data, status)) {
+      return;
+    }
+
+    const now =
+      new Date().toISOString();
+
+    if (state.editingPostId) {
+      const existing =
+        getPostById(
+          state.editingPostId
+        );
+
+      if (!existing) {
+        state.editingPostId = null;
+      } else {
+        existing.platforms =
+          data.platforms;
+
+        existing.caption =
+          data.caption;
+
+        existing.hashtags =
+          data.hashtags;
+
+        existing.imageData =
+          data.imageData;
+
+        existing.status =
+          status;
+
+        existing.updatedAt =
+          now;
+
+        existing.scheduledAt =
+          status === "scheduled"
+            ? data.scheduledAt
+            : "";
+
+        existing.publishedAt =
+          status === "published"
+            ? now
+            : "";
+
+        state.editingPostId = null;
+
+        saveState();
+
+        toast(
+          statusMessage(status, true),
+          "success"
+        );
+
+        navigate(statusPage(status));
+
+        return;
+      }
+    }
+
+    const post = {
+      id: uid(),
+
+      platforms:
+        data.platforms,
+
+      caption:
+        data.caption,
+
+      hashtags:
+        data.hashtags,
+
+      imageData:
+        data.imageData,
+
+      status,
+
+      scheduledAt:
+        status === "scheduled"
+          ? data.scheduledAt
+          : "",
+
+      publishedAt:
+        status === "published"
+          ? now
+          : "",
+
+      createdAt:
+        now,
+
+      updatedAt:
+        now
+    };
+
+    state.posts.unshift(post);
+
+    saveState();
+
+    toast(
+      statusMessage(status, false),
+      "success"
+    );
+
+    navigate(statusPage(status));
+  }
+
+  function statusMessage(status, editing) {
+    if (status === "draft") {
+      return editing
+        ? "Draft updated successfully."
+        : "Post saved as draft.";
+    }
+
+    if (status === "scheduled") {
+      return editing
+        ? "Post rescheduled successfully."
+        : "Post scheduled successfully.";
+    }
+
+    return editing
+      ? "Post published successfully."
+      : "Post published successfully.";
+  }
+
+  function statusPage(status) {
+    if (status === "draft") {
+      return "drafts";
+    }
+
+    if (status === "scheduled") {
+      return "scheduled";
+    }
+
+    return "published";
+  }
+
+  function handleImageUpload(event) {
+    const file =
+      event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast(
+        "Please select an image file.",
+        "error"
+      );
+
+      return;
+    }
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+      const preview =
+        document.getElementById(
+          "postxImagePreview"
+        );
+
+      if (preview) {
+        preview.innerHTML = `
+          <img
+            class="postx-image-preview"
+            src="${escapeHTML(
+              reader.result
+            )}"
+            alt="Post image preview"
+          >
+        `;
+      }
+
+      updateCreatePreview();
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function updateCreatePreview() {
+    const caption =
+      document.getElementById(
+        "postxCaption"
+      )?.value || "";
+
+    const hashtags =
+      document.getElementById(
+        "postxHashtags"
+      )?.value || "";
+
+    const fullCaption =
+      buildCaption(
+        caption,
+        hashtags
+      );
+
+    const image =
+      document.querySelector(
+        "#postxImagePreview img"
+      )?.src || "";
+
+    const platforms = [
+      ...document.querySelectorAll(
+        'input[name="postx-platform"]:checked'
+      )
+    ].map(input => input.value);
+
+    const count =
+      document.getElementById(
+        "postxCharacterCount"
+      );
+
+    if (count) {
+      count.textContent =
+        `${caption.length} characters`;
+    }
+
+    const preview =
+      document.getElementById(
+        "postxPreview"
+      );
+
+    if (!preview) return;
+
+    const platform =
+      PLATFORM[platforms[0]] ||
+      PLATFORM.facebook;
+
+    preview.innerHTML = `
+      <div class="postx-preview-header">
+
+        <div
+          class="postx-preview-avatar"
+          style="
+            background:${platform.color};
+          "
+        >
+          ${platform.icon}
+        </div>
+
+        <div>
+          <div
+            style="
+              color:#fff;
+              font-weight:800;
+              font-size:12px;
+            "
+          >
+            PostX
+          </div>
+
+          <div
+            style="
+              color:#718399;
+              font-size:9px;
+            "
+          >
+            ${platform.name}
+          </div>
+        </div>
+
+      </div>
+
+      ${
+        image
+          ? `
+            <img
+              class="postx-preview-image"
+              src="${escapeHTML(image)}"
+              alt="Preview"
+            >
+          `
+          : ""
+      }
+
+      <div class="postx-preview-content">
+        ${
+          fullCaption
+            ? escapeHTML(fullCaption)
+            : "Your post preview will appear here..."
+        }
+      </div>
+
+      <div
+        style="
+          padding:0 14px 14px;
+          display:flex;
+          gap:14px;
+          color:#65778c;
+          font-size:11px;
+        "
+      >
+        ♡ Like
+       　💬 Comment
+       　↗ Share
+      </div>
+    `;
+  }
+
+  function toDateTimeLocal(value) {
     if (!value) return "";
 
     const date =
@@ -2584,637 +2866,140 @@
     );
   }
 
-
-  function setupCreateForm(post) {
-    const caption =
-      document.getElementById(
-        "postxCaption"
-      );
-
-    const hashtags =
-      document.getElementById(
-        "postxHashtags"
-      );
-
-    const schedule =
-      document.getElementById(
-        "postxSchedule"
-      );
-
-    const imageInput =
-      document.getElementById(
-        "postxImageInput"
-      );
-
-    let imageData =
-      post.imageData || "";
-
-    let selectedPlatforms =
-      [...(
-        post.platforms?.length
-          ? post.platforms
-          : ["facebook"]
-      )];
-
-
-    /* PLATFORM */
-
-    document
-      .querySelectorAll(
-        "[data-platform]"
-      )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const id =
-              button.dataset.platform;
-
-            if (
-              selectedPlatforms.includes(id)
-            ) {
-              selectedPlatforms =
-                selectedPlatforms.filter(
-                  item => item !== id
-                );
-            } else {
-              selectedPlatforms.push(id);
-            }
-
-            button.classList.toggle(
-              "selected",
-              selectedPlatforms.includes(id)
-            );
-
-            updatePreview();
-          }
-        );
-
-      });
-
-
-    /* CAPTION */
-
-    function updatePreview() {
-      const fullCaption =
-        buildFullCaption(
-          caption.value,
-          hashtags.value
-        );
-
-      const preview =
-        document.getElementById(
-          "postxLiveCaption"
-        );
-
-      preview.textContent =
-        fullCaption ||
-        "Your post preview will appear here…";
-
-      const counter =
-        document.getElementById(
-          "postxCharCount"
-        );
-
-      counter.textContent =
-        `${caption.value.length} characters`;
-
-      const imageContainer =
-        document.getElementById(
-          "postxLiveImage"
-        );
-
-      imageContainer.innerHTML =
-        imageData
-          ? `
-            <img
-              class="postx-preview-image"
-              src="${escapeHTML(imageData)}"
-              alt="Post preview"
-            >
-          `
-          : "";
-
-      const uploadPreview =
-        document.getElementById(
-          "postxUploadPreview"
-        );
-
-      uploadPreview.innerHTML =
-        imageData
-          ? `
-            <img
-              class="postx-upload-preview"
-              src="${escapeHTML(imageData)}"
-              alt="Selected image"
-            >
-          `
-          : "";
-    }
-
-
-    caption.addEventListener(
-      "input",
-      updatePreview
-    );
-
-    hashtags.addEventListener(
-      "input",
-      updatePreview
-    );
-
-
-    /* IMAGE */
-
-    imageInput.addEventListener(
-      "change",
-      () => {
-
-        const file =
-          imageInput.files?.[0];
-
-        if (!file) return;
-
-        if (!file.type.startsWith("image/")) {
-          toast(
-            "Please select an image file.",
-            "error"
-          );
-          return;
-        }
-
-        if (
-          file.size >
-          5 * 1024 * 1024
-        ) {
-          toast(
-            "Image must be 5MB or smaller.",
-            "error"
-          );
-          return;
-        }
-
-        const reader =
-          new FileReader();
-
-        reader.onload = event => {
-
-          imageData =
-            event.target.result;
-
-          updatePreview();
-
-          toast(
-            "Image added successfully.",
-            "success"
-          );
-        };
-
-        reader.readAsDataURL(file);
-      }
-    );
-
-
-    /* CANCEL */
-
-    document
-      .getElementById(
-        "postxCancelCreate"
-      )
-      .addEventListener(
-        "click",
-        () => navigate("dashboard")
-      );
-
-
-    /* SAVE */
-
-    document
-      .getElementById(
-        "postxSaveDraft"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          savePost(
-            "draft",
-            selectedPlatforms,
-            caption.value,
-            hashtags.value,
-            imageData,
-            schedule.value
-          );
-
-        }
-      );
-
-
-    /* SCHEDULE */
-
-    document
-      .getElementById(
-        "postxSchedulePost"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          if (!schedule.value) {
-
-            toast(
-              "Choose a date and time first.",
-              "error"
-            );
-
-            return;
-          }
-
-          const selectedDate =
-            new Date(schedule.value);
-
-          if (
-            Number.isNaN(
-              selectedDate.getTime()
-            )
-          ) {
-            toast(
-              "Invalid schedule date.",
-              "error"
-            );
-
-            return;
-          }
-
-          if (
-            selectedDate.getTime() <=
-            Date.now()
-          ) {
-            toast(
-              "Schedule time must be in the future.",
-              "error"
-            );
-
-            return;
-          }
-
-          savePost(
-            "scheduled",
-            selectedPlatforms,
-            caption.value,
-            hashtags.value,
-            imageData,
-            schedule.value
-          );
-
-        }
-      );
-
-
-    /* PUBLISH */
-
-    document
-      .getElementById(
-        "postxPublishPost"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          savePost(
-            "published",
-            selectedPlatforms,
-            caption.value,
-            hashtags.value,
-            imageData,
-            ""
-          );
-
-        }
-      );
-
-
-    updatePreview();
-  }
-
-
-  function savePost(
-    status,
-    platforms,
-    caption,
-    hashtags,
-    imageData,
-    scheduledAt
-  ) {
-
-    const cleanCaption =
-      String(caption || "").trim();
-
-    if (!cleanCaption) {
-      toast(
-        "Write a caption before saving.",
-        "error"
-      );
-
-      return;
-    }
-
-    if (!platforms.length) {
-      toast(
-        "Select at least one social platform.",
-        "error"
-      );
-
-      return;
-    }
-
-    const now =
-      new Date().toISOString();
-
-    const existing =
-      state.editingPostId
-        ? getPostById(
-            state.editingPostId
-          )
-        : null;
-
-    if (existing) {
-
-      existing.caption =
-        cleanCaption;
-
-      existing.hashtags =
-        normalizeHashtags(
-          hashtags
-        );
-
-      existing.platforms =
-        [...platforms];
-
-      existing.imageData =
-        imageData || "";
-
-      existing.status =
-        status;
-
-      existing.scheduledAt =
-        status === "scheduled"
-          ? new Date(
-              scheduledAt
-            ).toISOString()
-          : "";
-
-      existing.publishedAt =
-        status === "published"
-          ? now
-          : existing.publishedAt || "";
-
-      existing.updatedAt =
-        now;
-
-    } else {
-
-      state.posts.push({
-        id: uid(),
-
-        caption:
-          cleanCaption,
-
-        hashtags:
-          normalizeHashtags(
-            hashtags
-          ),
-
-        platforms:
-          [...platforms],
-
-        imageData:
-          imageData || "",
-
-        status,
-
-        scheduledAt:
-          status === "scheduled"
-            ? new Date(
-                scheduledAt
-              ).toISOString()
-            : "",
-
-        publishedAt:
-          status === "published"
-            ? now
-            : "",
-
-        createdAt:
-          now,
-
-        updatedAt:
-          now
-      });
-
-    }
-
-    state.editingPostId = null;
-
-    saveState();
-
-    toast(
-      status === "draft"
-        ? "Draft saved."
-        : status === "scheduled"
-          ? "Post scheduled."
-          : "Post published.",
-      "success"
-    );
-
-    setTimeout(() => {
-
-      navigate(
-        status === "draft"
-          ? "drafts"
-          : status === "scheduled"
-            ? "scheduled"
-            : "published"
-      );
-
-    }, 350);
-  }
-
-
   /* =========================================================
      LIST PAGES
      ========================================================= */
 
-  function renderListPage(
-    container,
-    page
-  ) {
+  function renderListPage(container, status) {
+    const posts =
+      state.posts
+        .filter(
+          post =>
+            post.status === status
+        )
+        .sort(
+          (a, b) =>
+            new Date(
+              b.updatedAt || b.createdAt
+            ) -
+            new Date(
+              a.updatedAt || a.createdAt
+            )
+        );
 
-    const pageConfig = {
-      scheduled: {
-        title: "Scheduled Posts",
-        subtitle:
-          "Posts waiting to be published."
-      },
-
-      drafts: {
-        title: "Drafts",
-        subtitle:
-          "Continue working on unfinished posts."
-      },
-
-      published: {
-        title: "Published Posts",
-        subtitle:
-          "Your published social media content."
-      }
+    const titles = {
+      scheduled: "Scheduled Posts",
+      drafts: "Drafts",
+      published: "Published Posts"
     };
 
-    const config =
-      pageConfig[page] ||
-      pageConfig.published;
-
-    let posts =
-      state.posts.filter(
-        post =>
-          post.status === page
-      );
-
-    posts.sort(
-      (a, b) =>
-        new Date(
-          b.updatedAt || b.createdAt
-        ) -
-        new Date(
-          a.updatedAt || a.createdAt
-        )
-    );
+    const subtitles = {
+      scheduled:
+        "Posts waiting to be published.",
+      drafts:
+        "Posts saved for later editing.",
+      published:
+        "Your published social media posts."
+    };
 
     container.innerHTML = `
-
       <div class="postx-page">
 
         <div class="postx-page-header">
 
           <div>
-
             <h1 class="postx-page-title">
-              ${escapeHTML(config.title)}
+              ${titles[status]}
             </h1>
 
             <p class="postx-page-subtitle">
-              ${escapeHTML(config.subtitle)}
+              ${subtitles[status]}
             </p>
-
           </div>
 
-          <div class="postx-actions">
-
-            <button
-              class="postx-btn postx-btn-gradient"
-              data-list-create
-            >
-              + Create Post
-            </button>
-
-          </div>
+          <button
+            class="postx-btn postx-btn-primary"
+            data-postx-nav="create"
+          >
+            + Create Post
+          </button>
 
         </div>
 
-        <div class="postx-card postx-section-card">
+        ${
+          posts.length
+            ? `
+              <div class="postx-card postx-section-card">
 
-          ${
-            posts.length
-              ? `
                 <div class="postx-list">
 
                   ${posts
-                    .map(post =>
-                      detailedPostItem(post)
+                    .map(
+                      post =>
+                        postListItem(
+                          post,
+                          true
+                        )
                     )
                     .join("")}
 
                 </div>
-              `
-              : `
-                <div class="postx-empty">
 
-                  <div class="postx-empty-icon">
-                    ${
-                      page === "drafts"
-                        ? "📝"
-                        : page === "scheduled"
-                          ? "⏰"
-                          : "🚀"
-                    }
-                  </div>
-
-                  <div
-                    style="
-                      font-weight:800;
-                      color:#fff;
-                    "
-                  >
-                    No ${escapeHTML(page)}
-                    posts yet.
-                  </div>
-
-                  <div
-                    style="
-                      margin-top:6px;
-                    "
-                  >
-                    Create a post to get started.
-                  </div>
-
-                </div>
-              `
-          }
-
-        </div>
+              </div>
+            `
+            : emptyState(
+                status === "draft"
+                  ? "▤"
+                  : status === "scheduled"
+                  ? "◷"
+                  : "✓",
+                `No ${status} posts`,
+                "Create a post to get started."
+              )
+        }
 
       </div>
     `;
 
-    document
-      .querySelector(
-        "[data-list-create]"
-      )
-      ?.addEventListener(
-        "click",
-        () => navigate("create")
-      );
+    bindNavigationButtons(container);
 
-    bindPostActions();
+    bindPostActions(container);
   }
 
+  function postListItem(post, withActions = false) {
+    const platforms =
+      getPlatforms(post);
 
-  function postListItem(post) {
     const date =
       post.status === "scheduled"
         ? post.scheduledAt
         : post.status === "published"
-          ? post.publishedAt
-          : post.updatedAt;
+        ? post.publishedAt
+        : post.updatedAt;
 
     return `
-      <div class="postx-list-item">
+      <div
+        class="postx-list-item"
+        data-post-id="${escapeHTML(post.id)}"
+        style="
+          align-items:flex-start;
+          flex-wrap:wrap;
+        "
+      >
 
         <div class="postx-list-thumb">
-
           ${
             post.imageData
               ? `
                 <img
-                  src="${escapeHTML(post.imageData)}"
+                  src="${escapeHTML(
+                    post.imageData
+                  )}"
                   alt=""
                 >
               `
               : "P"
           }
-
         </div>
 
         <div class="postx-list-body">
@@ -3223,283 +3008,109 @@
             ${escapeHTML(
               truncate(
                 post.caption ||
-                "Untitled",
-                50
+                "Untitled post",
+                80
               )
             )}
           </div>
 
-          <div class="postx-list-meta">
-
+          <div
+            class="postx-list-meta"
+          >
             ${escapeHTML(
               formatDateTime(date)
             )}
-
-            &nbsp; • &nbsp;
-
-            ${platformBadges(
-              post.platforms
-            )}
-
           </div>
-
-        </div>
-
-        <span
-          class="
-            postx-status
-            postx-status-${statusClass(
-              post.status
-            )}
-          "
-        >
-          ${escapeHTML(post.status)}
-        </span>
-
-      </div>
-    `;
-  }
-
-
-  function detailedPostItem(post) {
-    const date =
-      post.status === "scheduled"
-        ? post.scheduledAt
-        : post.status === "published"
-          ? post.publishedAt
-          : post.updatedAt;
-
-    return `
-      <div
-        class="postx-list-item"
-        style="
-          align-items:flex-start;
-        "
-      >
-
-        <div class="postx-list-thumb">
-
-          ${
-            post.imageData
-              ? `
-                <img
-                  src="${escapeHTML(post.imageData)}"
-                  alt=""
-                >
-              `
-              : "P"
-          }
-
-        </div>
-
-        <div class="postx-list-body">
 
           <div
-            style="
-              font-weight:800;
-              line-height:1.4;
-            "
+            class="postx-platforms"
+            style="margin-top:7px"
           >
-            ${escapeHTML(
-              truncate(
-                post.caption ||
-                "Untitled",
-                160
-              )
-            )}
+            ${
+              platforms.length
+                ? platforms
+                    .map(
+                      platform => `
+                        <span
+                          class="postx-platform-badge"
+                        >
+                          <span
+                            class="postx-platform-dot"
+                            style="
+                              background:${platform.color};
+                            "
+                          ></span>
+
+                          ${escapeHTML(
+                            platform.name
+                          )}
+                        </span>
+                      `
+                    )
+                    .join("")
+                : ""
+            }
           </div>
 
+        </div>
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-left:auto;
+          "
+        >
+
+          <span
+            class="
+              postx-status
+              postx-status-${escapeHTML(
+                post.status
+              )}
+            "
+          >
+            ${escapeHTML(post.status)}
+          </span>
+
           ${
-            post.hashtags
+            withActions
               ? `
-                <div
+                <button
+                  class="postx-btn"
+                  data-postx-edit="${escapeHTML(
+                    post.id
+                  )}"
                   style="
-                    color:#00d4ff;
-                    font-size:12px;
-                    margin-top:6px;
+                    padding:6px 9px;
+                    font-size:11px;
                   "
                 >
-                  ${escapeHTML(
-                    post.hashtags
-                  )}
-                </div>
+                  Edit
+                </button>
+
+                <button
+                  class="postx-btn postx-btn-danger"
+                  data-postx-delete="${escapeHTML(
+                    post.id
+                  )}"
+                  style="
+                    padding:6px 9px;
+                    font-size:11px;
+                  "
+                >
+                  Delete
+                </button>
               `
               : ""
           }
 
-          <div class="postx-list-meta">
-
-            ${escapeHTML(
-              formatDateTime(date)
-            )}
-
-          </div>
-
-          <div
-            style="
-              display:flex;
-              align-items:center;
-              gap:6px;
-              margin-top:9px;
-              flex-wrap:wrap;
-            "
-          >
-
-            ${platformBadges(
-              post.platforms
-            )}
-
-          </div>
-
-          <div
-            style="
-              display:flex;
-              gap:8px;
-              margin-top:12px;
-              flex-wrap:wrap;
-            "
-          >
-
-            <button
-              class="postx-btn"
-              data-edit-post="${post.id}"
-              style="
-                padding:7px 11px;
-                font-size:12px;
-              "
-            >
-              Edit
-            </button>
-
-            <button
-              class="postx-btn postx-btn-danger"
-              data-delete-post="${post.id}"
-              style="
-                padding:7px 11px;
-                font-size:12px;
-              "
-            >
-              Delete
-            </button>
-
-          </div>
-
         </div>
-
-        <span
-          class="
-            postx-status
-            postx-status-${statusClass(
-              post.status
-            )}
-          "
-        >
-          ${escapeHTML(post.status)}
-        </span>
 
       </div>
     `;
   }
-
-
-  /* =========================================================
-     POST ACTIONS
-     ========================================================= */
-
-  function bindPostActions() {
-
-    document
-      .querySelectorAll(
-        "[data-edit-post]"
-      )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const post =
-              getPostById(
-                button.dataset.editPost
-              );
-
-            if (!post) {
-              toast(
-                "Post could not be found.",
-                "error"
-              );
-              return;
-            }
-
-            state.editingPostId =
-              post.id;
-
-            state.activePage =
-              "create";
-
-            saveState();
-
-            render();
-
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth"
-            });
-
-          }
-        );
-
-      });
-
-
-    document
-      .querySelectorAll(
-        "[data-delete-post]"
-      )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const id =
-              button.dataset.deletePost;
-
-            const post =
-              getPostById(id);
-
-            if (!post) return;
-
-            const confirmed =
-              window.confirm(
-                "Delete this post permanently?"
-              );
-
-            if (!confirmed) {
-              return;
-            }
-
-            state.posts =
-              state.posts.filter(
-                item =>
-                  item.id !== id
-              );
-
-            saveState();
-
-            toast(
-              "Post deleted.",
-              "success"
-            );
-
-            render();
-
-          }
-        );
-
-      });
-  }
-
 
   /* =========================================================
      CALENDAR
@@ -3520,169 +3131,168 @@
         year,
         month,
         1
-      );
+      ).getDay();
 
-    const lastDay =
+    const daysInMonth =
       new Date(
         year,
         month + 1,
         0
-      );
+      ).getDate();
 
-    const start =
-      firstDay.getDay();
+    const postsByDay = {};
 
-    const days =
-      lastDay.getDate();
+    state.posts
+      .filter(
+        post =>
+          post.status === "scheduled" &&
+          post.scheduledAt
+      )
+      .forEach(post => {
+        const date =
+          new Date(
+            post.scheduledAt
+          );
 
-    const monthName =
-      now.toLocaleDateString(
-        undefined,
-        {
-          month: "long",
-          year: "numeric"
+        if (
+          date.getFullYear() === year &&
+          date.getMonth() === month
+        ) {
+          const day =
+            date.getDate();
+
+          if (!postsByDay[day]) {
+            postsByDay[day] = [];
+          }
+
+          postsByDay[day].push(post);
         }
-      );
+      });
+
+    const weekdayLabels = [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ];
 
     const cells = [];
 
     for (
       let i = 0;
-      i < start;
+      i < firstDay;
       i++
     ) {
-      cells.push(`
-        <div></div>
-      `);
+      cells.push(
+        `<div></div>`
+      );
     }
 
     for (
       let day = 1;
-      day <= days;
+      day <= daysInMonth;
       day++
     ) {
-
-      const date =
-        new Date(
-          year,
-          month,
-          day
-        );
-
-      const dateKey =
-        date.toISOString()
-          .slice(0, 10);
-
-      const todayKey =
-        now.toISOString()
-          .slice(0, 10);
-
-      const dayPosts =
-        state.posts.filter(
-          post => {
-
-            const value =
-              post.scheduledAt ||
-              post.publishedAt ||
-              post.createdAt;
-
-            return value &&
-              new Date(value)
-                .toISOString()
-                .slice(0, 10) ===
-                dateKey;
-          }
-        );
+      const posts =
+        postsByDay[day] || [];
 
       cells.push(`
         <div
-          class="
-            postx-calendar-day
-            ${dateKey === todayKey
-              ? "today"
-              : ""}
-          "
+          class="postx-calendar-day"
         >
 
-          <div class="postx-calendar-number">
+          <div
+            class="postx-calendar-number"
+          >
             ${day}
           </div>
 
-          ${dayPosts
-            .slice(0, 3)
-            .map(post => `
-              <div
-                class="postx-calendar-post"
-                title="${escapeHTML(
-                  post.caption
-                )}"
-              >
-                ${escapeHTML(
-                  truncate(
-                    post.caption ||
-                    "Post",
-                    22
+          ${
+            posts.length
+              ? posts
+                  .map(
+                    post => `
+                      <div
+                        class="postx-calendar-post"
+                      >
+                        ${escapeHTML(
+                          truncate(
+                            post.caption ||
+                            "Scheduled post",
+                            28
+                          )
+                        )}
+                      </div>
+                    `
                   )
-                )}
-              </div>
-            `)
-            .join("")}
+                  .join("")
+              : ""
+          }
 
         </div>
       `);
     }
 
     container.innerHTML = `
-
       <div class="postx-page">
 
         <div class="postx-page-header">
 
           <div>
-
             <h1 class="postx-page-title">
               Calendar
             </h1>
 
             <p class="postx-page-subtitle">
-              ${escapeHTML(monthName)}
+              ${now.toLocaleString(
+                undefined,
+                {
+                  month: "long",
+                  year: "numeric"
+                }
+              )}
             </p>
-
           </div>
 
           <button
-            class="postx-btn postx-btn-gradient"
-            id="postxCalendarCreate"
+            class="postx-btn postx-btn-primary"
+            data-postx-nav="create"
           >
-            + Create Post
+            + Schedule Post
           </button>
 
         </div>
 
-        <div
-          class="postx-card postx-section-card"
-        >
+        <div class="postx-card postx-section-card">
+
+          <div
+            class="postx-calendar"
+            style="margin-bottom:8px"
+          >
+            ${weekdayLabels
+              .map(
+                day => `
+                  <div
+                    style="
+                      padding:7px;
+                      color:#65788d;
+                      font-size:10px;
+                      font-weight:800;
+                      text-align:center;
+                    "
+                  >
+                    ${day}
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
 
           <div class="postx-calendar">
-
-            ${[
-              "Sun",
-              "Mon",
-              "Tue",
-              "Wed",
-              "Thu",
-              "Fri",
-              "Sat"
-            ]
-              .map(dayName => `
-                <div class="postx-calendar-head">
-                  ${dayName}
-                </div>
-              `)
-              .join("")}
-
             ${cells.join("")}
-
           </div>
 
         </div>
@@ -3690,45 +3300,179 @@
       </div>
     `;
 
-    document
-      .getElementById(
-        "postxCalendarCreate"
-      )
-      ?.addEventListener(
-        "click",
-        () => navigate("create")
-      );
+    bindNavigationButtons(container);
   }
-
 
   /* =========================================================
-     SERVICE WORKER
+     EDIT / DELETE
      ========================================================= */
 
-  function registerServiceWorker() {
-    if (
-      "serviceWorker" in navigator &&
-      location.protocol !== "file:"
-    ) {
+  function bindPostActions(container) {
+    container
+      .querySelectorAll(
+        "[data-postx-edit]"
+      )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.dataset.postxEdit;
 
-      window.addEventListener(
-        "load",
-        () => {
+            if (!getPostById(id)) {
+              return;
+            }
 
-          navigator.serviceWorker
-            .register("./sw.js")
-            .catch(error => {
-              console.warn(
-                "PostX service worker:",
-                error
+            state.editingPostId = id;
+
+            state.activePage = "create";
+
+            saveState();
+
+            render();
+          }
+        );
+      });
+
+    container
+      .querySelectorAll(
+        "[data-postx-delete]"
+      )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.dataset.postxDelete;
+
+            const post =
+              getPostById(id);
+
+            if (!post) return;
+
+            const confirmed =
+              window.confirm(
+                "Delete this post?"
               );
-            });
 
-        }
-      );
-    }
+            if (!confirmed) return;
+
+            state.posts =
+              state.posts.filter(
+                item =>
+                  item.id !== id
+              );
+
+            saveState();
+
+            toast(
+              "Post deleted.",
+              "success"
+            );
+
+            render();
+          }
+        );
+      });
   }
 
+  /* =========================================================
+     EMPTY STATE
+     ========================================================= */
+
+  function emptyState(
+    icon,
+    title,
+    message
+  ) {
+    return `
+      <div class="postx-card postx-empty">
+
+        <div class="postx-empty-icon">
+          ${icon}
+        </div>
+
+        <div
+          style="
+            color:#dbe5ef;
+            font-weight:850;
+            margin-bottom:5px;
+          "
+        >
+          ${escapeHTML(title)}
+        </div>
+
+        <div
+          style="
+            font-size:12px;
+            margin-bottom:18px;
+          "
+        >
+          ${escapeHTML(message)}
+        </div>
+
+        <button
+          class="postx-btn postx-btn-primary"
+          data-postx-nav="create"
+        >
+          + Create Post
+        </button>
+
+      </div>
+    `;
+  }
+
+  /* =========================================================
+     EVENT HELPERS
+     ========================================================= */
+
+  function bindNavigationButtons(root) {
+    root
+      .querySelectorAll(
+        "[data-postx-nav]"
+      )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            navigate(
+              button.dataset.postxNav
+            );
+          }
+        );
+      });
+  }
+
+  /* =========================================================
+     TOAST
+     ========================================================= */
+
+  function toast(
+    message,
+    type = "success"
+  ) {
+    const container =
+      document.getElementById(
+        "postxToastContainer"
+      );
+
+    if (!container) return;
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      `postx-toast ${type}`;
+
+    item.textContent =
+      message;
+
+    container.appendChild(item);
+
+    setTimeout(() => {
+      item.remove();
+    }, 3200);
+  }
 
   /* =========================================================
      START APPLICATION
@@ -3744,28 +3488,24 @@
 
     render();
 
-    registerServiceWorker();
+    saveState();
 
     console.log(
-      `PostX ${APP.version} loaded successfully.`
+      `PostX ${APP.version} started successfully.`
     );
   }
-
 
   if (
     document.readyState ===
     "loading"
   ) {
-
     document.addEventListener(
       "DOMContentLoaded",
-      start
+      start,
+      { once: true }
     );
-
   } else {
-
     start();
-
   }
 
 })();
