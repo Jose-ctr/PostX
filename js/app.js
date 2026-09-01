@@ -2698,3 +2698,799 @@ function initComposerEngine() {
 /* ================= 33. START PART 4 ================= */
 
 initComposerEngine();
+
+/* =========================================================
+   POSTX v2.0 — PART 5
+   POST LISTS ENGINE
+   ---------------------------------------------------------
+   Responsibilities:
+   - Drafts page
+   - Scheduled page
+   - Published page
+   - Search/filter
+   - Empty states
+   - Post counts
+   - Edit / publish / delete actions
+   ========================================================= */
+
+
+/* ================= 34. LIST HELPERS ================= */
+
+function getPostsByStatus(status) {
+  return state.posts
+    .filter(post => post.status === status)
+    .sort((a, b) => {
+      const dateA = new Date(
+        status === 'scheduled'
+          ? (a.scheduledAt || a.updatedAt)
+          : status === 'published'
+            ? (a.publishedAt || a.updatedAt)
+            : (a.updatedAt || a.createdAt)
+      ).getTime();
+
+      const dateB = new Date(
+        status === 'scheduled'
+          ? (b.scheduledAt || b.updatedAt)
+          : status === 'published'
+            ? (b.publishedAt || b.updatedAt)
+            : (b.updatedAt || b.createdAt)
+      ).getTime();
+
+      return status === 'scheduled'
+        ? dateA - dateB
+        : dateB - dateA;
+    });
+}
+
+
+function filterPosts(posts) {
+  const query =
+    String(state.searchQuery || '')
+      .trim()
+      .toLowerCase();
+
+  if (!query) return posts;
+
+  return posts.filter(post => {
+
+    const searchable = [
+      post.caption,
+      post.hashtags,
+      post.status,
+      ...(post.platforms || [])
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return searchable.includes(query);
+  });
+}
+
+
+/* ================= 35. LIST SEARCH ================= */
+
+function renderListSearch(inputId, placeholder) {
+  return `
+    <div style="
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    ">
+
+      <input
+        id="${inputId}"
+        type="search"
+        autocomplete="off"
+        placeholder="${escapeHTML(placeholder)}"
+        value="${escapeHTML(state.searchQuery || '')}"
+        style="
+          flex:1;
+          min-width:220px;
+          background:#1a1a24;
+          border:1px solid #2a2a3a;
+          border-radius:12px;
+          padding:11px 14px;
+          color:#fff;
+          outline:none;
+        "
+      >
+
+      <button
+        class="clear-list-search"
+        type="button"
+        style="
+          background:#1e1e2e;
+          border:1px solid #2a2a3a;
+          color:#9aa0b4;
+          padding:10px 14px;
+          border-radius:10px;
+          cursor:pointer;
+        "
+      >
+        Clear
+      </button>
+
+    </div>
+  `;
+}
+
+
+/* ================= 36. LIST HEADER ================= */
+
+function renderListHeader(title, subtitle, count) {
+  return `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:15px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    ">
+
+      <div>
+        <h2 style="
+          margin:0;
+          color:#fff;
+          font-size:24px;
+          font-weight:800;
+        ">
+          ${escapeHTML(title)}
+        </h2>
+
+        <div style="
+          color:#6a708a;
+          font-size:13px;
+          margin-top:5px;
+        ">
+          ${escapeHTML(subtitle)}
+        </div>
+      </div>
+
+      <div style="
+        background:#1e1e2e;
+        border:1px solid #2a2a3a;
+        color:#fff;
+        padding:8px 13px;
+        border-radius:20px;
+        font-size:12px;
+        font-weight:700;
+      ">
+        ${count} post${count === 1 ? '' : 's'}
+      </div>
+
+    </div>
+  `;
+}
+
+
+/* ================= 37. EMPTY STATE ================= */
+
+function renderEmptyListState(type) {
+
+  const config = {
+
+    drafts: {
+      icon: '📝',
+      title: 'No drafts yet',
+      text: 'Create a post and save it as a draft to continue later.'
+    },
+
+    scheduled: {
+      icon: '⏰',
+      title: 'Nothing scheduled',
+      text: 'Schedule a post and it will appear here.'
+    },
+
+    published: {
+      icon: '✅',
+      title: 'No published posts',
+      text: 'Posts you publish will appear here.'
+    }
+
+  };
+
+  const item =
+    config[type] || config.drafts;
+
+  return `
+    <div style="
+      text-align:center;
+      padding:55px 25px;
+      background:#15151f;
+      border:1px dashed #2a2a3a;
+      border-radius:18px;
+    ">
+
+      <div style="
+        font-size:42px;
+        margin-bottom:12px;
+      ">
+        ${item.icon}
+      </div>
+
+      <h3 style="
+        color:#fff;
+        margin:0 0 8px;
+        font-size:18px;
+      ">
+        ${escapeHTML(item.title)}
+      </h3>
+
+      <p style="
+        color:#6a708a;
+        margin:0 auto 20px;
+        max-width:420px;
+        line-height:1.6;
+        font-size:13px;
+      ">
+        ${escapeHTML(item.text)}
+      </p>
+
+      <button
+        class="postx-create-from-list"
+        type="button"
+        style="
+          background:#6c5ce7;
+          border:none;
+          color:#fff;
+          padding:11px 18px;
+          border-radius:10px;
+          cursor:pointer;
+          font-weight:700;
+        "
+      >
+        + Create Post
+      </button>
+
+    </div>
+  `;
+}
+
+
+/* ================= 38. STATUS BADGE ================= */
+
+function renderStatusBadge(status) {
+
+  const styles = {
+
+    draft: {
+      background:'#2a2a2a',
+      color:'#d7d9e2'
+    },
+
+    scheduled: {
+      background:'#2a2a4a',
+      color:'#b9b5ff'
+    },
+
+    published: {
+      background:'#183525',
+      color:'#65e6a4'
+    }
+
+  };
+
+  const style =
+    styles[status] || styles.draft;
+
+  return `
+    <span style="
+      display:inline-flex;
+      align-items:center;
+      padding:5px 10px;
+      border-radius:20px;
+      background:${style.background};
+      color:${style.color};
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    ">
+      ${escapeHTML(status)}
+    </span>
+  `;
+}
+
+
+/* ================= 39. PLATFORM BADGES ================= */
+
+function renderPlatformBadges(platforms) {
+
+  const ids = safeArray(platforms)
+    .filter(id => PLATFORM_IDS.includes(id));
+
+  if (!ids.length) {
+
+    return `
+      <span style="
+        color:#6a708a;
+        font-size:11px;
+      ">
+        No platform selected
+      </span>
+    `;
+  }
+
+  return ids.map(id => {
+
+    const platform =
+      PLATFORMS[id];
+
+    return `
+      <span style="
+        display:inline-flex;
+        align-items:center;
+        padding:5px 9px;
+        border-radius:20px;
+        background:#1e1e2e;
+        border:1px solid #2a2a3a;
+        color:#aeb3c7;
+        font-size:10px;
+      ">
+        ${escapeHTML(platform?.label || id)}
+      </span>
+    `;
+
+  }).join('');
+}
+
+
+/* ================= 40. SINGLE LIST CARD ================= */
+
+function renderListCard(post) {
+
+  const scheduled =
+    post.status === 'scheduled';
+
+  const published =
+    post.status === 'published';
+
+  const dateText =
+    scheduled
+      ? `Scheduled: ${formatDate(post.scheduledAt)}`
+      : published
+        ? `Published: ${formatDate(post.publishedAt)}`
+        : `Updated: ${formatDate(post.updatedAt)}`;
+
+  return `
+    <article
+      class="post-card"
+      data-id="${escapeHTML(post.id)}"
+      style="
+        background:#15151f;
+        border:1px solid #2a2a3a;
+        border-radius:16px;
+        padding:18px;
+        overflow:hidden;
+      "
+    >
+
+      ${
+        post.media
+          ? `
+            <div style="
+              margin-bottom:14px;
+              position:relative;
+            ">
+              <img
+                src="${escapeHTML(post.media)}"
+                alt="Post media"
+                loading="lazy"
+                style="
+                  width:100%;
+                  max-height:300px;
+                  object-fit:cover;
+                  border-radius:12px;
+                  display:block;
+                  background:#101018;
+                "
+                onerror="this.style.display='none'"
+              >
+            </div>
+          `
+          : ''
+      }
+
+      <div style="
+        display:flex;
+        align-items:center;
+        gap:8px;
+        flex-wrap:wrap;
+        margin-bottom:12px;
+      ">
+
+        ${renderStatusBadge(post.status)}
+
+        ${renderPlatformBadges(post.platforms)}
+
+      </div>
+
+      <div style="
+        color:#fff;
+        font-size:14px;
+        line-height:1.6;
+        white-space:pre-wrap;
+        overflow-wrap:anywhere;
+      ">
+        ${escapeHTML(post.caption)}
+      </div>
+
+      ${
+        post.hashtags
+          ? `
+            <div style="
+              color:#8175ff;
+              font-size:13px;
+              margin-top:8px;
+              overflow-wrap:anywhere;
+            ">
+              ${escapeHTML(post.hashtags)}
+            </div>
+          `
+          : ''
+      }
+
+      <div style="
+        color:#6a708a;
+        font-size:11px;
+        margin-top:12px;
+      ">
+        ${escapeHTML(dateText)}
+      </div>
+
+      <div style="
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+        margin-top:14px;
+        padding-top:14px;
+        border-top:1px solid #242433;
+      ">
+
+        <button
+          class="btn-edit"
+          data-id="${escapeHTML(post.id)}"
+          type="button"
+          style="
+            background:#1e1e2e;
+            border:1px solid #2a2a3a;
+            color:#fff;
+            padding:7px 13px;
+            border-radius:9px;
+            cursor:pointer;
+          "
+        >
+          Edit
+        </button>
+
+        ${
+          scheduled || post.status === 'draft'
+            ? `
+              <button
+                class="btn-publish-now"
+                data-id="${escapeHTML(post.id)}"
+                type="button"
+                style="
+                  background:#6c5ce7;
+                  border:none;
+                  color:#fff;
+                  padding:7px 13px;
+                  border-radius:9px;
+                  cursor:pointer;
+                  font-weight:700;
+                "
+              >
+                Publish Now
+              </button>
+            `
+            : ''
+        }
+
+        <button
+          class="btn-delete"
+          data-id="${escapeHTML(post.id)}"
+          type="button"
+          style="
+            background:#2a1a1a;
+            border:1px solid #3a2a2a;
+            color:#ff7777;
+            padding:7px 13px;
+            border-radius:9px;
+            cursor:pointer;
+          "
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </article>
+  `;
+}
+
+
+/* ================= 41. RENDER LIST ================= */
+
+function renderPostListPage({
+  pageId,
+  status,
+  title,
+  subtitle,
+  searchId,
+  searchPlaceholder
+}) {
+
+  const page =
+    safeEl(pageId);
+
+  if (!page) return;
+
+  let posts =
+    getPostsByStatus(status);
+
+  posts =
+    filterPosts(posts);
+
+  page.innerHTML = `
+
+    <div style="
+      max-width:900px;
+      margin:0 auto;
+    ">
+
+      ${renderListHeader(
+        title,
+        subtitle,
+        posts.length
+      )}
+
+      ${renderListSearch(
+        searchId,
+        searchPlaceholder
+      )}
+
+      ${
+        posts.length
+          ? `
+            <div style="
+              display:grid;
+              gap:14px;
+            ">
+              ${posts
+                .map(renderListCard)
+                .join('')}
+            </div>
+          `
+          : renderEmptyListState(status)
+      }
+
+    </div>
+  `;
+
+  bindListSearch(searchId);
+}
+
+
+/* ================= 42. DRAFTS ================= */
+
+function renderDrafts() {
+
+  renderPostListPage({
+
+    pageId:'drafts-page',
+
+    status:'draft',
+
+    title:'Drafts',
+
+    subtitle:
+      'Posts saved locally and ready to publish.',
+
+    searchId:
+      'drafts-search',
+
+    searchPlaceholder:
+      'Search drafts...'
+
+  });
+}
+
+
+/* ================= 43. SCHEDULED ================= */
+
+function renderScheduled() {
+
+  renderPostListPage({
+
+    pageId:'scheduled-page',
+
+    status:'scheduled',
+
+    title:'Scheduled',
+
+    subtitle:
+      'Posts waiting for their scheduled publishing time.',
+
+    searchId:
+      'scheduled-search',
+
+    searchPlaceholder:
+      'Search scheduled posts...'
+
+  });
+}
+
+
+/* ================= 44. PUBLISHED ================= */
+
+function renderPublished() {
+
+  renderPostListPage({
+
+    pageId:'published-page',
+
+    status:'published',
+
+    title:'Published',
+
+    subtitle:
+      'Posts that have been published in the local demo.',
+
+    searchId:
+      'published-search',
+
+    searchPlaceholder:
+      'Search published posts...'
+
+  });
+}
+
+
+/* ================= 45. SEARCH BINDING ================= */
+
+function bindListSearch(inputId) {
+
+  const input =
+    safeEl(inputId);
+
+  if (input) {
+
+    input.addEventListener(
+      'input',
+      e => {
+
+        state.searchQuery =
+          e.target.value;
+
+        const page =
+          state.activePage;
+
+        if (page === 'drafts') {
+          renderDrafts();
+        }
+
+        else if (page === 'scheduled') {
+          renderScheduled();
+        }
+
+        else if (page === 'published') {
+          renderPublished();
+        }
+
+      }
+    );
+
+    input.addEventListener(
+      'keydown',
+      e => {
+
+        if (e.key === 'Escape') {
+
+          state.searchQuery = '';
+
+          input.value = '';
+
+          render();
+        }
+      }
+    );
+  }
+
+
+  /*
+   * Clear search
+   */
+
+  $$('.clear-list-search').forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        state.searchQuery = '';
+
+        render();
+      }
+    );
+
+  });
+
+
+  /*
+   * Create from empty state
+   */
+
+  $$('.postx-create-from-list').forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        resetComposer();
+
+        navigate('create');
+      }
+    );
+
+  });
+}
+
+
+/* ================= 46. AUTO-REFRESH SCHEDULED LIST ================= */
+
+let scheduledRefreshTimer = null;
+
+function startScheduledRefresh() {
+
+  if (scheduledRefreshTimer) {
+    clearInterval(
+      scheduledRefreshTimer
+    );
+  }
+
+  scheduledRefreshTimer =
+    setInterval(() => {
+
+      /*
+       * This does NOT call a real API.
+       *
+       * It simply refreshes the Scheduled UI so
+       * date/time information remains current.
+       */
+
+      if (
+        state.activePage === 'scheduled'
+      ) {
+        renderScheduled();
+      }
+
+    }, 30000);
+}
+
+
+/* ================= 47. LIST ENGINE INIT ================= */
+
+function initPostLists() {
+
+  startScheduledRefresh();
+
+  /*
+   * Part 4 already provides the global
+   * .btn-edit / .btn-delete /
+   * .btn-publish-now handlers.
+   *
+   * This prevents duplicate event listeners.
+   */
+
+  console.log(
+    '[PostX] Part 5 — Post Lists Engine ready'
+  );
+}
+
+
+/* ================= 48. START PART 5 ================= */
+
+initPostLists();
