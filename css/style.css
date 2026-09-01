@@ -7,24 +7,16 @@
 File:
     css/style.css
 
-Purpose:
-    Main PostX application stylesheet.
-
-Works with:
-    index.html
-    js/app.js
-
 Design:
-    - Modern SaaS dashboard
-    - Mobile-first responsive layout
-    - Facebook / Instagram publishing UI
-    - Dashboard cards
-    - Composer
-    - Calendar
-    - Drafts
-    - Scheduled posts
-    - Published posts
-    - Toast notifications
+    Premium SaaS
+    Dark Navy
+    Neon Cyan Accents
+    Clean Professional UI
+    Mobile First
+
+Brand:
+    Original PostX icon/logo remains unchanged.
+    Neon cyan is used selectively — not excessively.
 
 =========================================================
 */
@@ -34,50 +26,105 @@ Design:
 ===================================================== */
 
 :root {
-  --postx-bg: #f5f7fb;
-  --postx-surface: #ffffff;
-  --postx-surface-soft: #f8fafc;
 
-  --postx-text: #111827;
-  --postx-text-soft: #334155;
-  --postx-muted: #64748b;
+  /* ---------------------------------------------------
+     POSTX BRAND
+  --------------------------------------------------- */
 
-  --postx-border: #e2e8f0;
+  --postx-bg: #070D18;
+  --postx-bg-soft: #0A1220;
 
-  --postx-primary: #635bff;
-  --postx-primary-dark: #5146e5;
-  --postx-primary-soft: #eeecff;
+  --postx-surface: #101B2D;
+  --postx-surface-2: #142238;
+  --postx-surface-3: #182941;
 
-  --postx-success: #16a34a;
-  --postx-success-soft: #dcfce7;
+  --postx-cyan: #00E5FF;
+  --postx-cyan-soft: #67EEFF;
+  --postx-cyan-dark: #00AFC4;
 
-  --postx-warning: #d97706;
-  --postx-warning-soft: #fef3c7;
+  /* ---------------------------------------------------
+     TEXT
+  --------------------------------------------------- */
 
-  --postx-danger: #dc2626;
-  --postx-danger-soft: #fee2e2;
+  --postx-text: #F5F9FC;
+  --postx-text-soft: #C4CFDC;
+  --postx-muted: #8290A3;
+  --postx-muted-2: #637083;
 
-  --postx-sidebar: #0f172a;
-  --postx-sidebar-soft: #1e293b;
-  --postx-sidebar-text: #cbd5e1;
+  /* ---------------------------------------------------
+     BORDERS
+  --------------------------------------------------- */
 
-  --postx-radius-sm: 10px;
-  --postx-radius-md: 14px;
-  --postx-radius-lg: 18px;
-  --postx-radius-xl: 24px;
+  --postx-border:
+    rgba(255, 255, 255, 0.08);
+
+  --postx-border-soft:
+    rgba(255, 255, 255, 0.055);
+
+  --postx-border-cyan:
+    rgba(0, 229, 255, 0.25);
+
+  /* ---------------------------------------------------
+     STATUS
+  --------------------------------------------------- */
+
+  --postx-success: #22C55E;
+  --postx-success-soft:
+    rgba(34, 197, 94, 0.12);
+
+  --postx-warning: #F59E0B;
+  --postx-warning-soft:
+    rgba(245, 158, 11, 0.12);
+
+  --postx-danger: #EF4444;
+  --postx-danger-soft:
+    rgba(239, 68, 68, 0.12);
+
+  --postx-info: #38BDF8;
+  --postx-info-soft:
+    rgba(56, 189, 248, 0.12);
+
+  /* ---------------------------------------------------
+     SIDEBAR
+  --------------------------------------------------- */
+
+  --postx-sidebar: #08111E;
+  --postx-sidebar-2: #0B1626;
+  --postx-sidebar-text: #AEBBCA;
+
+  /* ---------------------------------------------------
+     RADIUS
+  --------------------------------------------------- */
+
+  --postx-radius-sm: 9px;
+  --postx-radius-md: 12px;
+  --postx-radius-lg: 16px;
+  --postx-radius-xl: 20px;
+
+  /* ---------------------------------------------------
+     SHADOWS
+  --------------------------------------------------- */
 
   --postx-shadow-sm:
-    0 2px 8px rgba(15, 23, 42, 0.05);
+    0 4px 14px rgba(0, 0, 0, 0.20);
 
   --postx-shadow:
-    0 12px 35px rgba(15, 23, 42, 0.08);
+    0 10px 30px rgba(0, 0, 0, 0.28);
 
   --postx-shadow-lg:
-    0 20px 55px rgba(15, 23, 42, 0.12);
+    0 20px 55px rgba(0, 0, 0, 0.40);
+
+  --postx-cyan-glow:
+    0 0 24px rgba(0, 229, 255, 0.12);
+
+  /* ---------------------------------------------------
+     MOTION
+  --------------------------------------------------- */
 
   --postx-transition:
     0.18s ease;
 }
+
 
 /* =====================================================
    2. GLOBAL RESET
@@ -94,10 +141,24 @@ html {
 
 body {
   min-height: 100vh;
+
   margin: 0;
 
-  background: var(--postx-bg);
-  color: var(--postx-text);
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(0, 229, 255, 0.045),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 90% 100%,
+      rgba(0, 180, 220, 0.025),
+      transparent 30%
+    ),
+    var(--postx-bg);
+
+  color:
+    var(--postx-text);
 
   font-family:
     Inter,
@@ -109,7 +170,9 @@ body {
     sans-serif;
 
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+
+  text-rendering:
+    optimizeLegibility;
 }
 
 button,
@@ -133,8 +196,9 @@ a {
   text-decoration: none;
 }
 
+
 /* =====================================================
-   3. POSTX ROOT
+   3. ROOT
 ===================================================== */
 
 .postx-root {
@@ -149,12 +213,15 @@ a {
   display: flex;
 }
 
+
 /* =====================================================
    4. SIDEBAR
 ===================================================== */
 
 .postx-sidebar {
+
   position: fixed;
+
   z-index: 100;
 
   top: 0;
@@ -163,10 +230,18 @@ a {
 
   width: 250px;
 
-  padding: 22px 16px;
+  padding:
+    22px
+    16px;
 
-  background: var(--postx-sidebar);
-  color: #ffffff;
+  background:
+    linear-gradient(
+      180deg,
+      var(--postx-sidebar),
+      #07101B
+    );
+
+  color: var(--postx-text);
 
   display: flex;
   flex-direction: column;
@@ -175,16 +250,23 @@ a {
 
   scrollbar-width: thin;
 
+  border-right:
+    1px solid
+    var(--postx-border-soft);
+
   transition:
     transform 0.22s ease;
 }
+
 
 /* =====================================================
    5. BRAND
 ===================================================== */
 
 .postx-brand {
+
   display: flex;
+
   align-items: center;
 
   gap: 11px;
@@ -196,69 +278,113 @@ a {
 }
 
 .postx-brand-mark {
+
   width: 42px;
   height: 42px;
 
   flex: 0 0 auto;
 
   display: grid;
+
   place-items: center;
+
+  overflow: hidden;
 
   border-radius: 13px;
 
-  color: #ffffff;
-
   background:
-    linear-gradient(
-      135deg,
-      #635bff,
-      #ec4899
-    );
+    var(--postx-surface-2);
+
+  color:
+    var(--postx-cyan);
 
   font-size: 21px;
+
   font-weight: 900;
 
+  border:
+    1px solid
+    rgba(0, 229, 255, 0.18);
+
   box-shadow:
-    0 8px 24px
-    rgba(99, 91, 255, 0.35);
+    0 0 18px
+    rgba(0, 229, 255, 0.10);
+}
+
+
+/*
+  If your original icon is an image,
+  this preserves it instead of replacing it.
+*/
+
+.postx-brand-mark img {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  border-radius: inherit;
 }
 
 .postx-brand-name {
+
   font-size: 20px;
+
   font-weight: 900;
 
-  letter-spacing: -0.4px;
+  letter-spacing:
+    -0.4px;
 }
 
 .postx-brand-sub {
+
   margin-top: 2px;
 
-  color: #94a3b8;
+  color:
+    var(--postx-muted);
 
   font-size: 10px;
+
+  letter-spacing:
+    0.2px;
 }
+
 
 /* =====================================================
    6. NAVIGATION
 ===================================================== */
 
 .postx-nav {
+
   display: grid;
+
   gap: 6px;
 }
 
 .postx-nav-btn {
+
+  position: relative;
+
   width: 100%;
 
-  border: 0;
-  border-radius: 12px;
+  border: 1px solid transparent;
 
-  padding: 12px 13px;
+  border-radius:
+    var(--postx-radius-md);
 
-  background: transparent;
-  color: var(--postx-sidebar-text);
+  padding:
+    12px
+    13px;
+
+  background:
+    transparent;
+
+  color:
+    var(--postx-sidebar-text);
 
   display: flex;
+
   align-items: center;
 
   gap: 12px;
@@ -268,34 +394,73 @@ a {
   transition:
     background var(--postx-transition),
     color var(--postx-transition),
+    border-color var(--postx-transition),
     transform var(--postx-transition);
 }
 
 .postx-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  color:
+    var(--postx-text);
+
+  border-color:
+    var(--postx-border-soft);
 }
 
 .postx-nav-btn:active {
-  transform: scale(0.98);
+
+  transform:
+    scale(0.985);
 }
 
 .postx-nav-btn.active {
+
   background:
     linear-gradient(
-      135deg,
-      rgba(99, 91, 255, 0.98),
-      rgba(99, 91, 255, 0.72)
+      90deg,
+      rgba(0, 229, 255, 0.11),
+      rgba(0, 229, 255, 0.035)
     );
 
-  color: #ffffff;
+  color:
+    var(--postx-cyan);
+
+  border-color:
+    rgba(0, 229, 255, 0.10);
 
   box-shadow:
-    0 8px 22px
-    rgba(99, 91, 255, 0.25);
+    var(--postx-cyan-glow);
+}
+
+.postx-nav-btn.active::before {
+
+  content: "";
+
+  position: absolute;
+
+  left: -1px;
+
+  top: 10px;
+  bottom: 10px;
+
+  width: 3px;
+
+  background:
+    var(--postx-cyan);
+
+  border-radius:
+    0 4px 4px 0;
+
+  box-shadow:
+    0 0 10px
+    rgba(0, 229, 255, 0.55);
 }
 
 .postx-nav-icon {
+
   width: 24px;
 
   flex: 0 0 auto;
@@ -303,14 +468,17 @@ a {
   text-align: center;
 
   font-size: 17px;
+
   font-weight: 800;
 }
+
 
 /* =====================================================
    7. SIDEBAR FOOTER
 ===================================================== */
 
 .postx-sidebar-footer {
+
   margin-top: auto;
 
   padding:
@@ -318,103 +486,139 @@ a {
     10px
     4px;
 
-  color: #94a3b8;
+  color:
+    var(--postx-muted);
 
   font-size: 11px;
 
   line-height: 1.5;
 }
 
+
 /* =====================================================
    8. MAIN AREA
 ===================================================== */
 
 .postx-main {
-  width: calc(100% - 250px);
+
+  width:
+    calc(100% - 250px);
 
   min-height: 100vh;
 
   margin-left: 250px;
 }
 
+
 /* =====================================================
    9. MOBILE HEADER
 ===================================================== */
 
 .postx-mobile-header {
+
   display: none;
 
   height: 62px;
 
   padding:
-    0
-    16px;
+    0 16px;
 
-  background: #ffffff;
+  background:
+    rgba(8, 17, 30, 0.96);
 
   border-bottom:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
   align-items: center;
+
   justify-content: space-between;
 
   position: sticky;
+
   top: 0;
 
   z-index: 70;
+
+  backdrop-filter:
+    blur(14px);
 }
 
 .postx-mobile-brand {
-  color: var(--postx-text);
+
+  color:
+    var(--postx-text);
 
   font-size: 18px;
+
   font-weight: 900;
 }
 
 .postx-menu-btn {
+
   width: 40px;
   height: 40px;
 
   border:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
-  border-radius: 10px;
+  border-radius:
+    10px;
 
-  background: #ffffff;
-  color: var(--postx-text);
+  background:
+    var(--postx-surface);
+
+  color:
+    var(--postx-text);
 
   font-size: 20px;
+
+  transition:
+    var(--postx-transition);
 }
 
 .postx-menu-btn:hover {
-  background: var(--postx-surface-soft);
+
+  border-color:
+    var(--postx-border-cyan);
+
+  color:
+    var(--postx-cyan);
+
+  background:
+    var(--postx-surface-2);
 }
+
 
 /* =====================================================
    10. PAGE
 ===================================================== */
 
 .postx-page {
+
   width: 100%;
 
   max-width: 1280px;
 
   margin:
-    0
-    auto;
+    0 auto;
 
   padding:
     30px;
 }
+
 
 /* =====================================================
    11. PAGE HEADER
 ===================================================== */
 
 .postx-page-header {
+
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   gap: 20px;
@@ -423,9 +627,11 @@ a {
 }
 
 .postx-page-title {
+
   margin: 0;
 
-  color: var(--postx-text);
+  color:
+    var(--postx-text);
 
   font-size:
     clamp(
@@ -436,16 +642,19 @@ a {
 
   font-weight: 900;
 
-  letter-spacing: -0.8px;
+  letter-spacing:
+    -0.8px;
 }
 
 .postx-page-subtitle {
+
   margin:
     7px
     0
     0;
 
-  color: var(--postx-muted);
+  color:
+    var(--postx-muted);
 
   font-size: 14px;
 
@@ -453,6 +662,7 @@ a {
 }
 
 .postx-actions {
+
   display: flex;
 
   flex-wrap: wrap;
@@ -460,122 +670,207 @@ a {
   gap: 10px;
 }
 
+
 /* =====================================================
    12. BUTTONS
 ===================================================== */
 
 .postx-btn {
-  border: 0;
 
-  border-radius: 12px;
+  min-height: 44px;
+
+  border-radius:
+    10px;
 
   padding:
-    11px
+    10px
     16px;
 
   font-weight: 750;
 
+  border:
+    1px solid transparent;
+
   transition:
     transform var(--postx-transition),
     background var(--postx-transition),
+    border-color var(--postx-transition),
+    color var(--postx-transition),
     box-shadow var(--postx-transition);
 }
 
 .postx-btn:hover {
-  transform: translateY(-1px);
+
+  transform:
+    translateY(-1px);
 }
 
 .postx-btn:active {
-  transform: translateY(0);
+
+  transform:
+    translateY(0);
 }
 
+
+/* Primary */
+
 .postx-btn-primary {
-  color: #ffffff;
+
+  color:
+    #031017;
 
   background:
-    var(--postx-primary);
+    var(--postx-cyan);
 
   box-shadow:
-    0 8px 18px
-    rgba(99, 91, 255, 0.22);
+    0 6px 18px
+    rgba(0, 229, 255, 0.15);
 }
 
 .postx-btn-primary:hover {
+
+  color:
+    #021015;
+
   background:
-    var(--postx-primary-dark);
+    var(--postx-cyan-soft);
+
+  box-shadow:
+    0 8px 25px
+    rgba(0, 229, 255, 0.22);
 }
 
+
+/* Secondary */
+
 .postx-btn-secondary {
-  color: var(--postx-text);
 
-  background: #ffffff;
+  color:
+    var(--postx-text);
 
-  border:
-    1px solid var(--postx-border);
+  background:
+    var(--postx-surface-2);
+
+  border-color:
+    var(--postx-border);
 }
 
 .postx-btn-secondary:hover {
+
   background:
-    var(--postx-surface-soft);
+    var(--postx-surface-3);
+
+  border-color:
+    var(--postx-border-cyan);
 }
 
+
+/* Success */
+
 .postx-btn-success {
-  color: #166534;
+
+  color:
+    #86EFAC;
 
   background:
     var(--postx-success-soft);
+
+  border-color:
+    rgba(34, 197, 94, 0.12);
 }
 
 .postx-btn-success:hover {
-  background: #bbf7d0;
+
+  background:
+    rgba(34, 197, 94, 0.18);
 }
 
+
+/* Danger */
+
 .postx-btn-danger {
-  color: #991b1b;
+
+  color:
+    #FCA5A5;
 
   background:
     var(--postx-danger-soft);
+
+  border-color:
+    rgba(239, 68, 68, 0.12);
 }
 
 .postx-btn-danger:hover {
-  background: #fecaca;
+
+  background:
+    rgba(239, 68, 68, 0.18);
 }
 
+
+/* Small */
+
 .postx-btn-small {
+
+  min-height: 36px;
+
   padding:
-    8px
+    7px
     11px;
 
   font-size: 12px;
 }
+
 
 /* =====================================================
    13. CARDS
 ===================================================== */
 
 .postx-card {
+
   background:
-    var(--postx-surface);
+    linear-gradient(
+      145deg,
+      var(--postx-surface-2),
+      var(--postx-surface)
+    );
 
   border:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
   border-radius:
     var(--postx-radius-lg);
+
+  box-shadow:
+    var(--postx-shadow-sm);
+
+  transition:
+    border-color var(--postx-transition),
+    box-shadow var(--postx-transition),
+    transform var(--postx-transition);
+}
+
+.postx-card:hover {
+
+  border-color:
+    rgba(0, 229, 255, 0.12);
 
   box-shadow:
     var(--postx-shadow);
 }
 
 .postx-section-card {
+
   padding: 21px;
 }
+
 
 /* =====================================================
    14. DASHBOARD STATS
 ===================================================== */
 
 .postx-stats {
+
   display: grid;
 
   grid-template-columns:
@@ -587,61 +882,105 @@ a {
 }
 
 .postx-stat {
+
+  position: relative;
+
   padding: 20px;
+
+  overflow: hidden;
+}
+
+.postx-stat::after {
+
+  content: "";
+
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  right: -45px;
+  bottom: -50px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(0, 229, 255, 0.045);
 }
 
 .postx-stat-top {
+
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   gap: 10px;
 }
 
 .postx-stat-label {
-  color: var(--postx-muted);
 
-  font-size: 13px;
+  color:
+    var(--postx-muted);
+
+  font-size: 12px;
 
   font-weight: 650;
+
+  text-transform: uppercase;
+
+  letter-spacing:
+    0.45px;
 }
 
 .postx-stat-icon {
+
   width: 38px;
   height: 38px;
 
-  border-radius: 11px;
+  border-radius:
+    11px;
 
   display: grid;
+
   place-items: center;
 
   background:
-    var(--postx-primary-soft);
+    rgba(0, 229, 255, 0.08);
 
   color:
-    var(--postx-primary);
+    var(--postx-cyan);
+
+  border:
+    1px solid
+    rgba(0, 229, 255, 0.10);
 
   font-weight: 900;
 }
 
 .postx-stat-value {
+
   margin-top: 12px;
 
-  color: var(--postx-text);
+  color:
+    var(--postx-text);
 
   font-size: 29px;
 
   font-weight: 900;
 
-  letter-spacing: -0.8px;
+  letter-spacing:
+    -0.8px;
 }
+
 
 /* =====================================================
    15. DASHBOARD GRID
 ===================================================== */
 
 .postx-dashboard-grid {
+
   display: grid;
 
   grid-template-columns:
@@ -651,14 +990,17 @@ a {
   gap: 20px;
 }
 
+
 /* =====================================================
    16. SECTION HEADINGS
 ===================================================== */
 
 .postx-section-title {
+
   margin: 0;
 
-  color: var(--postx-text);
+  color:
+    var(--postx-text);
 
   font-size: 17px;
 
@@ -666,9 +1008,11 @@ a {
 }
 
 .postx-section-head {
+
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   gap: 15px;
@@ -676,45 +1020,59 @@ a {
   margin-bottom: 18px;
 }
 
+
 /* =====================================================
    17. EMPTY STATES
 ===================================================== */
 
 .postx-empty {
+
   padding:
     35px
     18px;
 
-  color: var(--postx-muted);
+  color:
+    var(--postx-muted);
 
   text-align: center;
 }
 
 .postx-empty-icon {
+
   margin-bottom: 9px;
 
+  color:
+    var(--postx-cyan);
+
   font-size: 35px;
+
+  opacity: 0.85;
 }
 
 .postx-empty-title {
+
   margin-bottom: 5px;
 
-  color: var(--postx-text);
+  color:
+    var(--postx-text);
 
   font-weight: 800;
 }
+
 
 /* =====================================================
    18. POST LIST
 ===================================================== */
 
 .postx-list {
+
   display: grid;
 
   gap: 12px;
 }
 
 .postx-list-item {
+
   display: flex;
 
   align-items: center;
@@ -723,19 +1081,27 @@ a {
 
   padding: 13px;
 
-  background: #ffffff;
+  background:
+    rgba(255, 255, 255, 0.018);
 
   border:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
-  border-radius: 13px;
+  border-radius:
+    13px;
 
   transition:
+    border-color var(--postx-transition),
     box-shadow var(--postx-transition),
     transform var(--postx-transition);
 }
 
 .postx-list-item:hover {
+
+  border-color:
+    rgba(0, 229, 255, 0.12);
+
   box-shadow:
     var(--postx-shadow-sm);
 
@@ -744,6 +1110,7 @@ a {
 }
 
 .postx-list-thumb {
+
   width: 58px;
   height: 58px;
 
@@ -751,13 +1118,19 @@ a {
 
   overflow: hidden;
 
-  border-radius: 11px;
+  border-radius:
+    11px;
 
   background:
-    #eef2f7;
+    var(--postx-surface-3);
+
+  border:
+    1px solid
+    var(--postx-border);
 }
 
 .postx-list-thumb img {
+
   width: 100%;
   height: 100%;
 
@@ -765,13 +1138,16 @@ a {
 }
 
 .postx-list-body {
+
   min-width: 0;
 
   flex: 1;
 }
 
 .postx-list-title {
-  color: var(--postx-text);
+
+  color:
+    var(--postx-text);
 
   font-weight: 750;
 
@@ -783,14 +1159,17 @@ a {
 }
 
 .postx-list-meta {
+
   margin-top: 4px;
 
-  color: var(--postx-muted);
+  color:
+    var(--postx-muted);
 
   font-size: 12px;
 }
 
 .postx-list-actions {
+
   display: flex;
 
   flex-wrap: wrap;
@@ -798,20 +1177,25 @@ a {
   gap: 6px;
 }
 
+
 /* =====================================================
    19. STATUS BADGES
 ===================================================== */
 
 .postx-status {
+
   display: inline-flex;
 
   align-items: center;
 
+  gap: 6px;
+
   padding:
     5px
-    8px;
+    9px;
 
-  border-radius: 999px;
+  border-radius:
+    999px;
 
   font-size: 10px;
 
@@ -819,38 +1203,99 @@ a {
 
   text-transform: uppercase;
 
-  letter-spacing: 0.35px;
+  letter-spacing:
+    0.35px;
+}
+
+.postx-status::before {
+
+  content: "";
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
 }
 
 .postx-status-draft {
+
   background:
-    #f1f5f9;
+    rgba(148, 163, 184, 0.12);
 
   color:
-    #475569;
+    #CBD5E1;
+}
+
+.postx-status-draft::before {
+
+  background:
+    #94A3B8;
 }
 
 .postx-status-scheduled {
+
   background:
     var(--postx-warning-soft);
 
   color:
-    #92400e;
+    #FBBF24;
+}
+
+.postx-status-scheduled::before {
+
+  background:
+    var(--postx-warning);
 }
 
 .postx-status-published {
+
   background:
     var(--postx-success-soft);
 
   color:
-    #166534;
+    #4ADE80;
 }
 
+.postx-status-published::before {
+
+  background:
+    var(--postx-success);
+}
+
+
 /* =====================================================
-   20. PLATFORM BADGES
+   20. FAILED STATUS
+===================================================== */
+
+.postx-status-failed {
+
+  background:
+    var(--postx-danger-soft);
+
+  color:
+    #F87171;
+}
+
+.postx-status-failed::before {
+
+  content: "";
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background:
+    var(--postx-danger);
+}
+
+
+/* =====================================================
+   21. PLATFORM BADGES
 ===================================================== */
 
 .postx-platforms {
+
   display: flex;
 
   align-items: center;
@@ -859,29 +1304,39 @@ a {
 }
 
 .postx-platform-badge {
-  width: 24px;
-  height: 24px;
 
-  border-radius: 8px;
+  width: 25px;
+  height: 25px;
+
+  border-radius:
+    8px;
 
   display: grid;
+
   place-items: center;
 
   background:
     var(--platform-color);
 
-  color: #ffffff;
+  color:
+    #ffffff;
 
   font-size: 12px;
 
   font-weight: 900;
+
+  box-shadow:
+    0 2px 7px
+    rgba(0, 0, 0, 0.20);
 }
 
+
 /* =====================================================
-   21. COMPOSER
+   22. COMPOSER
 ===================================================== */
 
 .postx-composer-layout {
+
   display: grid;
 
   grid-template-columns:
@@ -891,98 +1346,128 @@ a {
   gap: 20px;
 }
 
-.postx-composer {
+.postx-composer,
+.postx-preview {
+
   padding: 23px;
 }
 
-.postx-preview {
-  padding: 23px;
-}
 
 /* =====================================================
-   22. FORM FIELDS
+   23. FORM FIELDS
 ===================================================== */
 
 .postx-field {
+
   margin-bottom: 18px;
 }
 
 .postx-label {
+
   display: block;
 
   margin-bottom: 8px;
 
-  color: var(--postx-text);
+  color:
+    var(--postx-text-soft);
 
   font-size: 13px;
 
-  font-weight: 800;
+  font-weight: 750;
 }
 
 .postx-input,
 .postx-textarea,
 .postx-select {
+
   width: 100%;
+
+  min-height: 44px;
 
   padding:
     12px
     13px;
 
   border:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
-  border-radius: 12px;
+  border-radius:
+    11px;
 
-  background: #ffffff;
+  background:
+    #0B1627;
 
-  color: var(--postx-text);
+  color:
+    var(--postx-text);
 
   outline: none;
 
   transition:
     border-color var(--postx-transition),
-    box-shadow var(--postx-transition);
+    box-shadow var(--postx-transition),
+    background var(--postx-transition);
 }
 
 .postx-input::placeholder,
 .postx-textarea::placeholder {
-  color: #94a3b8;
+
+  color:
+    #5F6D80;
+}
+
+.postx-input:hover,
+.postx-textarea:hover,
+.postx-select:hover {
+
+  border-color:
+    rgba(255, 255, 255, 0.13);
 }
 
 .postx-input:focus,
 .postx-textarea:focus,
 .postx-select:focus {
+
   border-color:
-    var(--postx-primary);
+    var(--postx-cyan);
+
+  background:
+    #0D192B;
 
   box-shadow:
     0 0 0 3px
-    rgba(99, 91, 255, 0.10);
+    rgba(0, 229, 255, 0.08);
 }
 
 .postx-textarea {
+
   min-height: 170px;
 
   resize: vertical;
 
-  line-height: 1.55;
+  line-height:
+    1.55;
 }
 
 .postx-character-count {
+
   margin-top: 5px;
 
-  color: var(--postx-muted);
+  color:
+    var(--postx-muted);
 
   font-size: 11px;
 
   text-align: right;
 }
 
+
 /* =====================================================
-   23. PLATFORM SELECTOR
+   24. PLATFORM SELECTOR
 ===================================================== */
 
 .postx-platform-selector {
+
   display: grid;
 
   grid-template-columns:
@@ -993,10 +1478,12 @@ a {
 }
 
 .postx-platform-option {
+
   position: relative;
 }
 
 .postx-platform-option input {
+
   position: absolute;
 
   opacity: 0;
@@ -1005,20 +1492,29 @@ a {
 }
 
 .postx-platform-label {
+
   display: flex;
 
   align-items: center;
 
   gap: 10px;
 
-  padding: 12px;
+  min-height: 50px;
+
+  padding: 11px;
 
   border:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
-  border-radius: 12px;
+  border-radius:
+    11px;
 
-  background: #ffffff;
+  background:
+    var(--postx-surface);
+
+  color:
+    var(--postx-text-soft);
 
   cursor: pointer;
 
@@ -1029,44 +1525,58 @@ a {
 }
 
 .postx-platform-label:hover {
+
   background:
-    var(--postx-surface-soft);
+    var(--postx-surface-2);
+
+  border-color:
+    rgba(255, 255, 255, 0.13);
 }
 
 .postx-platform-option input:checked
 + .postx-platform-label {
+
   border-color:
-    var(--postx-primary);
+    var(--postx-cyan);
 
   background:
-    #f5f3ff;
+    rgba(0, 229, 255, 0.055);
+
+  color:
+    var(--postx-text);
 
   box-shadow:
     0 0 0 2px
-    rgba(99, 91, 255, 0.08);
+    rgba(0, 229, 255, 0.06);
 }
 
 .postx-platform-logo {
+
   width: 31px;
   height: 31px;
 
   flex: 0 0 auto;
 
-  border-radius: 9px;
+  border-radius:
+    9px;
 
-  color: #ffffff;
+  color:
+    #ffffff;
 
   display: grid;
+
   place-items: center;
 
   font-weight: 900;
 }
 
+
 /* =====================================================
-   24. IMAGE UPLOAD
+   25. IMAGE UPLOAD
 ===================================================== */
 
 .postx-upload {
+
   display: block;
 
   padding:
@@ -1075,12 +1585,13 @@ a {
 
   border:
     2px dashed
-    #d1d5db;
+    rgba(255, 255, 255, 0.13);
 
-  border-radius: 14px;
+  border-radius:
+    14px;
 
   background:
-    #fafafa;
+    rgba(255, 255, 255, 0.018);
 
   text-align: center;
 
@@ -1092,61 +1603,74 @@ a {
 }
 
 .postx-upload:hover {
+
   border-color:
-    var(--postx-primary);
+    rgba(0, 229, 255, 0.40);
 
   background:
-    #f8f7ff;
+    rgba(0, 229, 255, 0.035);
 }
 
 .postx-upload-icon {
+
   margin-bottom: 7px;
+
+  color:
+    var(--postx-cyan);
 
   font-size: 34px;
 }
 
 .postx-upload-title {
-  color: var(--postx-text);
+
+  color:
+    var(--postx-text);
 
   font-weight: 800;
 }
 
 .postx-upload-text {
+
   margin-top: 5px;
 
-  color: var(--postx-muted);
+  color:
+    var(--postx-muted);
 
   font-size: 12px;
 }
 
+
 /* =====================================================
-   25. PREVIEW PHONE
+   26. PREVIEW PHONE
 ===================================================== */
 
 .postx-preview-phone {
+
   width: 100%;
 
   max-width: 360px;
 
   margin:
-    0
-    auto;
+    0 auto;
 
   overflow: hidden;
 
   border:
-    1px solid #dbe1e9;
+    1px solid
+    var(--postx-border);
 
-  border-radius: 22px;
+  border-radius:
+    22px;
 
-  background: #ffffff;
+  background:
+    #0F1928;
 
   box-shadow:
-    0 14px 40px
-    rgba(15, 23, 42, 0.10);
+    var(--postx-shadow-lg);
 }
 
 .postx-preview-header {
+
   display: flex;
 
   align-items: center;
@@ -1156,10 +1680,12 @@ a {
   padding: 14px;
 
   border-bottom:
-    1px solid #eef1f5;
+    1px solid
+    var(--postx-border);
 }
 
 .postx-avatar {
+
   width: 35px;
   height: 35px;
 
@@ -1168,16 +1694,18 @@ a {
   border-radius: 50%;
 
   display: grid;
+
   place-items: center;
 
   background:
-    linear-gradient(
-      135deg,
-      #635bff,
-      #ec4899
-    );
+    var(--postx-surface-3);
 
-  color: #ffffff;
+  color:
+    var(--postx-cyan);
+
+  border:
+    1px solid
+    rgba(0, 229, 255, 0.15);
 
   font-size: 13px;
 
@@ -1185,7 +1713,9 @@ a {
 }
 
 .postx-preview-account {
-  color: var(--postx-text);
+
+  color:
+    var(--postx-text);
 
   font-size: 13px;
 
@@ -1193,33 +1723,39 @@ a {
 }
 
 .postx-preview-account small {
+
   display: block;
 
   margin-top: 2px;
 
-  color: #9ca3af;
+  color:
+    var(--postx-muted);
 
   font-weight: 500;
 }
 
 .postx-preview-image {
+
   width: 100%;
 
-  aspect-ratio: 1 / 1;
+  aspect-ratio:
+    1 / 1;
 
   overflow: hidden;
 
   display: grid;
+
   place-items: center;
 
   background:
-    #f1f5f9;
+    #0B1627;
 
   color:
-    #94a3b8;
+    var(--postx-muted);
 }
 
 .postx-preview-image img {
+
   width: 100%;
   height: 100%;
 
@@ -1227,22 +1763,29 @@ a {
 }
 
 .postx-preview-content {
+
   padding: 14px;
 }
 
 .postx-preview-caption {
-  color: var(--postx-text);
+
+  color:
+    var(--postx-text-soft);
 
   font-size: 13px;
 
-  line-height: 1.5;
+  line-height:
+    1.5;
 
-  white-space: pre-wrap;
+  white-space:
+    pre-wrap;
 
-  word-break: break-word;
+  word-break:
+    break-word;
 }
 
 .postx-preview-actions {
+
   display: flex;
 
   align-items: center;
@@ -1255,16 +1798,18 @@ a {
     13px;
 
   color:
-    #475569;
+    var(--postx-muted);
 
   font-size: 19px;
 }
 
+
 /* =====================================================
-   26. FORM ACTIONS
+   27. FORM ACTIONS
 ===================================================== */
 
 .postx-form-actions {
+
   display: flex;
 
   flex-wrap: wrap;
@@ -1276,60 +1821,88 @@ a {
   margin-top: 8px;
 }
 
+
 /* =====================================================
-   27. TABLES
+   28. TABLES
 ===================================================== */
 
 .postx-table-wrap {
+
   width: 100%;
 
   overflow-x: auto;
 }
 
 .postx-table {
+
   width: 100%;
 
-  border-collapse: collapse;
+  border-collapse:
+    collapse;
 }
 
 .postx-table th,
 .postx-table td {
+
   padding:
     13px
     11px;
 
   border-bottom:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
-  text-align: left;
+  text-align:
+    left;
 
-  vertical-align: middle;
+  vertical-align:
+    middle;
 
   font-size: 13px;
 }
 
 .postx-table th {
-  color: var(--postx-muted);
 
-  font-size: 11px;
+  color:
+    var(--postx-muted);
 
-  text-transform: uppercase;
+  font-size: 10px;
 
-  letter-spacing: 0.4px;
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.5px;
 }
 
+.postx-table td {
+
+  color:
+    var(--postx-text-soft);
+}
+
+.postx-table tr:hover td {
+
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+
 /* =====================================================
-   28. CALENDAR
+   29. CALENDAR
 ===================================================== */
 
 .postx-calendar {
+
   padding: 20px;
 }
 
 .postx-calendar-head {
+
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   gap: 15px;
@@ -1338,7 +1911,9 @@ a {
 }
 
 .postx-calendar-title {
-  color: var(--postx-text);
+
+  color:
+    var(--postx-text);
 
   font-size: 19px;
 
@@ -1346,19 +1921,23 @@ a {
 }
 
 .postx-calendar-grid {
+
   display: grid;
 
   grid-template-columns:
     repeat(7, 1fr);
 
   border-top:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
   border-left:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 }
 
 .postx-calendar-day-name {
+
   padding:
     9px
     7px;
@@ -1366,46 +1945,64 @@ a {
   color:
     var(--postx-muted);
 
+  background:
+    rgba(255, 255, 255, 0.018);
+
   font-size: 10px;
 
   font-weight: 850;
 
-  text-transform: uppercase;
+  text-transform:
+    uppercase;
 
   border-right:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
   border-bottom:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 }
 
 .postx-calendar-cell {
+
   min-height: 105px;
 
   padding: 8px;
 
-  background: #ffffff;
+  background:
+    rgba(255, 255, 255, 0.012);
 
   border-right:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
 
   border-bottom:
-    1px solid var(--postx-border);
+    1px solid
+    var(--postx-border);
+}
+
+.postx-calendar-cell:hover {
+
+  background:
+    rgba(0, 229, 255, 0.025);
 }
 
 .postx-calendar-cell.muted {
+
   background:
-    #f8fafc;
+    rgba(255, 255, 255, 0.006);
 
   color:
-    #cbd5e1;
+    var(--postx-muted-2);
 }
 
 .postx-calendar-number {
+
   margin-bottom: 6px;
 
   color:
-    var(--postx-text);
+    var(--postx-text-soft);
 
   font-size: 11px;
 
@@ -1413,56 +2010,76 @@ a {
 }
 
 .postx-calendar-number.today {
+
   width: 24px;
   height: 24px;
 
   display: inline-grid;
+
   place-items: center;
 
   border-radius: 50%;
 
-  color: #ffffff;
+  color:
+    #031017;
 
   background:
-    var(--postx-primary);
+    var(--postx-cyan);
+
+  box-shadow:
+    0 0 12px
+    rgba(0, 229, 255, 0.25);
 }
 
 .postx-calendar-event {
+
   margin-top: 4px;
 
   padding:
     5px
     6px;
 
-  border-radius: 6px;
+  border-radius:
+    6px;
 
   background:
-    #f0edff;
+    rgba(0, 229, 255, 0.08);
 
   color:
-    #5146a8;
+    var(--postx-cyan-soft);
+
+  border-left:
+    2px solid
+    var(--postx-cyan);
 
   font-size: 10px;
 
-  white-space: nowrap;
+  white-space:
+    nowrap;
 
-  overflow: hidden;
+  overflow:
+    hidden;
 
-  text-overflow: ellipsis;
+  text-overflow:
+    ellipsis;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 }
 
 .postx-calendar-event:hover {
+
   background:
-    #e5e0ff;
+    rgba(0, 229, 255, 0.13);
 }
 
+
 /* =====================================================
-   29. TOASTS
+   30. TOASTS
 ===================================================== */
 
 .postx-toast-container {
+
   position: fixed;
 
   right: 18px;
@@ -1482,20 +2099,30 @@ a {
 }
 
 .postx-toast {
+
   padding:
     13px
     15px;
 
-  border-radius: 12px;
+  border-radius:
+    11px;
 
   background:
-    #111827;
+    #122037;
 
-  color: #ffffff;
+  color:
+    var(--postx-text);
+
+  border:
+    1px solid
+    var(--postx-border);
+
+  border-left:
+    3px solid
+    var(--postx-cyan);
 
   box-shadow:
-    0 12px 30px
-    rgba(0, 0, 0, 0.20);
+    var(--postx-shadow-lg);
 
   font-size: 13px;
 
@@ -1508,22 +2135,27 @@ a {
 }
 
 .postx-toast.success {
-  background:
-    #166534;
+
+  border-left-color:
+    var(--postx-success);
 }
 
 .postx-toast.error {
-  background:
-    #991b1b;
+
+  border-left-color:
+    var(--postx-danger);
 }
 
 .postx-toast.warning {
-  background:
-    #92400e;
+
+  border-left-color:
+    var(--postx-warning);
 }
 
 @keyframes postxToastIn {
+
   from {
+
     transform:
       translateY(10px);
 
@@ -1531,6 +2163,7 @@ a {
   }
 
   to {
+
     transform:
       translateY(0);
 
@@ -1538,11 +2171,13 @@ a {
   }
 }
 
+
 /* =====================================================
-   30. MOBILE OVERLAY
+   31. MOBILE OVERLAY
 ===================================================== */
 
 .postx-overlay {
+
   position: fixed;
 
   inset: 0;
@@ -1552,23 +2187,32 @@ a {
   display: none;
 
   background:
-    rgba(15, 23, 42, 0.55);
+    rgba(2, 7, 14, 0.72);
+
+  backdrop-filter:
+    blur(4px);
 }
 
 .postx-overlay.show {
-  display: block;
+
+  display:
+    block;
 }
 
+
 /* =====================================================
-   31. HIDDEN
+   32. HIDDEN
 ===================================================== */
 
 .postx-hidden {
-  display: none !important;
+
+  display:
+    none !important;
 }
 
+
 /* =====================================================
-   32. FOCUS ACCESSIBILITY
+   33. ACCESSIBILITY
 ===================================================== */
 
 button:focus-visible,
@@ -1576,53 +2220,92 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 label:focus-visible {
-  outline:
-    3px solid
-    rgba(99, 91, 255, 0.30);
 
-  outline-offset: 2px;
+  outline:
+    2px solid
+    var(--postx-cyan);
+
+  outline-offset:
+    2px;
 }
 
+
 /* =====================================================
-   33. SCROLLBAR
+   34. SCROLLBAR
 ===================================================== */
 
 * {
-  scrollbar-width: thin;
+
+  scrollbar-width:
+    thin;
+
   scrollbar-color:
-    #cbd5e1
+    #2A3A50
     transparent;
 }
 
+::-webkit-scrollbar {
+
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+
+  background:
+    var(--postx-bg);
+}
+
+::-webkit-scrollbar-thumb {
+
+  background:
+    #26364D;
+
+  border-radius:
+    20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+  background:
+    var(--postx-cyan-dark);
+}
+
+
 /* =====================================================
-   34. TABLET
+   35. TABLET
 ===================================================== */
 
 @media (max-width: 1050px) {
 
   .postx-stats {
+
     grid-template-columns:
       repeat(2, 1fr);
   }
 
   .postx-dashboard-grid {
+
     grid-template-columns:
       1fr;
   }
 
   .postx-composer-layout {
+
     grid-template-columns:
       1fr;
   }
 }
 
+
 /* =====================================================
-   35. MOBILE
+   36. MOBILE
 ===================================================== */
 
 @media (max-width: 760px) {
 
   .postx-sidebar {
+
     width: 270px;
 
     transform:
@@ -1630,21 +2313,25 @@ label:focus-visible {
   }
 
   .postx-sidebar.open {
+
     transform:
       translateX(0);
   }
 
   .postx-main {
+
     width: 100%;
 
     margin-left: 0;
   }
 
   .postx-mobile-header {
+
     display: flex;
   }
 
   .postx-page {
+
     padding:
       20px
       14px
@@ -1652,12 +2339,27 @@ label:focus-visible {
   }
 
   .postx-page-header {
-    align-items: flex-start;
 
-    flex-direction: column;
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
+
+  .postx-actions {
+
+    width: 100%;
+  }
+
+  .postx-actions .postx-btn {
+
+    flex:
+      1;
   }
 
   .postx-stats {
+
     grid-template-columns:
       1fr 1fr;
 
@@ -1665,94 +2367,172 @@ label:focus-visible {
   }
 
   .postx-stat {
-    padding: 15px;
+
+    padding:
+      15px;
   }
 
   .postx-stat-value {
-    font-size: 24px;
+
+    font-size:
+      24px;
   }
 
   .postx-list-item {
-    align-items: flex-start;
+
+    align-items:
+      flex-start;
   }
 
   .postx-list-actions {
-    flex-direction: column;
+
+    flex-direction:
+      column;
   }
 
   .postx-list-actions .postx-btn {
-    width: 100%;
+
+    width:
+      100%;
   }
 
   .postx-calendar {
-    padding: 10px;
+
+    padding:
+      10px;
   }
 
   .postx-calendar-cell {
-    min-height: 76px;
 
-    padding: 5px;
+    min-height:
+      76px;
+
+    padding:
+      5px;
   }
 
   .postx-calendar-event {
-    font-size: 8px;
+
+    font-size:
+      8px;
   }
 
   .postx-calendar-day-name {
+
     padding:
       7px
       3px;
 
-    font-size: 8px;
+    font-size:
+      8px;
   }
 }
 
+
 /* =====================================================
-   36. SMALL PHONES
+   37. SMALL PHONES
 ===================================================== */
 
 @media (max-width: 480px) {
 
+  .postx-page {
+
+    padding:
+      16px
+      12px
+      25px;
+  }
+
   .postx-stats {
+
     grid-template-columns:
-      1fr;
+      1fr 1fr;
+  }
+
+  .postx-stat {
+
+    padding:
+      14px;
+  }
+
+  .postx-stat-label {
+
+    font-size:
+      10px;
+  }
+
+  .postx-stat-value {
+
+    font-size:
+      21px;
   }
 
   .postx-platform-selector {
+
     grid-template-columns:
       1fr;
   }
 
   .postx-form-actions {
-    justify-content: stretch;
+
+    justify-content:
+      stretch;
   }
 
   .postx-form-actions .postx-btn {
-    flex: 1;
+
+    flex:
+      1;
   }
 
   .postx-page-title {
-    font-size: 27px;
+
+    font-size:
+      27px;
   }
 
   .postx-section-card,
   .postx-composer,
   .postx-preview {
-    padding: 16px;
+
+    padding:
+      16px;
   }
 
   .postx-list-item {
-    gap: 10px;
+
+    gap:
+      10px;
   }
 
   .postx-list-thumb {
-    width: 50px;
-    height: 50px;
+
+    width:
+      50px;
+
+    height:
+      50px;
+  }
+
+  .postx-toast-container {
+
+    left:
+      12px;
+
+    right:
+      12px;
+
+    bottom:
+      12px;
+
+    width:
+      auto;
   }
 }
 
+
 /* =====================================================
-   37. REDUCED MOTION
+   38. REDUCED MOTION
 ===================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1760,7 +2540,9 @@ label:focus-visible {
   *,
   *::before,
   *::after {
-    scroll-behavior: auto !important;
+
+    scroll-behavior:
+      auto !important;
 
     transition-duration:
       0.01ms !important;
@@ -1773,6 +2555,31 @@ label:focus-visible {
   }
 }
 
+
+/* =====================================================
+   39. OPTIONAL BRAND UTILITIES
+===================================================== */
+
+.postx-cyan {
+
+  color:
+    var(--postx-cyan);
+}
+
+.postx-glow {
+
+  box-shadow:
+    var(--postx-cyan-glow);
+}
+
+.postx-muted {
+
+  color:
+    var(--postx-muted);
+}
+
+
 /* =====================================================
    END OF POSTX STYLE SHEET
-========================================================= */
+=========================================================
+*/
