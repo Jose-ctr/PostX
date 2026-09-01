@@ -6111,3 +6111,1290 @@ function showCalendarDayModal(
 
   });
 }
+
+/* =========================================================
+   POSTX v2.0 — PART 10
+   CALENDAR & SCHEDULING ENGINE
+   ---------------------------------------------------------
+   Responsibilities:
+   - Calendar month rendering
+   - Previous / next month navigation
+   - Scheduled-post date grouping
+   - Selected-date scheduled posts
+   - Safe local datetime handling
+   - Edit scheduled posts
+   - Publish scheduled posts now
+   - Delete scheduled posts
+   - Reschedule scheduled posts
+   - No duplicate event listeners
+   - LocalStorage persistence
+   ========================================================= */
+
+/* ================= 10.1 CALENDAR STATE ================= */
+
+if (!state.calendarDate || !(state.calendarDate instanceof Date)) {
+  state.calendarDate = new Date();
+}
+
+if (!state.selectedCalendarDate) {
+  state.selectedCalendarDate = null;
+}
+
+/* ================= 10.2 DATE HELPERS ================= */
+
+function calendarStartOfMonth(date) {
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function calendarEndOfMonth(date) {
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+
+function calendarDateKey(date) {
+  const d = date instanceof Date ? date : new Date(date);
+
+  if (isNaN(d.getTime())) return '';
+
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0')
+  ].join('-');
+}
+
+function parseCalendarDateKey(key) {
+  if (!key || typeof key !== 'string') return null;
+
+  const parts = key.split('-').map(Number);
+
+  if (
+    parts.length !== 3 ||
+    parts.some(Number.isNaN)
+  ) {
+    return null;
+  }
+
+  const [year, month, day] = parts;
+
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
+function calendarMonthLabel(date) {
+  return new Date(date).toLocaleDateString('en-KE', {
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function calendarDayNumber(date) {
+  return new Date(date).getDate();
+}
+
+/*
+ * Convert an ISO UTC datetime into the value expected by
+ * <input type="datetime-local"> using LOCAL time.
+ */
+function toLocalDateTimeInput(iso) {
+  if (!iso || !isValidDateString(iso)) return '';
+
+  const d = new Date(iso);
+
+  const pad = n => String(n).padStart(2, '0');
+
+  return [
+    d.getFullYear(),
+    pad(d.getMonth() + 1),
+    pad(d.getDate())
+  ].join('-') + 'T' + [
+    pad(d.getHours()),
+    pad(d.getMinutes())
+  ].join(':');
+}
+
+/*
+ * Convert datetime-local input into an ISO UTC value.
+ */
+function localDateTimeToISO(value) {
+  if (!value) return null;
+
+  const d = new Date(value);
+
+  if (isNaN(d.getTime())) return null;
+
+  return d.toISOString();
+}
+
+/* ================= 10.3 SCHEDULED POSTS ================= */
+
+function getScheduledPosts() {
+  return safeArray(state.posts)
+    .filter(post =>
+      post &&
+      post.status === 'scheduled' &&
+      isValidDateString(post.scheduledAt)
+    )
+    .sort((a, b) =>
+      new Date(a.scheduledAt).getTime() -
+      new Date(b.scheduledAt).getTime()
+    );
+}
+
+function getScheduledPostsForDate(dateKey) {
+  const date = parseCalendarDateKey(dateKey);
+
+  if (!date) return [];
+
+  return getScheduledPosts().filter(post => {
+    return calendarDateKey(new Date(post.scheduledAt)) === dateKey;
+  });
+}
+
+function getScheduledCountForDate(dateKey) {
+  return getScheduledPostsForDate(dateKey).length;
+}
+
+/* ================= 10.4 CALENDAR NAVIGATION ================= */
+
+function changeCalendarMonth(offset) {
+  const current = state.calendarDate instanceof Date
+    ? state.calendarDate
+    : new Date();
+
+  const next = new Date(
+    current.getFullYear(),
+    current.getMonth() + offset,
+    1
+  );
+
+  state.calendarDate = next;
+
+  /*
+   * Keep selected date sensible when changing month.
+   * We intentionally do not erase scheduled posts.
+   */
+  state.selectedCalendarDate = null;
+
+  renderCalendar();
+}
+
+function goToCurrentMonth() {
+  const today = new Date();
+
+  state.calendarDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+
+  state.selectedCalendarDate = calendarDateKey(today);
+
+  renderCalendar();
+}
+
+/* ================= 10.5 CALENDAR HTML ================= */
+
+function renderCalendar() {
+  const container =
+    safeEl('calendar-page') ||
+    $('[data-page-content="calendar"]');
+
+  if (!container) return;
+
+  const monthDate = state.calendarDate instanceof Date
+    ? state.calendarDate
+    : new Date();
+
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  /*
+   * Convert Sunday=0 to Monday=0.
+   */
+  const startingWeekday = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = lastDay.getDate();
+
+  const todayKey = calendarDateKey(new Date());
+
+  let selectedKey = state.selectedCalendarDate;
+
+  if (!selectedKey) {
+    selectedKey = todayKey;
+  }
+
+  /*
+   * If selected date belongs to another month,
+   * don't visually select it inside this month.
+   */
+  const selectedDate = parseCalendarDateKey(selectedKey);
+
+  const selectedIsCurrentMonth =
+    selectedDate &&
+    selectedDate.getFullYear() === year &&
+    selectedDate.getMonth() === month;
+
+  const scheduledPosts = getScheduledPosts();
+
+  const scheduledByDate = {};
+
+  scheduledPosts.forEach(post => {
+    const key = calendarDateKey(new Date(post.scheduledAt));
+
+    if (!key) return;
+
+    if (!scheduledByDate[key]) {
+      scheduledByDate[key] = [];
+    }
+
+    scheduledByDate[key].push(post);
+  });
+
+  let calendarCells = '';
+
+  /* Empty cells before first day */
+  for (let i = 0; i < startingWeekday; i++) {
+    calendarCells += `
+      <div
+        class="postx-calendar-cell postx-calendar-empty"
+        aria-hidden="true"
+        style="
+          min-height:100px;
+          background:#101018;
+          border:1px solid #20202d;
+          opacity:.45;
+        "
+      ></div>
+    `;
+  }
+
+  /* Actual month days */
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const key = calendarDateKey(date);
+
+    const posts = scheduledByDate[key] || [];
+
+    const isToday = key === todayKey;
+    const isSelected =
+      selectedIsCurrentMonth &&
+      key === selectedKey;
+
+    const count = posts.length;
+
+    calendarCells += `
+      <button
+        type="button"
+        class="postx-calendar-cell"
+        data-calendar-date="${escapeHTML(key)}"
+        aria-label="${escapeHTML(
+          date.toLocaleDateString('en-KE', {
+            weekday:'long',
+            month:'long',
+            day:'numeric',
+            year:'numeric'
+          })
+        )}"
+        style="
+          min-height:100px;
+          padding:10px;
+          text-align:left;
+          vertical-align:top;
+          background:${isSelected ? '#1d1938' : '#15151f'};
+          border:1px solid ${isToday ? '#6c5ce7' : '#2a2a3a'};
+          border-radius:12px;
+          color:#fff;
+          cursor:pointer;
+          position:relative;
+          overflow:hidden;
+        "
+      >
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:8px;
+          "
+        >
+          <span
+            style="
+              width:28px;
+              height:28px;
+              display:inline-flex;
+              align-items:center;
+              justify-content:center;
+              border-radius:50%;
+              background:${isToday ? '#6c5ce7' : '#1e1e2e'};
+              color:#fff;
+              font-size:12px;
+              font-weight:700;
+            "
+          >
+            ${day}
+          </span>
+
+          ${
+            count
+              ? `
+                <span
+                  style="
+                    background:#6c5ce7;
+                    color:#fff;
+                    min-width:22px;
+                    height:22px;
+                    padding:0 6px;
+                    border-radius:20px;
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:10px;
+                    font-weight:700;
+                  "
+                >
+                  ${count}
+                </span>
+              `
+              : ''
+          }
+        </div>
+
+        ${
+          posts.slice(0, 2).map(post => `
+            <div
+              class="calendar-post-preview"
+              data-calendar-post-id="${escapeHTML(post.id)}"
+              style="
+                background:#1e1e2e;
+                border:1px solid #2a2a3a;
+                border-left:3px solid #6c5ce7;
+                border-radius:7px;
+                padding:5px 7px;
+                margin-top:5px;
+                overflow:hidden;
+              "
+            >
+              <div
+                style="
+                  color:#fff;
+                  font-size:10px;
+                  font-weight:700;
+                  white-space:nowrap;
+                  overflow:hidden;
+                  text-overflow:ellipsis;
+                "
+              >
+                ${escapeHTML(
+                  new Date(post.scheduledAt).toLocaleTimeString(
+                    'en-KE',
+                    {
+                      hour:'2-digit',
+                      minute:'2-digit'
+                    }
+                  )
+                )}
+              </div>
+
+              <div
+                style="
+                  color:#9aa0b4;
+                  font-size:10px;
+                  white-space:nowrap;
+                  overflow:hidden;
+                  text-overflow:ellipsis;
+                "
+              >
+                ${escapeHTML(post.caption || 'Untitled post')}
+              </div>
+            </div>
+          `).join('')
+        }
+
+        ${
+          count > 2
+            ? `
+              <div
+                style="
+                  color:#6c5ce7;
+                  font-size:10px;
+                  margin-top:5px;
+                  font-weight:700;
+                "
+              >
+                +${count - 2} more
+              </div>
+            `
+            : ''
+        }
+      </button>
+    `;
+  }
+
+  /*
+   * Complete final week.
+   */
+  const totalCells = startingWeekday + daysInMonth;
+  const remainingCells = (7 - (totalCells % 7)) % 7;
+
+  for (let i = 0; i < remainingCells; i++) {
+    calendarCells += `
+      <div
+        class="postx-calendar-cell postx-calendar-empty"
+        aria-hidden="true"
+        style="
+          min-height:100px;
+          background:#101018;
+          border:1px solid #20202d;
+          opacity:.45;
+        "
+      ></div>
+    `;
+  }
+
+  const selectedPosts =
+    selectedKey
+      ? getScheduledPostsForDate(selectedKey)
+      : [];
+
+  const selectedDateObject =
+    selectedKey
+      ? parseCalendarDateKey(selectedKey)
+      : null;
+
+  const selectedTitle =
+    selectedDateObject
+      ? selectedDateObject.toLocaleDateString('en-KE', {
+          weekday:'long',
+          month:'long',
+          day:'numeric',
+          year:'numeric'
+        })
+      : 'Select a date';
+
+  container.innerHTML = `
+    <div style="max-width:1100px;margin:0 auto;">
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:12px;
+          flex-wrap:wrap;
+          margin-bottom:18px;
+        "
+      >
+        <div>
+          <h2
+            style="
+              color:#fff;
+              margin:0;
+              font-size:24px;
+            "
+          >
+            Content Calendar
+          </h2>
+
+          <div
+            style="
+              color:#6a708a;
+              font-size:12px;
+              margin-top:5px;
+            "
+          >
+            ${scheduledPosts.length} scheduled post${scheduledPosts.length === 1 ? '' : 's'}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="calendar-today-btn"
+          style="
+            background:#1e1e2e;
+            border:1px solid #2a2a3a;
+            color:#fff;
+            padding:9px 14px;
+            border-radius:10px;
+            cursor:pointer;
+          "
+        >
+          Today
+        </button>
+      </div>
+
+      <div
+        style="
+          background:#15151f;
+          border:1px solid #2a2a3a;
+          border-radius:18px;
+          padding:16px;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:16px;
+          "
+        >
+
+          <button
+            type="button"
+            id="calendar-prev"
+            aria-label="Previous month"
+            style="
+              width:40px;
+              height:40px;
+              border-radius:10px;
+              border:1px solid #2a2a3a;
+              background:#1e1e2e;
+              color:#fff;
+              cursor:pointer;
+              font-size:18px;
+            "
+          >
+            ‹
+          </button>
+
+          <h3
+            style="
+              color:#fff;
+              margin:0;
+              font-size:18px;
+              text-align:center;
+            "
+          >
+            ${escapeHTML(calendarMonthLabel(monthDate))}
+          </h3>
+
+          <button
+            type="button"
+            id="calendar-next"
+            aria-label="Next month"
+            style="
+              width:40px;
+              height:40px;
+              border-radius:10px;
+              border:1px solid #2a2a3a;
+              background:#1e1e2e;
+              color:#fff;
+              cursor:pointer;
+              font-size:18px;
+            "
+          >
+            ›
+          </button>
+
+        </div>
+
+        <div
+          style="
+            display:grid;
+            grid-template-columns:repeat(7,minmax(0,1fr));
+            gap:6px;
+            margin-bottom:6px;
+          "
+        >
+          ${
+            ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+              .map(day => `
+                <div
+                  style="
+                    text-align:center;
+                    color:#6a708a;
+                    font-size:10px;
+                    font-weight:700;
+                    text-transform:uppercase;
+                    padding:7px 2px;
+                  "
+                >
+                  ${day}
+                </div>
+              `).join('')
+          }
+        </div>
+
+        <div
+          id="postx-calendar-grid"
+          style="
+            display:grid;
+            grid-template-columns:repeat(7,minmax(0,1fr));
+            gap:6px;
+          "
+        >
+          ${calendarCells}
+        </div>
+
+      </div>
+
+      <div
+        style="
+          margin-top:18px;
+          background:#15151f;
+          border:1px solid #2a2a3a;
+          border-radius:18px;
+          padding:20px;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:10px;
+            margin-bottom:14px;
+            flex-wrap:wrap;
+          "
+        >
+          <div>
+            <h3
+              style="
+                margin:0;
+                color:#fff;
+                font-size:16px;
+              "
+            >
+              ${escapeHTML(selectedTitle)}
+            </h3>
+
+            <div
+              style="
+                color:#6a708a;
+                font-size:11px;
+                margin-top:4px;
+              "
+            >
+              Scheduled content
+            </div>
+          </div>
+
+          ${
+            selectedPosts.length
+              ? `
+                <span
+                  style="
+                    background:#2a2a4a;
+                    color:#bdb7ff;
+                    border-radius:20px;
+                    padding:5px 10px;
+                    font-size:11px;
+                  "
+                >
+                  ${selectedPosts.length} post${selectedPosts.length === 1 ? '' : 's'}
+                </span>
+              `
+              : ''
+          }
+        </div>
+
+        ${
+          selectedPosts.length
+            ? `
+              <div
+                style="
+                  display:grid;
+                  gap:12px;
+                "
+              >
+                ${selectedPosts.map(renderCalendarScheduledPost).join('')}
+              </div>
+            `
+            : `
+              <div
+                style="
+                  padding:30px 15px;
+                  text-align:center;
+                  color:#6a708a;
+                  border:1px dashed #2a2a3a;
+                  border-radius:12px;
+                "
+              >
+                No scheduled posts for this date.
+              </div>
+            `
+        }
+
+      </div>
+
+    </div>
+  `;
+
+  bindCalendarEvents();
+}
+
+/* ================= 10.6 SCHEDULED POST CARD ================= */
+
+function renderCalendarScheduledPost(post) {
+  const time = isValidDateString(post.scheduledAt)
+    ? new Date(post.scheduledAt).toLocaleTimeString('en-KE', {
+        hour:'2-digit',
+        minute:'2-digit'
+      })
+    : '—';
+
+  const platforms = safeArray(post.platforms);
+
+  return `
+    <div
+      class="postx-calendar-scheduled-card"
+      data-scheduled-card-id="${escapeHTML(post.id)}"
+      style="
+        background:#1a1a24;
+        border:1px solid #2a2a3a;
+        border-radius:14px;
+        padding:15px;
+      "
+    >
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:flex-start;
+          gap:10px;
+        "
+      >
+
+        <div style="min-width:0;flex:1;">
+
+          <div
+            style="
+              color:#6c5ce7;
+              font-size:12px;
+              font-weight:800;
+              margin-bottom:6px;
+            "
+          >
+            ${escapeHTML(time)}
+          </div>
+
+          <div
+            style="
+              color:#fff;
+              font-size:14px;
+              line-height:1.5;
+              white-space:pre-wrap;
+              overflow-wrap:anywhere;
+            "
+          >
+            ${escapeHTML(post.caption || 'Untitled post')}
+          </div>
+
+          ${
+            post.hashtags
+              ? `
+                <div
+                  style="
+                    color:#6c5ce7;
+                    font-size:12px;
+                    margin-top:6px;
+                  "
+                >
+                  ${escapeHTML(post.hashtags)}
+                </div>
+              `
+              : ''
+          }
+
+        </div>
+
+        <span
+          style="
+            flex-shrink:0;
+            background:#2a2a4a;
+            color:#bdb7ff;
+            padding:5px 9px;
+            border-radius:20px;
+            font-size:10px;
+            text-transform:uppercase;
+          "
+        >
+          Scheduled
+        </span>
+
+      </div>
+
+      ${
+        platforms.length
+          ? `
+            <div
+              style="
+                display:flex;
+                flex-wrap:wrap;
+                gap:6px;
+                margin-top:10px;
+              "
+            >
+              ${platforms.map(pid => `
+                <span
+                  style="
+                    background:#15151f;
+                    border:1px solid #2a2a3a;
+                    color:#9aa0b4;
+                    padding:4px 8px;
+                    border-radius:20px;
+                    font-size:10px;
+                  "
+                >
+                  ${escapeHTML(
+                    PLATFORMS[pid]?.label || pid
+                  )}
+                </span>
+              `).join('')}
+            </div>
+          `
+          : ''
+      }
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          flex-wrap:wrap;
+          margin-top:13px;
+        "
+      >
+
+        <button
+          type="button"
+          class="calendar-edit-btn"
+          data-id="${escapeHTML(post.id)}"
+          style="
+            background:#1e1e2e;
+            border:1px solid #2a2a3a;
+            color:#fff;
+            padding:7px 11px;
+            border-radius:8px;
+            cursor:pointer;
+          "
+        >
+          Edit
+        </button>
+
+        <button
+          type="button"
+          class="calendar-publish-btn"
+          data-id="${escapeHTML(post.id)}"
+          style="
+            background:#6c5ce7;
+            border:none;
+            color:#fff;
+            padding:7px 11px;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:700;
+          "
+        >
+          Publish Now
+        </button>
+
+        <button
+          type="button"
+          class="calendar-delete-btn"
+          data-id="${escapeHTML(post.id)}"
+          style="
+            background:#2a1a1a;
+            border:1px solid #3a2a2a;
+            color:#ff6b6b;
+            padding:7px 11px;
+            border-radius:8px;
+            cursor:pointer;
+          "
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+/* ================= 10.7 CALENDAR EVENTS ================= */
+
+function bindCalendarEvents() {
+  const prev = safeEl('calendar-prev');
+  const next = safeEl('calendar-next');
+  const today = safeEl('calendar-today-btn');
+
+  if (prev) {
+    prev.onclick = () => changeCalendarMonth(-1);
+  }
+
+  if (next) {
+    next.onclick = () => changeCalendarMonth(1);
+  }
+
+  if (today) {
+    today.onclick = goToCurrentMonth;
+  }
+
+  $$('.postx-calendar-cell[data-calendar-date]').forEach(cell => {
+    cell.onclick = () => {
+      const key = cell.dataset.calendarDate;
+
+      if (!key) return;
+
+      state.selectedCalendarDate = key;
+
+      renderCalendar();
+    };
+  });
+
+  $$('.calendar-edit-btn').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+
+      if (id) {
+        editScheduledPost(id);
+      }
+    };
+  });
+
+  $$('.calendar-publish-btn').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+
+      if (id) {
+        publishScheduledPostNow(id);
+      }
+    };
+  });
+
+  $$('.calendar-delete-btn').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+
+      if (id) {
+        deleteScheduledPost(id);
+      }
+    };
+  });
+}
+
+/* ================= 10.8 EDIT SCHEDULED POST ================= */
+
+function editScheduledPost(id) {
+  const post = state.posts.find(p => p.id === id);
+
+  if (!post) {
+    showToast('Scheduled post not found', 'error');
+    return;
+  }
+
+  state.editingPostId = post.id;
+
+  /*
+   * Composer uses datetime-local, so convert the stored ISO
+   * value into local browser time first.
+   */
+  state.composer = {
+    caption: post.caption || '',
+    hashtags: post.hashtags || '',
+    media: post.media || '',
+    platforms: [...safeArray(post.platforms)],
+    scheduledAt: toLocalDateTimeInput(post.scheduledAt)
+  };
+
+  saveState();
+
+  navigate('create');
+}
+
+/* ================= 10.9 PUBLISH SCHEDULED POST ================= */
+
+function publishScheduledPostNow(id) {
+  const post = state.posts.find(p => p.id === id);
+
+  if (!post) {
+    showToast('Scheduled post not found', 'error');
+    return;
+  }
+
+  const performPublish = () => {
+    const index = state.posts.findIndex(p => p.id === id);
+
+    if (index === -1) {
+      showToast('Post no longer exists', 'error');
+      return;
+    }
+
+    const current = state.posts[index];
+
+    current.status = 'published';
+    current.publishedAt = nowISO();
+    current.scheduledAt = null;
+    current.updatedAt = nowISO();
+
+    state.posts[index] = normalizePost(current);
+
+    saveState();
+
+    showToast(
+      'Post moved to Published successfully',
+      'success'
+    );
+
+    renderCalendar();
+  };
+
+  if (typeof openModal === 'function') {
+    openModal({
+      title: 'Publish this post now?',
+      body: `
+        <div>
+          This will move the scheduled post to your
+          <strong style="color:#fff;">Published</strong> list.
+        </div>
+      `,
+      actions: [
+        {
+          label: 'Cancel',
+          variant: ''
+        },
+        {
+          label: 'Publish Now',
+          variant: 'primary',
+          onClick: performPublish
+        }
+      ]
+    });
+  } else {
+    if (window.confirm('Publish this post now?')) {
+      performPublish();
+    }
+  }
+}
+
+/* ================= 10.10 DELETE SCHEDULED POST ================= */
+
+function deleteScheduledPost(id) {
+  const post = state.posts.find(p => p.id === id);
+
+  if (!post) {
+    showToast('Scheduled post not found', 'error');
+    return;
+  }
+
+  const performDelete = () => {
+    state.posts = state.posts.filter(p => p.id !== id);
+
+    if (state.editingPostId === id) {
+      state.editingPostId = null;
+    }
+
+    saveState();
+
+    showToast(
+      'Scheduled post deleted',
+      'success'
+    );
+
+    renderCalendar();
+  };
+
+  if (typeof openModal === 'function') {
+    openModal({
+      title: 'Delete scheduled post?',
+      body: `
+        <div>
+          This action cannot be undone.
+        </div>
+      `,
+      actions: [
+        {
+          label: 'Cancel',
+          variant: ''
+        },
+        {
+          label: 'Delete',
+          variant: 'primary',
+          onClick: performDelete
+        }
+      ]
+    });
+  } else {
+    if (window.confirm('Delete this scheduled post?')) {
+      performDelete();
+    }
+  }
+}
+
+/* ================= 10.11 SCHEDULE VALIDATION ================= */
+
+function validateScheduledDate(value) {
+  const iso = localDateTimeToISO(value);
+
+  if (!iso) {
+    showToast(
+      'Please select a valid schedule date and time',
+      'warning'
+    );
+    return null;
+  }
+
+  /*
+   * Allow scheduling slightly into the future.
+   * A 30-second tolerance avoids rejecting a timestamp while
+   * the user is submitting.
+   */
+  if (new Date(iso).getTime() < Date.now() - 30000) {
+    showToast(
+      'Scheduled time must be in the future',
+      'warning'
+    );
+    return null;
+  }
+
+  return iso;
+}
+
+/* ================= 10.12 OPTIONAL SCHEDULE HELPER ================= */
+
+function schedulePost(postId, localDateTimeValue) {
+  const post = state.posts.find(p => p.id === postId);
+
+  if (!post) {
+    showToast('Post not found', 'error');
+    return false;
+  }
+
+  const iso = validateScheduledDate(localDateTimeValue);
+
+  if (!iso) return false;
+
+  post.status = 'scheduled';
+  post.scheduledAt = iso;
+  post.publishedAt = null;
+  post.updatedAt = nowISO();
+
+  state.posts = normalizePosts(state.posts);
+
+  saveState();
+
+  state.calendarDate = new Date(iso);
+
+  state.selectedCalendarDate =
+    calendarDateKey(new Date(iso));
+
+  showToast(
+    'Post scheduled successfully',
+    'success'
+  );
+
+  return true;
+}
+
+/* ================= 10.13 CALENDAR RESPONSIVE FIX ================= */
+
+function ensureCalendarResponsiveStyle() {
+  if (safeEl('postx-calendar-responsive-style')) {
+    return;
+  }
+
+  const style = document.createElement('style');
+
+  style.id = 'postx-calendar-responsive-style';
+
+  style.textContent = `
+    @media (max-width: 700px) {
+
+      #postx-calendar-grid {
+        gap: 3px !important;
+      }
+
+      .postx-calendar-cell {
+        min-height: 72px !important;
+        padding: 6px !important;
+        border-radius: 8px !important;
+      }
+
+      .calendar-post-preview {
+        padding: 3px 4px !important;
+      }
+
+      .calendar-post-preview div {
+        font-size: 9px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+
+      .postx-calendar-cell {
+        min-height: 58px !important;
+      }
+
+      .postx-calendar-empty {
+        min-height: 58px !important;
+      }
+
+      .postx-calendar-cell > div:first-child {
+        margin-bottom: 2px !important;
+      }
+
+      .postx-calendar-cell > div:first-child > span:first-child {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 10px !important;
+      }
+
+      .calendar-post-preview {
+        display: none !important;
+      }
+
+      .postx-calendar-cell > div:last-child {
+        font-size: 8px !important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+/* ================= 10.14 INITIALIZE CALENDAR ENGINE ================= */
+
+function initCalendarEngine() {
+  ensureCalendarResponsiveStyle();
+
+  if (!state.calendarDate) {
+    state.calendarDate = new Date();
+  }
+
+  if (
+    state.selectedCalendarDate &&
+    !parseCalendarDateKey(state.selectedCalendarDate)
+  ) {
+    state.selectedCalendarDate = null;
+  }
+}
+
+/*
+ * Guarded initialization.
+ * Safe if Part 10 is pasted into a script that is already running.
+ */
+if (!window.__POSTX_CALENDAR_ENGINE_INITIALIZED) {
+  window.__POSTX_CALENDAR_ENGINE_INITIALIZED = true;
+
+  initCalendarEngine();
+}
+
+/* =========================================================
+   END OF POSTX v2.0 — PART 10
+   ========================================================= */
