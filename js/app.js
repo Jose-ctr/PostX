@@ -1507,3 +1507,1194 @@ function bindDashboardActions() {
 /* ================= 26. PART 3 INITIALIZATION ================= */
 
 bindDashboardActions();
+
+/* =========================================================
+   POSTX v2.0 — PART 4
+   COMPOSER ENGINE
+   ---------------------------------------------------------
+   Responsibilities:
+   - Create posts
+   - Edit posts
+   - Save drafts
+   - Schedule posts
+   - Publish posts locally
+   - Platform selection
+   - Image upload/preview
+   - Composer validation
+   - LocalStorage persistence
+   ========================================================= */
+
+
+/* ================= 11. COMPOSER STATE ================= */
+
+function createEmptyComposer() {
+  return {
+    caption: '',
+    hashtags: '',
+    media: '',
+    platforms: [],
+    scheduledAt: ''
+  };
+}
+
+if (!state.composer) {
+  state.composer = createEmptyComposer();
+}
+
+
+/* ================= 12. LOAD POST INTO COMPOSER ================= */
+
+function loadPostIntoComposer(post) {
+  if (!post) {
+    state.composer = createEmptyComposer();
+    state.editingPostId = null;
+    return;
+  }
+
+  state.composer = {
+    caption: String(post.caption || ''),
+    hashtags: String(post.hashtags || ''),
+    media: String(post.media || ''),
+    platforms: Array.isArray(post.platforms)
+      ? [...new Set(
+          post.platforms.filter(id => PLATFORM_IDS.includes(id))
+        )]
+      : [],
+    scheduledAt: post.scheduledAt
+      ? toLocalDateTimeInput(post.scheduledAt)
+      : ''
+  };
+
+  state.editingPostId = post.id;
+}
+
+
+/* ================= 13. DATE/TIME HELPERS ================= */
+
+/*
+ * Converts an ISO UTC date into the local datetime-local format:
+ * YYYY-MM-DDTHH:mm
+ *
+ * This prevents timezone shifts when editing scheduled posts.
+ */
+
+function toLocalDateTimeInput(iso) {
+  if (!iso || !isValidDateString(iso)) return '';
+
+  const d = new Date(iso);
+
+  const pad = n => String(n).padStart(2, '0');
+
+  return [
+    d.getFullYear(),
+    pad(d.getMonth() + 1),
+    pad(d.getDate())
+  ].join('-') + 'T' +
+    [
+      pad(d.getHours()),
+      pad(d.getMinutes())
+    ].join(':');
+}
+
+
+/*
+ * Converts datetime-local value into ISO UTC.
+ */
+
+function localDateTimeToISO(value) {
+  if (!value) return null;
+
+  const d = new Date(value);
+
+  if (isNaN(d.getTime())) return null;
+
+  return d.toISOString();
+}
+
+
+/* ================= 14. RESET COMPOSER ================= */
+
+function resetComposer() {
+  state.composer = createEmptyComposer();
+  state.editingPostId = null;
+}
+
+
+/* ================= 15. READ COMPOSER FORM ================= */
+
+function readComposerForm() {
+  const captionEl = safeEl('composer-caption');
+  const hashtagsEl = safeEl('composer-hashtags');
+  const scheduleEl = safeEl('composer-schedule');
+
+  if (captionEl) {
+    state.composer.caption = captionEl.value;
+  }
+
+  if (hashtagsEl) {
+    state.composer.hashtags = hashtagsEl.value;
+  }
+
+  if (scheduleEl) {
+    state.composer.scheduledAt = scheduleEl.value;
+  }
+
+  state.composer.caption =
+    String(state.composer.caption || '').trim();
+
+  state.composer.hashtags =
+    String(state.composer.hashtags || '').trim();
+
+  state.composer.platforms = [
+    ...new Set(
+      safeArray(state.composer.platforms)
+        .filter(id => PLATFORM_IDS.includes(id))
+    )
+  ];
+}
+
+
+/* ================= 16. COMPOSER VALIDATION ================= */
+
+function validateComposer(options = {}) {
+
+  const requirePlatform =
+    options.requirePlatform !== false;
+
+  const requireSchedule =
+    options.requireSchedule === true;
+
+  readComposerForm();
+
+  const caption = state.composer.caption.trim();
+
+  if (!caption) {
+    showToast(
+      'Please enter a caption before continuing.',
+      'warning'
+    );
+
+    safeEl('composer-caption')?.focus();
+
+    return false;
+  }
+
+  if (caption.length > 10000) {
+    showToast(
+      'Caption is too long. Maximum 10,000 characters.',
+      'warning'
+    );
+
+    return false;
+  }
+
+  if (
+    requirePlatform &&
+    state.composer.platforms.length === 0
+  ) {
+    showToast(
+      'Please select at least one platform.',
+      'warning'
+    );
+
+    return false;
+  }
+
+  if (requireSchedule) {
+
+    if (!state.composer.scheduledAt) {
+      showToast(
+        'Please select a schedule date and time.',
+        'warning'
+      );
+
+      safeEl('composer-schedule')?.focus();
+
+      return false;
+    }
+
+    const scheduledISO =
+      localDateTimeToISO(state.composer.scheduledAt);
+
+    if (!scheduledISO) {
+      showToast(
+        'The selected schedule time is invalid.',
+        'error'
+      );
+
+      return false;
+    }
+
+    if (
+      new Date(scheduledISO).getTime() <= Date.now()
+    ) {
+      showToast(
+        'Schedule time must be in the future.',
+        'warning'
+      );
+
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+/* ================= 17. CONNECTED PLATFORM CHECK ================= */
+
+function getConnectedState(platform) {
+  if (!state.connectedAccounts) {
+    state.connectedAccounts = {};
+  }
+
+  return Boolean(
+    state.connectedAccounts[platform]
+  );
+}
+
+
+function validateSelectedPlatforms() {
+
+  const selected =
+    safeArray(state.composer.platforms);
+
+  if (!selected.length) {
+    showToast(
+      'Select at least one platform.',
+      'warning'
+    );
+
+    return false;
+  }
+
+  const disconnected = selected.filter(
+    id => !getConnectedState(id)
+  );
+
+  /*
+   * Frontend demo:
+   * Do not block creation because an account is not
+   * connected. Real API connection will be implemented
+   * in the backend integration phase.
+   */
+
+  if (disconnected.length) {
+
+    const names = disconnected
+      .map(id => PLATFORMS[id]?.label || id)
+      .join(', ');
+
+    showToast(
+      `${names} not connected. Post will be saved locally for now.`,
+      'warning'
+    );
+  }
+
+  return true;
+}
+
+
+/* ================= 18. BUILD POST OBJECT ================= */
+
+function buildPost(status) {
+
+  readComposerForm();
+
+  const now = nowISO();
+
+  let scheduledAt = null;
+  let publishedAt = null;
+
+  if (status === 'scheduled') {
+    scheduledAt =
+      localDateTimeToISO(
+        state.composer.scheduledAt
+      );
+  }
+
+  if (status === 'published') {
+    publishedAt = now;
+  }
+
+  return normalizePost({
+    id: state.editingPostId || uid(),
+
+    caption: state.composer.caption,
+
+    hashtags: state.composer.hashtags,
+
+    media: state.composer.media,
+
+    platforms: state.composer.platforms,
+
+    status,
+
+    createdAt:
+      state.editingPostId
+        ? (
+            state.posts.find(
+              p => p.id === state.editingPostId
+            )?.createdAt || now
+          )
+        : now,
+
+    updatedAt: now,
+
+    scheduledAt,
+
+    publishedAt
+  });
+}
+
+
+/* ================= 19. SAVE POST ================= */
+
+function saveComposerPost(status) {
+
+  const valid =
+    validateComposer({
+      requirePlatform: true,
+      requireSchedule: status === 'scheduled'
+    });
+
+  if (!valid) return false;
+
+  if (!validateSelectedPlatforms()) {
+    return false;
+  }
+
+  const post = buildPost(status);
+
+  if (!post) {
+    showToast(
+      'Unable to create the post.',
+      'error'
+    );
+
+    return false;
+  }
+
+  const existingIndex =
+    state.posts.findIndex(
+      p => p.id === post.id
+    );
+
+  if (existingIndex >= 0) {
+
+    state.posts[existingIndex] = post;
+
+  } else {
+
+    state.posts.unshift(post);
+  }
+
+  state.posts =
+    normalizePosts(state.posts);
+
+  saveState();
+
+  return true;
+}
+
+
+/* ================= 20. SAVE DRAFT ================= */
+
+function handleSaveDraft() {
+
+  if (!saveComposerPost('draft')) {
+    return;
+  }
+
+  showToast(
+    state.editingPostId
+      ? 'Draft updated successfully.'
+      : 'Draft saved successfully.',
+    'success'
+  );
+
+  resetComposer();
+
+  navigate('drafts');
+}
+
+
+/* ================= 21. SCHEDULE POST ================= */
+
+function handleSchedulePost() {
+
+  if (!saveComposerPost('scheduled')) {
+    return;
+  }
+
+  showToast(
+    state.editingPostId
+      ? 'Scheduled post updated successfully.'
+      : 'Post scheduled successfully.',
+    'success'
+  );
+
+  resetComposer();
+
+  navigate('scheduled');
+}
+
+
+/* ================= 22. PUBLISH CONFIRMATION ================= */
+
+function handlePublishConfirm() {
+
+  if (!validateComposer({
+    requirePlatform: true
+  })) {
+    return;
+  }
+
+  if (!validateSelectedPlatforms()) {
+    return;
+  }
+
+  openModal({
+    title: state.editingPostId
+      ? 'Publish Changes?'
+      : 'Publish Post?',
+
+    body: `
+      <div>
+        This frontend demo will mark the post as
+        <strong style="color:#fff;">Published</strong>
+        locally.
+      </div>
+
+      <div style="
+        margin-top:12px;
+        padding:12px;
+        border-radius:10px;
+        background:#1a1a24;
+        border:1px solid #2a2a3a;
+      ">
+        ${escapeHTML(
+          state.composer.caption.slice(0, 180)
+        )}${state.composer.caption.length > 180 ? '…' : ''}
+      </div>
+    `,
+
+    actions: [
+
+      {
+        label: 'Cancel',
+        variant: 'secondary',
+        close: true
+      },
+
+      {
+        label: 'Publish Now',
+        variant: 'primary',
+        close: true,
+
+        onClick: () => {
+          publishComposerPost();
+        }
+      }
+
+    ]
+  });
+}
+
+
+/* ================= 23. PUBLISH POST ================= */
+
+function publishComposerPost() {
+
+  if (!saveComposerPost('published')) {
+    return;
+  }
+
+  showToast(
+    'Post published successfully.',
+    'success'
+  );
+
+  resetComposer();
+
+  navigate('published');
+}
+
+
+/* ================= 24. EDIT POST ================= */
+
+function editPost(postId) {
+
+  const id = String(postId || '');
+
+  const post =
+    state.posts.find(
+      p => p.id === id
+    );
+
+  if (!post) {
+
+    showToast(
+      'Post could not be found.',
+      'error'
+    );
+
+    return;
+  }
+
+  loadPostIntoComposer(post);
+
+  navigate('create');
+}
+
+
+/* ================= 25. DELETE POST ================= */
+
+function deletePost(postId) {
+
+  const id = String(postId || '');
+
+  const post =
+    state.posts.find(
+      p => p.id === id
+    );
+
+  if (!post) {
+    showToast(
+      'Post not found.',
+      'error'
+    );
+
+    return;
+  }
+
+  openModal({
+
+    title: 'Delete Post?',
+
+    body: `
+      <div>
+        Are you sure you want to permanently delete this post?
+      </div>
+
+      <div style="
+        margin-top:12px;
+        padding:12px;
+        border-radius:10px;
+        background:#1a1a24;
+        border:1px solid #2a2a3a;
+        color:#fff;
+      ">
+        ${escapeHTML(
+          post.caption.slice(0, 180)
+        )}${post.caption.length > 180 ? '…' : ''}
+      </div>
+    `,
+
+    actions: [
+
+      {
+        label: 'Cancel',
+        variant: 'secondary'
+      },
+
+      {
+        label: 'Delete',
+        variant: 'danger',
+
+        onClick: () => {
+
+          state.posts =
+            state.posts.filter(
+              p => p.id !== id
+            );
+
+          if (
+            state.editingPostId === id
+          ) {
+            resetComposer();
+          }
+
+          saveState();
+
+          showToast(
+            'Post deleted.',
+            'success'
+          );
+
+          render();
+        }
+      }
+
+    ]
+  });
+}
+
+
+/* ================= 26. PLATFORM SELECTION ================= */
+
+function toggleComposerPlatform(platformId) {
+
+  const id =
+    String(platformId || '')
+      .toLowerCase()
+      .trim();
+
+  if (!PLATFORM_IDS.includes(id)) {
+    return;
+  }
+
+  if (!state.composer) {
+    state.composer =
+      createEmptyComposer();
+  }
+
+  const index =
+    state.composer.platforms.indexOf(id);
+
+  if (index >= 0) {
+
+    state.composer.platforms.splice(
+      index,
+      1
+    );
+
+  } else {
+
+    state.composer.platforms.push(id);
+  }
+
+  state.composer.platforms =
+    [...new Set(
+      state.composer.platforms
+    )];
+
+  renderComposer();
+}
+
+
+/* ================= 27. MEDIA UPLOAD ================= */
+
+function handleComposerMedia(file) {
+
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+
+    showToast(
+      'Please select an image file.',
+      'warning'
+    );
+
+    return;
+  }
+
+  /*
+   * Keep the existing localStorage-safe limit.
+   * Large base64 images can quickly exhaust browser
+   * storage, so we reject oversized files.
+   */
+
+  const MAX_IMAGE_SIZE = 2_000_000;
+
+  if (file.size > MAX_IMAGE_SIZE) {
+
+    showToast(
+      'Image is too large. Please use an image under 2 MB.',
+      'error'
+    );
+
+    return;
+  }
+
+  const reader =
+    new FileReader();
+
+  reader.onload = event => {
+
+    const result =
+      event.target?.result;
+
+    if (
+      typeof result !== 'string' ||
+      !result
+    ) {
+
+      showToast(
+        'Unable to read image.',
+        'error'
+      );
+
+      return;
+    }
+
+    state.composer.media =
+      result;
+
+    renderComposer();
+
+    showToast(
+      'Image added to post.',
+      'success'
+    );
+  };
+
+  reader.onerror = () => {
+
+    showToast(
+      'Failed to read image.',
+      'error'
+    );
+  };
+
+  reader.readAsDataURL(file);
+}
+
+
+/* ================= 28. REMOVE MEDIA ================= */
+
+function removeComposerMedia() {
+
+  if (!state.composer) return;
+
+  state.composer.media = '';
+
+  renderComposer();
+
+  showToast(
+    'Image removed.',
+    'info'
+  );
+}
+
+
+/* ================= 29. COMPOSER EVENT BINDING ================= */
+
+function bindComposerEvents() {
+
+  const caption =
+    safeEl('composer-caption');
+
+  const hashtags =
+    safeEl('composer-hashtags');
+
+  const schedule =
+    safeEl('composer-schedule');
+
+  const uploadButton =
+    safeEl('composer-upload-btn');
+
+  const fileInput =
+    safeEl('composer-media-input');
+
+
+  /*
+   * Input events are attached only to the current
+   * composer DOM elements.
+   *
+   * renderComposer() replaces those elements, so old
+   * listeners disappear with the old DOM.
+   */
+
+  if (caption) {
+
+    caption.addEventListener(
+      'input',
+      e => {
+        state.composer.caption =
+          e.target.value;
+      }
+    );
+  }
+
+
+  if (hashtags) {
+
+    hashtags.addEventListener(
+      'input',
+      e => {
+        state.composer.hashtags =
+          e.target.value;
+      }
+    );
+  }
+
+
+  if (schedule) {
+
+    schedule.addEventListener(
+      'change',
+      e => {
+        state.composer.scheduledAt =
+          e.target.value;
+      }
+    );
+  }
+
+
+  /*
+   * Platform buttons
+   */
+
+  $$('.platform-btn').forEach(button => {
+
+    button.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        toggleComposerPlatform(
+          button.dataset.platform
+        );
+      }
+    );
+  });
+
+
+  /*
+   * Upload button
+   */
+
+  if (
+    uploadButton &&
+    fileInput
+  ) {
+
+    uploadButton.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        fileInput.click();
+      }
+    );
+
+
+    fileInput.addEventListener(
+      'change',
+      e => {
+
+        const file =
+          e.target.files?.[0];
+
+        if (file) {
+          handleComposerMedia(file);
+        }
+
+        /*
+         * Allow selecting the same file again.
+         */
+
+        e.target.value = '';
+      }
+    );
+  }
+
+
+  /*
+   * Remove media
+   */
+
+  const removeMedia =
+    safeEl('remove-media');
+
+  if (removeMedia) {
+
+    removeMedia.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        removeComposerMedia();
+      }
+    );
+  }
+
+
+  /*
+   * Main composer actions
+   */
+
+  const saveDraft =
+    safeEl('btn-save-draft');
+
+  if (saveDraft) {
+
+    saveDraft.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        handleSaveDraft();
+      }
+    );
+  }
+
+
+  const scheduleButton =
+    safeEl('btn-schedule');
+
+  if (scheduleButton) {
+
+    scheduleButton.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        handleSchedulePost();
+      }
+    );
+  }
+
+
+  const publishButton =
+    safeEl('btn-publish');
+
+  if (publishButton) {
+
+    publishButton.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        handlePublishConfirm();
+      }
+    );
+  }
+
+
+  /*
+   * Cancel edit
+   */
+
+  const cancelEdit =
+    safeEl('btn-cancel-edit');
+
+  if (cancelEdit) {
+
+    cancelEdit.addEventListener(
+      'click',
+      e => {
+
+        e.preventDefault();
+
+        resetComposer();
+
+        navigate('drafts');
+      }
+    );
+  }
+}
+
+
+/* ================= 30. GLOBAL POST ACTIONS ================= */
+
+function bindPostActions() {
+
+  if (window.__POSTX_POST_ACTIONS_BOUND) {
+    return;
+  }
+
+  window.__POSTX_POST_ACTIONS_BOUND = true;
+
+  document.addEventListener(
+    'click',
+    e => {
+
+      /*
+       * Edit
+       */
+
+      const editButton =
+        e.target.closest('.btn-edit');
+
+      if (editButton) {
+
+        e.preventDefault();
+
+        editPost(
+          editButton.dataset.id
+        );
+
+        return;
+      }
+
+
+      /*
+       * Delete
+       */
+
+      const deleteButton =
+        e.target.closest('.btn-delete');
+
+      if (deleteButton) {
+
+        e.preventDefault();
+
+        deletePost(
+          deleteButton.dataset.id
+        );
+
+        return;
+      }
+
+
+      /*
+       * Publish Now
+       */
+
+      const publishButton =
+        e.target.closest('.btn-publish-now');
+
+      if (publishButton) {
+
+        e.preventDefault();
+
+        publishPostById(
+          publishButton.dataset.id
+        );
+
+        return;
+      }
+    }
+  );
+}
+
+
+/* ================= 31. PUBLISH EXISTING POST ================= */
+
+function publishPostById(postId) {
+
+  const id =
+    String(postId || '');
+
+  const post =
+    state.posts.find(
+      p => p.id === id
+    );
+
+  if (!post) {
+
+    showToast(
+      'Post not found.',
+      'error'
+    );
+
+    return;
+  }
+
+  openModal({
+
+    title: 'Publish this post now?',
+
+    body: `
+      <div>
+        This will move the post to
+        <strong style="color:#fff;">
+          Published
+        </strong>.
+      </div>
+
+      <div style="
+        margin-top:12px;
+        padding:12px;
+        border-radius:10px;
+        background:#1a1a24;
+        border:1px solid #2a2a3a;
+      ">
+        ${escapeHTML(
+          post.caption.slice(0, 180)
+        )}${post.caption.length > 180 ? '…' : ''}
+      </div>
+    `,
+
+    actions: [
+
+      {
+        label: 'Cancel',
+        variant: 'secondary'
+      },
+
+      {
+        label: 'Publish Now',
+        variant: 'primary',
+
+        onClick: () => {
+
+          post.status =
+            'published';
+
+          post.scheduledAt =
+            null;
+
+          post.publishedAt =
+            nowISO();
+
+          post.updatedAt =
+            nowISO();
+
+          state.posts =
+            normalizePosts(
+              state.posts
+            );
+
+          saveState();
+
+          showToast(
+            'Post published successfully.',
+            'success'
+          );
+
+          render();
+        }
+      }
+
+    ]
+  });
+}
+
+
+/* ================= 32. INITIALIZE COMPOSER ENGINE ================= */
+
+function initComposerEngine() {
+
+  if (!state.composer) {
+    state.composer =
+      createEmptyComposer();
+  }
+
+  bindPostActions();
+
+  /*
+   * If an editing ID exists after page reload,
+   * restore the post into the composer.
+   */
+
+  if (state.editingPostId) {
+
+    const post =
+      state.posts.find(
+        p => p.id === state.editingPostId
+      );
+
+    if (post) {
+
+      loadPostIntoComposer(post);
+
+    } else {
+
+      resetComposer();
+    }
+  }
+}
+
+
+/* ================= 33. START PART 4 ================= */
+
+initComposerEngine();
