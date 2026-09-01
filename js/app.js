@@ -3944,3 +3944,665 @@ function handleSave(mode = 'draft') {
 function handlePublishConfirm() {
   handlePublishPost();
 }
+
+/* ================= 7. CALENDAR ENGINE ================= */
+
+/*
+ * PostX v2.0
+ * Calendar functionality:
+ * - Monthly calendar
+ * - Scheduled post indicators
+ * - Date selection
+ * - Previous / next month
+ * - Today button
+ * - Scheduled posts for selected date
+ * - Safe rendering
+ */
+
+/* ---------- Calendar Helpers ---------- */
+
+function getCalendarDate() {
+  if (!(state.calendarDate instanceof Date) || isNaN(state.calendarDate.getTime())) {
+    state.calendarDate = new Date();
+  }
+
+  return state.calendarDate;
+}
+
+function calendarKey(date) {
+  const d = new Date(date);
+
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0')
+  ].join('-');
+}
+
+function getPostsForCalendarDate(date) {
+  const key = calendarKey(date);
+
+  return state.posts.filter(post => {
+    if (post.status !== 'scheduled' || !post.scheduledAt) {
+      return false;
+    }
+
+    return calendarKey(new Date(post.scheduledAt)) === key;
+  });
+}
+
+function getMonthName(date) {
+  return date.toLocaleDateString('en-KE', {
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+/* ---------- Calendar Navigation ---------- */
+
+function changeCalendarMonth(offset) {
+  const current = getCalendarDate();
+
+  state.calendarDate = new Date(
+    current.getFullYear(),
+    current.getMonth() + offset,
+    1
+  );
+
+  state.selectedCalendarDate = null;
+
+  renderCalendar();
+}
+
+function goToCalendarToday() {
+  const today = new Date();
+
+  state.calendarDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+
+  state.selectedCalendarDate = calendarKey(today);
+
+  renderCalendar();
+}
+
+function selectCalendarDate(date) {
+  state.selectedCalendarDate = calendarKey(date);
+  renderCalendar();
+}
+
+/* ---------- Calendar Grid ---------- */
+
+function buildCalendarDays(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  /*
+   * Convert Sunday = 0 into Monday = 0
+   * so the calendar starts on Monday.
+   */
+  const startDay = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = lastDay.getDate();
+
+  const previousMonthLastDay = new Date(
+    year,
+    month,
+    0
+  ).getDate();
+
+  const cells = [];
+
+  /* Previous month filler days */
+  for (let i = startDay - 1; i >= 0; i--) {
+    cells.push({
+      day: previousMonthLastDay - i,
+      currentMonth: false,
+      date: new Date(
+        year,
+        month - 1,
+        previousMonthLastDay - i
+      )
+    });
+  }
+
+  /* Current month */
+  for (let day = 1; day <= daysInMonth; day++) {
+    cells.push({
+      day,
+      currentMonth: true,
+      date: new Date(year, month, day)
+    });
+  }
+
+  /* Next month filler */
+  let nextDay = 1;
+
+  while (cells.length % 7 !== 0) {
+    cells.push({
+      day: nextDay,
+      currentMonth: false,
+      date: new Date(year, month + 1, nextDay)
+    });
+
+    nextDay++;
+  }
+
+  return cells;
+}
+
+/* ---------- Calendar Rendering ---------- */
+
+function renderCalendar() {
+  const page = safeEl('calendar-page');
+
+  if (!page) return;
+
+  const calendarDate = getCalendarDate();
+  const todayKey = calendarKey(new Date());
+
+  const selectedKey =
+    state.selectedCalendarDate || todayKey;
+
+  const cells = buildCalendarDays(calendarDate);
+
+  page.innerHTML = `
+    <div style="max-width:1100px;margin:0 auto;">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-bottom:18px;
+      ">
+
+        <div>
+          <h2 style="
+            margin:0;
+            color:#fff;
+            font-size:24px;
+          ">
+            Content Calendar
+          </h2>
+
+          <div style="
+            color:#6a708a;
+            font-size:13px;
+            margin-top:4px;
+          ">
+            Manage your scheduled posts
+          </div>
+        </div>
+
+        <div style="
+          display:flex;
+          gap:8px;
+          flex-wrap:wrap;
+        ">
+
+          <button
+            id="calendar-prev"
+            style="
+              background:#1a1a24;
+              border:1px solid #2a2a3a;
+              color:#fff;
+              padding:9px 13px;
+              border-radius:10px;
+              cursor:pointer;
+            "
+          >
+            ←
+          </button>
+
+          <button
+            id="calendar-today"
+            style="
+              background:#6c5ce7;
+              border:none;
+              color:#fff;
+              padding:9px 15px;
+              border-radius:10px;
+              cursor:pointer;
+              font-weight:600;
+            "
+          >
+            Today
+          </button>
+
+          <button
+            id="calendar-next"
+            style="
+              background:#1a1a24;
+              border:1px solid #2a2a3a;
+              color:#fff;
+              padding:9px 13px;
+              border-radius:10px;
+              cursor:pointer;
+            "
+          >
+            →
+          </button>
+
+        </div>
+      </div>
+
+      <div style="
+        background:#15151f;
+        border:1px solid #2a2a3a;
+        border-radius:18px;
+        overflow:hidden;
+      ">
+
+        <div style="
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          padding:18px;
+          border-bottom:1px solid #2a2a3a;
+        ">
+          <h3 style="
+            margin:0;
+            color:#fff;
+            font-size:18px;
+          ">
+            ${escapeHTML(getMonthName(calendarDate))}
+          </h3>
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(7,1fr);
+          border-bottom:1px solid #2a2a3a;
+        ">
+          ${[
+            'Mon',
+            'Tue',
+            'Wed',
+            'Thu',
+            'Fri',
+            'Sat',
+            'Sun'
+          ].map(day => `
+            <div style="
+              padding:10px 4px;
+              text-align:center;
+              color:#6a708a;
+              font-size:11px;
+              font-weight:700;
+              text-transform:uppercase;
+            ">
+              ${day}
+            </div>
+          `).join('')}
+        </div>
+
+        <div
+          id="calendar-grid"
+          style="
+            display:grid;
+            grid-template-columns:repeat(7,1fr);
+          "
+        >
+
+          ${cells.map(cell => {
+
+            const key = calendarKey(cell.date);
+            const posts = getPostsForCalendarDate(cell.date);
+            const isToday = key === todayKey;
+            const isSelected = key === selectedKey;
+
+            return `
+              <button
+                class="calendar-day"
+                data-date="${key}"
+                style="
+                  min-height:90px;
+                  border:0;
+                  border-right:1px solid #242432;
+                  border-bottom:1px solid #242432;
+                  background:${isSelected ? '#211c3d' : '#15151f'};
+                  color:${cell.currentMonth ? '#fff' : '#4f5368'};
+                  padding:8px;
+                  text-align:left;
+                  cursor:pointer;
+                  position:relative;
+                "
+              >
+
+                <div style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  margin-bottom:5px;
+                ">
+
+                  <span style="
+                    width:26px;
+                    height:26px;
+                    border-radius:50%;
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    background:${isToday ? '#6c5ce7' : 'transparent'};
+                    color:#fff;
+                    font-size:12px;
+                    font-weight:${isToday ? '800' : '500'};
+                  ">
+                    ${cell.day}
+                  </span>
+
+                  ${posts.length ? `
+                    <span style="
+                      background:#6c5ce7;
+                      color:#fff;
+                      min-width:20px;
+                      height:20px;
+                      border-radius:10px;
+                      display:inline-flex;
+                      align-items:center;
+                      justify-content:center;
+                      font-size:10px;
+                      font-weight:700;
+                    ">
+                      ${posts.length}
+                    </span>
+                  ` : ''}
+
+                </div>
+
+                ${posts.slice(0,2).map(post => `
+                  <div style="
+                    background:#1e1e2e;
+                    border-left:3px solid #6c5ce7;
+                    padding:5px 6px;
+                    margin-top:4px;
+                    border-radius:5px;
+                    overflow:hidden;
+                  ">
+                    <div style="
+                      color:#fff;
+                      font-size:10px;
+                      white-space:nowrap;
+                      overflow:hidden;
+                      text-overflow:ellipsis;
+                    ">
+                      ${escapeHTML(post.caption || 'Untitled post')}
+                    </div>
+
+                    <div style="
+                      color:#6a708a;
+                      font-size:9px;
+                      margin-top:2px;
+                    ">
+                      ${formatDate(post.scheduledAt)}
+                    </div>
+                  </div>
+                `).join('')}
+
+                ${posts.length > 2 ? `
+                  <div style="
+                    color:#6c5ce7;
+                    font-size:9px;
+                    margin-top:4px;
+                  ">
+                    +${posts.length - 2} more
+                  </div>
+                ` : ''}
+
+              </button>
+            `;
+          }).join('')}
+
+        </div>
+      </div>
+
+      <div
+        id="calendar-selected-posts"
+        style="margin-top:18px;"
+      >
+        ${renderSelectedCalendarPosts(selectedKey)}
+      </div>
+
+    </div>
+  `;
+
+  bindCalendarEvents();
+}
+
+/* ---------- Selected Date Posts ---------- */
+
+function renderSelectedCalendarPosts(dateKey) {
+  const posts = state.posts.filter(post => {
+    if (post.status !== 'scheduled' || !post.scheduledAt) {
+      return false;
+    }
+
+    return calendarKey(new Date(post.scheduledAt)) === dateKey;
+  });
+
+  const date = new Date(`${dateKey}T00:00:00`);
+
+  if (!posts.length) {
+    return `
+      <div style="
+        background:#15151f;
+        border:1px dashed #2a2a3a;
+        border-radius:16px;
+        padding:24px;
+        text-align:center;
+        color:#6a708a;
+      ">
+        No scheduled posts for
+        <strong style="color:#fff;">
+          ${escapeHTML(
+            date.toLocaleDateString('en-KE', {
+              weekday:'long',
+              month:'long',
+              day:'numeric',
+              year:'numeric'
+            })
+          )}
+        </strong>.
+      </div>
+    `;
+  }
+
+  return `
+    <div style="
+      background:#15151f;
+      border:1px solid #2a2a3a;
+      border-radius:16px;
+      padding:18px;
+    ">
+
+      <h3 style="
+        margin:0 0 14px;
+        color:#fff;
+        font-size:16px;
+      ">
+        Scheduled Posts
+      </h3>
+
+      <div style="
+        display:grid;
+        gap:12px;
+      ">
+        ${posts.map(post => `
+          <div style="
+            background:#1a1a24;
+            border:1px solid #2a2a3a;
+            border-radius:12px;
+            padding:14px;
+          ">
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              gap:10px;
+              flex-wrap:wrap;
+            ">
+
+              <div style="flex:1;min-width:200px;">
+
+                <div style="
+                  color:#fff;
+                  font-size:14px;
+                  line-height:1.5;
+                  white-space:pre-wrap;
+                ">
+                  ${escapeHTML(post.caption)}
+                </div>
+
+                ${post.hashtags ? `
+                  <div style="
+                    color:#6c5ce7;
+                    font-size:12px;
+                    margin-top:5px;
+                  ">
+                    ${escapeHTML(post.hashtags)}
+                  </div>
+                ` : ''}
+
+                <div style="
+                  color:#6a708a;
+                  font-size:11px;
+                  margin-top:8px;
+                ">
+                  Scheduled:
+                  ${formatDate(post.scheduledAt)}
+                </div>
+
+              </div>
+
+              <div style="
+                display:flex;
+                gap:7px;
+                align-items:flex-start;
+                flex-wrap:wrap;
+              ">
+
+                <button
+                  class="btn-edit"
+                  data-id="${escapeHTML(post.id)}"
+                  style="
+                    background:#1e1e2e;
+                    border:1px solid #2a2a3a;
+                    color:#fff;
+                    padding:7px 11px;
+                    border-radius:8px;
+                    cursor:pointer;
+                  "
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="btn-publish-now"
+                  data-id="${escapeHTML(post.id)}"
+                  style="
+                    background:#6c5ce7;
+                    border:none;
+                    color:#fff;
+                    padding:7px 11px;
+                    border-radius:8px;
+                    cursor:pointer;
+                  "
+                >
+                  Publish Now
+                </button>
+
+                <button
+                  class="btn-delete"
+                  data-id="${escapeHTML(post.id)}"
+                  style="
+                    background:#2a1a1a;
+                    border:1px solid #3a2a2a;
+                    color:#ff6b6b;
+                    padding:7px 11px;
+                    border-radius:8px;
+                    cursor:pointer;
+                  "
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Calendar Events ---------- */
+
+function bindCalendarEvents() {
+  if (window.__POSTX_CALENDAR_BOUND) {
+    return;
+  }
+
+  window.__POSTX_CALENDAR_BOUND = true;
+
+  document.addEventListener('click', e => {
+
+    const day = e.target.closest('.calendar-day');
+
+    if (day) {
+      const dateKey = day.dataset.date;
+
+      if (dateKey) {
+        selectCalendarDate(
+          new Date(`${dateKey}T00:00:00`)
+        );
+      }
+
+      return;
+    }
+
+    const prev = e.target.closest('#calendar-prev');
+
+    if (prev) {
+      changeCalendarMonth(-1);
+      return;
+    }
+
+    const next = e.target.closest('#calendar-next');
+
+    if (next) {
+      changeCalendarMonth(1);
+      return;
+    }
+
+    const today = e.target.closest('#calendar-today');
+
+    if (today) {
+      goToCalendarToday();
+      return;
+    }
+  });
+}
+
+/* ---------- Calendar Initialization ---------- */
+
+function initializeCalendarState() {
+  if (!(state.calendarDate instanceof Date)) {
+    state.calendarDate = new Date();
+  }
+
+  if (isNaN(state.calendarDate.getTime())) {
+    state.calendarDate = new Date();
+  }
+
+  if (!state.selectedCalendarDate) {
+    state.selectedCalendarDate = calendarKey(new Date());
+  }
+}
