@@ -183,3 +183,374 @@ function saveState() {
     }
   }
 }
+
+/* =========================================================
+   POSTX v2.0
+   PART 2 — NAVIGATION, ROUTING & RENDER ENGINE
+   ========================================================= */
+
+/* ================= 8. NAVIGATION & ROUTING ================= */
+
+const VALID_PAGES = [
+  'dashboard',
+  'create',
+  'scheduled',
+  'drafts',
+  'published',
+  'calendar'
+];
+
+function sanitizePage(page) {
+  return VALID_PAGES.includes(page) ? page : 'dashboard';
+}
+
+function navigate(page) {
+  try {
+    const targetPage = sanitizePage(page);
+
+    state.activePage = targetPage;
+
+    /* Validate editing post reference */
+    if (
+      state.editingPostId &&
+      !state.posts.some(post => post.id === state.editingPostId)
+    ) {
+      state.editingPostId = null;
+    }
+
+    saveState();
+    render();
+    closeMobileDrawer();
+
+  } catch (error) {
+    console.error('[PostX] Navigation error:', error);
+  }
+}
+
+
+/* ================= 8.1 ACTIVE NAVIGATION STATE ================= */
+
+function updateNavActiveState() {
+  const currentPage = sanitizePage(state.activePage);
+
+  $$('[data-page]').forEach(element => {
+    const page = element.dataset.page;
+    const active = page === currentPage;
+
+    element.classList.toggle('active', active);
+
+    if (
+      element.tagName === 'BUTTON' ||
+      element.tagName === 'A'
+    ) {
+      if (active) {
+        element.setAttribute('aria-current', 'page');
+      } else {
+        element.removeAttribute('aria-current');
+      }
+    }
+  });
+}
+
+
+/* ================= 8.2 MOBILE DRAWER ================= */
+
+function closeMobileDrawer() {
+  const drawer =
+    safeEl('mobile-drawer') ||
+    $('.mobile-drawer') ||
+    safeEl('sidebar-drawer');
+
+  if (drawer) {
+    drawer.classList.remove(
+      'open',
+      'active',
+      'show'
+    );
+  }
+
+  const overlay =
+    $('.drawer-overlay') ||
+    safeEl('drawer-overlay');
+
+  if (overlay) {
+    overlay.classList.remove(
+      'open',
+      'active',
+      'show'
+    );
+  }
+
+  document.body.classList.remove(
+    'drawer-open',
+    'mobile-menu-open'
+  );
+}
+
+
+/* ================= 8.3 TOGGLE MOBILE DRAWER ================= */
+
+function toggleMobileDrawer() {
+  const drawer =
+    safeEl('mobile-drawer') ||
+    $('.mobile-drawer') ||
+    safeEl('sidebar-drawer');
+
+  if (!drawer) return;
+
+  const isOpen =
+    drawer.classList.contains('open');
+
+  if (isOpen) {
+    closeMobileDrawer();
+  } else {
+    drawer.classList.add('open');
+    document.body.classList.add('drawer-open');
+  }
+}
+
+
+/* ================= 9. GUARDED NAVIGATION EVENTS ================= */
+
+function bindNavigation() {
+
+  if (window.__POSTX_NAV_BOUND) {
+    return;
+  }
+
+  window.__POSTX_NAV_BOUND = true;
+
+
+  /* ---------- CLICK EVENTS ---------- */
+
+  document.addEventListener('click', event => {
+
+    /* Navigation */
+    const navTrigger =
+      event.target.closest('[data-page]');
+
+    if (navTrigger) {
+      const page =
+        navTrigger.dataset.page;
+
+      if (page) {
+        event.preventDefault();
+        navigate(page);
+        return;
+      }
+    }
+
+
+    /* Mobile menu button */
+    const drawerToggle =
+      event.target.closest(
+        '#mobile-drawer-toggle,' +
+        '.mobile-menu-btn,' +
+        '[data-drawer-toggle]'
+      );
+
+    if (drawerToggle) {
+      event.preventDefault();
+      toggleMobileDrawer();
+      return;
+    }
+
+
+    /* Drawer backdrop */
+    const clickedBackdrop =
+      event.target.matches(
+        '.drawer-overlay,' +
+        '#drawer-overlay,' +
+        '.mobile-drawer-backdrop'
+      );
+
+    if (clickedBackdrop) {
+      closeMobileDrawer();
+    }
+
+  });
+
+
+  /* ---------- KEYBOARD EVENTS ---------- */
+
+  document.addEventListener('keydown', event => {
+
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    /* Close active modal first */
+    if (
+      typeof activeModal !== 'undefined' &&
+      activeModal
+    ) {
+      if (
+        typeof closeModal === 'function'
+      ) {
+        closeModal();
+      }
+
+      return;
+    }
+
+    /* Otherwise close mobile drawer */
+    closeMobileDrawer();
+
+  });
+}
+
+
+/* ================= 10. SINGLE RENDER ROUTER ================= */
+
+function render() {
+
+  try {
+
+    /* ---------- Validate active page ---------- */
+
+    state.activePage =
+      sanitizePage(state.activePage);
+
+
+    /* ---------- Validate editing post ---------- */
+
+    if (
+      state.editingPostId &&
+      !state.posts.some(
+        post => post.id === state.editingPostId
+      )
+    ) {
+      state.editingPostId = null;
+    }
+
+
+    const activePage =
+      state.activePage;
+
+
+    /* ---------- Page visibility ---------- */
+
+    VALID_PAGES.forEach(pageId => {
+
+      const pageElement =
+        safeEl(`${pageId}-page`) ||
+        $(`[data-page-content="${pageId}"]`);
+
+      if (!pageElement) {
+        return;
+      }
+
+      pageElement.style.display =
+        pageId === activePage
+          ? 'block'
+          : 'none';
+
+    });
+
+
+    /* ---------- Page renderer ---------- */
+
+    switch (activePage) {
+
+      case 'dashboard':
+
+        if (
+          typeof renderDashboard === 'function'
+        ) {
+          renderDashboard();
+        }
+
+        break;
+
+
+      case 'create':
+
+        if (
+          typeof renderComposer === 'function'
+        ) {
+          renderComposer();
+        }
+
+        break;
+
+
+      case 'scheduled':
+
+        if (
+          typeof renderScheduled === 'function'
+        ) {
+          renderScheduled();
+        }
+
+        break;
+
+
+      case 'drafts':
+
+        if (
+          typeof renderDrafts === 'function'
+        ) {
+          renderDrafts();
+        }
+
+        break;
+
+
+      case 'published':
+
+        if (
+          typeof renderPublished === 'function'
+        ) {
+          renderPublished();
+        }
+
+        break;
+
+
+      case 'calendar':
+
+        if (
+          typeof renderCalendar === 'function'
+        ) {
+          renderCalendar();
+        }
+
+        break;
+
+
+      default:
+
+        state.activePage = 'dashboard';
+
+        if (
+          typeof renderDashboard === 'function'
+        ) {
+          renderDashboard();
+        }
+
+        break;
+
+    }
+
+
+    /* ---------- Update navigation ---------- */
+
+    updateNavActiveState();
+
+
+  } catch (error) {
+
+    console.error(
+      '[PostX] Render error:',
+      error
+    );
+
+  }
+
+}
+
+
+/* ================= 10.1 INITIALIZE PART 2 ================= */
+
+bindNavigation();
+render();
