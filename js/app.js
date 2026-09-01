@@ -5268,3 +5268,846 @@ function initializeCalendarState() {
     state.selectedCalendarDate = calendarKey(new Date());
   }
 }
+
+/* =========================================================
+   POSTX v2.0 — PART 9
+   CALENDAR ENGINE
+   ========================================================= */
+
+const CALENDAR = {
+  initialized: false
+};
+
+/* ================= 9.1 CALENDAR HELPERS ================= */
+
+function initializeCalendar() {
+  if (!(state.calendarDate instanceof Date) ||
+      isNaN(state.calendarDate.getTime())) {
+    state.calendarDate = new Date();
+  }
+
+  if (!('selectedCalendarDate' in state)) {
+    state.selectedCalendarDate = null;
+  }
+}
+
+function getCalendarDate(post) {
+  if (!post || typeof post !== 'object') return null;
+
+  const value =
+    post.scheduledAt ||
+    post.publishedAt ||
+    post.createdAt;
+
+  if (!value || !isValidDateString(value)) return null;
+
+  const date = new Date(value);
+
+  return isNaN(date.getTime()) ? null : date;
+}
+
+function getCalendarPosts(year, month) {
+  return safeArray(state.posts).filter(post => {
+    const date = getCalendarDate(post);
+
+    if (!date) return false;
+
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() === month
+    );
+  });
+}
+
+function getCalendarDayPosts(year, month, day) {
+  return getCalendarPosts(year, month).filter(post => {
+    const date = getCalendarDate(post);
+
+    return date && date.getDate() === day;
+  });
+}
+
+function getCalendarMonthLabel(year, month) {
+  return new Date(year, month, 1).toLocaleDateString('en-KE', {
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function isCalendarToday(year, month, day) {
+  const today = new Date();
+
+  return (
+    today.getFullYear() === year &&
+    today.getMonth() === month &&
+    today.getDate() === day
+  );
+}
+
+/* ================= 9.2 CALENDAR RENDER ================= */
+
+function renderCalendar() {
+  try {
+    const page =
+      safeEl('calendar-page') ||
+      $('[data-page-content="calendar"]');
+
+    if (!page) return;
+
+    initializeCalendar();
+
+    const current = state.calendarDate;
+
+    const year = current.getFullYear();
+    const month = current.getMonth();
+
+    const firstDay =
+      new Date(year, month, 1).getDay();
+
+    const daysInMonth =
+      new Date(year, month + 1, 0).getDate();
+
+    const monthPosts =
+      getCalendarPosts(year, month);
+
+    let html = `
+      <div class="postx-calendar">
+
+        <!-- HEADER -->
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:12px;
+          flex-wrap:wrap;
+          margin-bottom:20px;
+        ">
+
+          <div>
+            <h2 style="
+              margin:0;
+              color:#fff;
+              font-size:22px;
+              font-weight:800;
+            ">
+              Content Calendar
+            </h2>
+
+            <div style="
+              color:#6a708a;
+              font-size:12px;
+              margin-top:5px;
+            ">
+              ${monthPosts.length}
+              post${monthPosts.length === 1 ? '' : 's'}
+              this month
+            </div>
+          </div>
+
+          <div style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+          ">
+
+            <button
+              type="button"
+              class="calendar-control"
+              data-calendar-action="previous"
+              aria-label="Previous month"
+              style="
+                width:40px;
+                height:40px;
+                border-radius:10px;
+                border:1px solid #2a2a3a;
+                background:#1a1a24;
+                color:#fff;
+                cursor:pointer;
+                font-size:20px;
+              "
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              class="calendar-control"
+              data-calendar-action="today"
+              style="
+                padding:10px 14px;
+                border-radius:10px;
+                border:1px solid #2a2a3a;
+                background:#1e1e2e;
+                color:#fff;
+                cursor:pointer;
+                font-weight:600;
+              "
+            >
+              Today
+            </button>
+
+            <button
+              type="button"
+              class="calendar-control"
+              data-calendar-action="next"
+              aria-label="Next month"
+              style="
+                width:40px;
+                height:40px;
+                border-radius:10px;
+                border:1px solid #2a2a3a;
+                background:#1a1a24;
+                color:#fff;
+                cursor:pointer;
+                font-size:20px;
+              "
+            >
+              ›
+            </button>
+
+          </div>
+        </div>
+
+        <!-- MONTH TITLE -->
+        <div style="
+          color:#fff;
+          font-size:18px;
+          font-weight:700;
+          margin-bottom:12px;
+        ">
+          ${escapeHTML(
+            getCalendarMonthLabel(year, month)
+          )}
+        </div>
+
+        <!-- WEEK DAYS -->
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(7,minmax(0,1fr));
+          gap:6px;
+          margin-bottom:6px;
+        ">
+
+          ${[
+            'Sun',
+            'Mon',
+            'Tue',
+            'Wed',
+            'Thu',
+            'Fri',
+            'Sat'
+          ].map(day => `
+            <div style="
+              text-align:center;
+              padding:7px 2px;
+              color:#6a708a;
+              font-size:10px;
+              font-weight:700;
+              text-transform:uppercase;
+            ">
+              ${day}
+            </div>
+          `).join('')}
+
+        </div>
+
+        <!-- CALENDAR GRID -->
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(7,minmax(0,1fr));
+          gap:6px;
+        ">
+    `;
+
+    /* Empty cells before first day */
+    for (let i = 0; i < firstDay; i++) {
+      html += `
+        <div style="
+          min-height:95px;
+          background:#101019;
+          border:1px solid #1d1d29;
+          border-radius:10px;
+        "></div>
+      `;
+    }
+
+    /* Days */
+    for (let day = 1; day <= daysInMonth; day++) {
+
+      const posts =
+        getCalendarDayPosts(year, month, day);
+
+      const today =
+        isCalendarToday(year, month, day);
+
+      html += `
+        <button
+          type="button"
+          class="calendar-day"
+          data-calendar-day="${day}"
+          style="
+            min-height:95px;
+            width:100%;
+            text-align:left;
+            background:${today ? '#18152d' : '#15151f'};
+            border:1px solid ${today ? '#6c5ce7' : '#2a2a3a'};
+            border-radius:10px;
+            padding:8px;
+            cursor:pointer;
+            color:#fff;
+            overflow:hidden;
+          "
+        >
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:6px;
+          ">
+
+            <span style="
+              font-size:12px;
+              font-weight:${today ? '800' : '600'};
+              color:${today ? '#fff' : '#9aa0b4'};
+            ">
+              ${day}
+            </span>
+
+            ${
+              posts.length
+                ? `
+                  <span style="
+                    min-width:20px;
+                    height:20px;
+                    padding:0 5px;
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    border-radius:10px;
+                    background:#6c5ce7;
+                    color:#fff;
+                    font-size:10px;
+                    font-weight:700;
+                  ">
+                    ${posts.length}
+                  </span>
+                `
+                : ''
+            }
+
+          </div>
+
+          <div style="
+            display:flex;
+            flex-direction:column;
+            gap:4px;
+          ">
+
+            ${posts.slice(0, 3).map(post => {
+
+              const statusColor =
+                post.status === 'published'
+                  ? '#25D366'
+                  : post.status === 'scheduled'
+                    ? '#6c5ce7'
+                    : '#6a708a';
+
+              return `
+                <div
+                  class="calendar-post"
+                  data-post-id="${escapeHTML(post.id)}"
+                  style="
+                    border-left:3px solid ${statusColor};
+                    background:#1a1a24;
+                    border-radius:5px;
+                    padding:4px 6px;
+                    color:#cfd2df;
+                    font-size:10px;
+                    line-height:1.3;
+                    white-space:nowrap;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                  "
+                >
+                  ${escapeHTML(
+                    post.caption || '(No caption)'
+                  )}
+                </div>
+              `;
+
+            }).join('')}
+
+            ${
+              posts.length > 3
+                ? `
+                  <div style="
+                    color:#6a708a;
+                    font-size:10px;
+                    padding-left:4px;
+                  ">
+                    +${posts.length - 3} more
+                  </div>
+                `
+                : ''
+            }
+
+          </div>
+
+        </button>
+      `;
+    }
+
+    html += `
+        </div>
+
+        <!-- LEGEND -->
+        <div style="
+          display:flex;
+          gap:16px;
+          flex-wrap:wrap;
+          margin-top:18px;
+          padding:14px;
+          background:#15151f;
+          border:1px solid #2a2a3a;
+          border-radius:12px;
+        ">
+
+          <span style="
+            color:#9aa0b4;
+            font-size:11px;
+          ">
+            <b style="color:#6c5ce7;">●</b>
+            Scheduled
+          </span>
+
+          <span style="
+            color:#9aa0b4;
+            font-size:11px;
+          ">
+            <b style="color:#25D366;">●</b>
+            Published
+          </span>
+
+          <span style="
+            color:#9aa0b4;
+            font-size:11px;
+          ">
+            <b style="color:#6a708a;">●</b>
+            Draft
+          </span>
+
+        </div>
+
+      </div>
+    `;
+
+    page.innerHTML = html;
+
+    bindCalendarEvents();
+
+  } catch (err) {
+    console.error(
+      '[PostX Calendar Render Error]',
+      err
+    );
+  }
+}
+
+/* ================= 9.3 GUARDED CALENDAR EVENTS ================= */
+
+function bindCalendarEvents() {
+
+  const page =
+    safeEl('calendar-page') ||
+    $('[data-page-content="calendar"]');
+
+  if (!page) return;
+
+  /*
+   * Event delegation:
+   * Only ONE listener is attached to the calendar page.
+   * Re-rendering the calendar therefore cannot create
+   * duplicate event listeners.
+   */
+
+  if (page.dataset.calendarEventsBound === 'true') {
+    return;
+  }
+
+  page.dataset.calendarEventsBound = 'true';
+
+  page.addEventListener('click', handleCalendarClick);
+}
+
+function handleCalendarClick(e) {
+
+  const actionButton =
+    e.target.closest('[data-calendar-action]');
+
+  if (actionButton) {
+
+    const action =
+      actionButton.dataset.calendarAction;
+
+    if (action === 'previous') {
+      changeCalendarMonth(-1);
+      return;
+    }
+
+    if (action === 'next') {
+      changeCalendarMonth(1);
+      return;
+    }
+
+    if (action === 'today') {
+      goToCalendarToday();
+      return;
+    }
+  }
+
+  const postElement =
+    e.target.closest('.calendar-post');
+
+  if (postElement) {
+
+    e.stopPropagation();
+
+    const postId =
+      postElement.dataset.postId;
+
+    if (postId) {
+      openCalendarPost(postId);
+    }
+
+    return;
+  }
+
+  const dayElement =
+    e.target.closest('.calendar-day');
+
+  if (dayElement) {
+
+    const day =
+      Number(dayElement.dataset.calendarDay);
+
+    if (!day) return;
+
+    selectCalendarDay(day);
+  }
+}
+
+/* ================= 9.4 MONTH NAVIGATION ================= */
+
+function changeCalendarMonth(offset) {
+
+  initializeCalendar();
+
+  const current = state.calendarDate;
+
+  state.calendarDate = new Date(
+    current.getFullYear(),
+    current.getMonth() + offset,
+    1
+  );
+
+  state.selectedCalendarDate = null;
+
+  renderCalendar();
+}
+
+function goToCalendarToday() {
+
+  const today = new Date();
+
+  state.calendarDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+
+  state.selectedCalendarDate =
+    today.toISOString();
+
+  renderCalendar();
+}
+
+/* ================= 9.5 DAY SELECTION ================= */
+
+function selectCalendarDay(day) {
+
+  initializeCalendar();
+
+  const current =
+    state.calendarDate;
+
+  const selectedDate = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    day
+  );
+
+  state.selectedCalendarDate =
+    selectedDate.toISOString();
+
+  const posts =
+    getCalendarDayPosts(
+      current.getFullYear(),
+      current.getMonth(),
+      day
+    );
+
+  if (posts.length) {
+
+    showCalendarDayModal(
+      current.getFullYear(),
+      current.getMonth(),
+      day,
+      posts
+    );
+
+    return;
+  }
+
+  /*
+   * No posts on selected day:
+   * prepare composer for a new scheduled post.
+   */
+
+  state.editingPostId = null;
+
+  state.composer = {
+    caption: '',
+    hashtags: '',
+    media: '',
+    platforms: [],
+    scheduledAt: toLocalDateTimeInput(selectedDate)
+  };
+
+  navigate('create');
+}
+
+/* ================= 9.6 DATE INPUT HELPER ================= */
+
+function toLocalDateTimeInput(date) {
+
+  if (!(date instanceof Date) ||
+      isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = value =>
+    String(value).padStart(2, '0');
+
+  return (
+    date.getFullYear() +
+    '-' +
+    pad(date.getMonth() + 1) +
+    '-' +
+    pad(date.getDate()) +
+    'T' +
+    pad(date.getHours()) +
+    ':' +
+    pad(date.getMinutes())
+  );
+}
+
+/* ================= 9.7 OPEN CALENDAR POST ================= */
+
+function openCalendarPost(postId) {
+
+  const post =
+    state.posts.find(
+      p => p.id === postId
+    );
+
+  if (!post) {
+    showToast(
+      'Post could not be found',
+      'error'
+    );
+    return;
+  }
+
+  /*
+   * Use the existing editor if Part 5/6
+   * provides editPost().
+   */
+
+  if (typeof editPost === 'function') {
+    editPost(postId);
+    return;
+  }
+
+  /*
+   * Safe fallback if editPost() is not available.
+   */
+
+  state.editingPostId = postId;
+
+  state.composer = {
+    caption: post.caption || '',
+    hashtags: post.hashtags || '',
+    media: post.media || '',
+    platforms: safeArray(post.platforms),
+    scheduledAt:
+      post.scheduledAt
+        ? toLocalDateTimeInput(
+            new Date(post.scheduledAt)
+          )
+        : ''
+  };
+
+  navigate('create');
+}
+
+/* ================= 9.8 DAY MODAL ================= */
+
+function showCalendarDayModal(
+  year,
+  month,
+  day,
+  posts
+) {
+
+  const dateLabel =
+    new Date(year, month, day)
+      .toLocaleDateString('en-KE', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+  const body = `
+    <div style="
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    ">
+
+      ${posts.map(post => {
+
+        const date =
+          getCalendarDate(post);
+
+        return `
+          <button
+            type="button"
+            class="calendar-modal-post"
+            data-post-id="${escapeHTML(post.id)}"
+            style="
+              width:100%;
+              text-align:left;
+              padding:12px;
+              background:#1a1a24;
+              border:1px solid #2a2a3a;
+              border-radius:10px;
+              cursor:pointer;
+              color:#fff;
+            "
+          >
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              gap:8px;
+              margin-bottom:5px;
+            ">
+
+              <strong style="
+                color:#fff;
+                font-size:12px;
+              ">
+                ${escapeHTML(
+                  post.status.toUpperCase()
+                )}
+              </strong>
+
+              <span style="
+                color:#6a708a;
+                font-size:10px;
+              ">
+                ${
+                  date
+                    ? escapeHTML(
+                        formatDate(
+                          date.toISOString()
+                        )
+                      )
+                    : '—'
+                }
+              </span>
+
+            </div>
+
+            <div style="
+              color:#9aa0b4;
+              font-size:12px;
+              line-height:1.5;
+            ">
+              ${escapeHTML(
+                post.caption || '(No caption)'
+              )}
+            </div>
+
+          </button>
+        `;
+
+      }).join('')}
+
+    </div>
+  `;
+
+  openModal({
+    title: dateLabel,
+    body,
+    actions: [
+      {
+        label: 'Close',
+        variant: 'secondary'
+      }
+    ]
+  });
+
+  /*
+   * Modal posts are dynamically generated.
+   * Use one delegated listener on the modal box.
+   */
+
+  const root =
+    safeEl('postx-modal-root');
+
+  const box =
+    root?.querySelector(
+      '.postx-modal-box'
+    );
+
+  if (!box) return;
+
+  if (box.dataset.calendarModalBound === 'true') {
+    return;
+  }
+
+  box.dataset.calendarModalBound = 'true';
+
+  box.addEventListener('click', e => {
+
+    const item =
+      e.target.closest(
+        '.calendar-modal-post'
+      );
+
+    if (!item) return;
+
+    const postId =
+      item.dataset.postId;
+
+    closeModal();
+
+    if (postId) {
+      openCalendarPost(postId);
+    }
+
+  });
+}
