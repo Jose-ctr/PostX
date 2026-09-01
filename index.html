@@ -10,7 +10,12 @@
 
   <meta
     name="theme-color"
-    content="#0f172a"
+    content="#070D18"
+  >
+
+  <meta
+    name="color-scheme"
+    content="dark"
   >
 
   <meta
@@ -40,74 +45,100 @@
 
   <title>PostX - Smart Social Media Publisher</title>
 
+  <!-- PWA -->
   <link
     rel="manifest"
     href="manifest.json"
   >
 
+  <!-- PostX stylesheet -->
   <link
     rel="stylesheet"
-    href="css/style.css"
+    href="css/style.css?v=9"
   >
 
+  <!-- Original PostX brand icon -->
   <link
     rel="icon"
     href="assets/icons/icon-192.png"
     type="image/png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="assets/icons/icon-192.png"
   >
 </head>
 
 <body>
 
   <!--
-  =========================================================
+    =====================================================
                          POSTX
               Smart Social Media Publisher
-  =========================================================
+    =====================================================
 
-  The application interface is created by:
+    Main application container.
 
-      js/app.js
-
-  Keeping this HTML foundation intentionally lightweight
-  allows the JavaScript application engine to control:
-
-      - Navigation
-      - Dashboard
-      - Create Post
-      - Drafts
-      - Scheduled Posts
-      - Published Posts
-      - Calendar
-      - LocalStorage
-      - Mobile navigation
-      - PWA behavior
-
-  =========================================================
+    js/app.js controls:
+    - Dashboard
+    - Navigation
+    - Create Post
+    - Drafts
+    - Scheduled Posts
+    - Published Posts
+    - Calendar
+    - LocalStorage
+    - Mobile navigation
+    - PWA functionality
   -->
 
   <div id="postx-app"></div>
 
+  <!-- JavaScript disabled message -->
   <noscript>
     <div
       style="
-        max-width:600px;
-        margin:60px auto;
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
         padding:24px;
-        font-family:system-ui,sans-serif;
+        background:#070D18;
+        color:#F4F8FC;
+        font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
         text-align:center;
       "
     >
-      <h1>PostX</h1>
+      <div
+        style="
+          width:100%;
+          max-width:480px;
+          padding:32px 24px;
+          background:#101B2D;
+          border:1px solid rgba(42,229,255,.15);
+          border-radius:20px;
+        "
+      >
+        <h1 style="margin:0 0 10px;">
+          PostX
+        </h1>
 
-      <p>
-        JavaScript is required to use PostX.
-        Please enable JavaScript in your browser
-        and reload the application.
-      </p>
+        <p
+          style="
+            margin:0;
+            color:#94A3B8;
+            line-height:1.6;
+          "
+        >
+          JavaScript is required to use PostX.
+          Please enable JavaScript and reload the application.
+        </p>
+      </div>
     </div>
   </noscript>
 
+  <!-- PostX application engine -->
   <script
     src="js/app.js"
     defer
