@@ -8402,3 +8402,471 @@ if (!window.__POSTX_PROFILE_ENGINE_INITIALIZED) {
 /* =========================================================
    END OF POSTX v2.0 — PART 11
    ========================================================= */
+
+/* =========================================================
+   POSTX v2.0 — PART 12
+   FINAL INTEGRATION, VALIDATION & INITIALIZATION
+   ---------------------------------------------------------
+   Responsibilities:
+   - Final state validation
+   - Safe initialization
+   - Single startup execution
+   - Storage recovery
+   - Navigation binding
+   - Initial rendering
+   - Scheduled-post maintenance
+   - Final runtime safety
+   ========================================================= */
+
+/* ================= 12.1 FINAL RUNTIME CONFIG ================= */
+
+const POSTX_FINAL = {
+  initialized: false,
+  version: '2.0.0',
+  startupKey: '__POSTX_FINAL_STARTED',
+  maxPosts: 500
+};
+
+
+/* ================= 12.2 FINAL STATE VALIDATION ================= */
+
+function validateFinalState() {
+  try {
+    if (!state || typeof state !== 'object') {
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+
+    if (!Array.isArray(state.posts)) {
+      state.posts = [];
+    }
+
+    state.posts = normalizePosts(state.posts);
+
+    if (!state.connectedAccounts ||
+        typeof state.connectedAccounts !== 'object') {
+      state.connectedAccounts = {
+        facebook: false,
+        instagram: false,
+        x: false
+      };
+    }
+
+    state.connectedAccounts = {
+      facebook: Boolean(state.connectedAccounts.facebook),
+      instagram: Boolean(state.connectedAccounts.instagram),
+      x: Boolean(state.connectedAccounts.x)
+    };
+
+    if (!state.profile || typeof state.profile !== 'object') {
+      state.profile = {
+        name: DEFAULT_STATE.profile.name,
+        email: DEFAULT_STATE.profile.email
+      };
+    }
+
+    state.profile = {
+      name: String(state.profile.name || DEFAULT_STATE.profile.name),
+      email: String(state.profile.email || '')
+    };
+
+    state.activePage = sanitizePage(state.activePage);
+
+    if (
+      state.editingPostId &&
+      !state.posts.some(post => post.id === state.editingPostId)
+    ) {
+      state.editingPostId = null;
+    }
+
+    /*
+     * Prevent uncontrolled localStorage growth.
+     * Keep the newest posts only if an abnormal number
+     * of records somehow enters the application.
+     */
+    if (state.posts.length > POSTX_FINAL.maxPosts) {
+      state.posts.sort(
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt).getTime() -
+          new Date(a.updatedAt || a.createdAt).getTime()
+      );
+
+      state.posts = state.posts.slice(0, POSTX_FINAL.maxPosts);
+
+      showToast(
+        `Post limit reached. Keeping the ${POSTX_FINAL.maxPosts} newest posts.`,
+        'warning'
+      );
+    }
+
+    return true;
+
+  } catch (err) {
+    console.error('[PostX] Final state validation failed:', err);
+
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+    return false;
+  }
+}
+
+
+/* ================= 12.3 SCHEDULE MAINTENANCE ================= */
+
+function maintainScheduledPosts() {
+  try {
+    if (!Array.isArray(state.posts)) return;
+
+    let changed = false;
+
+    state.posts = state.posts.map(post => {
+      if (!post || typeof post !== 'object') return post;
+
+      /*
+       * Scheduled posts remain scheduled.
+       * The frontend does NOT falsely claim that an API
+       * published them. Real automatic publishing requires
+       * the future backend/API engine.
+       */
+      if (post.status === 'scheduled') {
+
+        if (!post.scheduledAt || !isValidDateString(post.scheduledAt)) {
+          changed = true;
+
+          return {
+            ...post,
+            status: 'draft',
+            scheduledAt: null,
+            updatedAt: nowISO()
+          };
+        }
+      }
+
+      return post;
+    });
+
+    if (changed) {
+      state.posts = normalizePosts(state.posts);
+      saveState();
+    }
+
+  } catch (err) {
+    console.error('[PostX] Schedule maintenance error:', err);
+  }
+}
+
+
+/* ================= 12.4 STORAGE HEALTH CHECK ================= */
+
+function checkStorageHealth() {
+  try {
+    const testKey = '__postx_storage_test__';
+    const testValue = 'ok';
+
+    localStorage.setItem(testKey, testValue);
+
+    const result = localStorage.getItem(testKey);
+
+    localStorage.removeItem(testKey);
+
+    return result === testValue;
+
+  } catch (err) {
+    console.warn('[PostX] LocalStorage unavailable:', err);
+
+    try {
+      showToast(
+        'Local storage is unavailable. Your changes may not persist.',
+        'warning',
+        5000
+      );
+    } catch {}
+
+    return false;
+  }
+}
+
+
+/* ================= 12.5 FINAL DOM SAFETY ================= */
+
+function ensurePostXRoot() {
+  try {
+    /*
+     * Most PostX installations already have their page
+     * containers in index.html. This function only verifies
+     * the DOM and never destroys existing markup.
+     */
+
+    const requiredPages = [
+      'dashboard',
+      'create',
+      'scheduled',
+      'drafts',
+      'published',
+      'calendar'
+    ];
+
+    const existingPages = requiredPages.filter(page => {
+      return safeEl(`${page}-page`) ||
+             document.querySelector(`[data-page-content="${page}"]`);
+    });
+
+    if (!existingPages.length) {
+      console.warn(
+        '[PostX] No page containers detected. Check index.html.'
+      );
+      return false;
+    }
+
+    return true;
+
+  } catch (err) {
+    console.error('[PostX] DOM validation failed:', err);
+    return false;
+  }
+}
+
+
+/* ================= 12.6 FINAL ERROR HANDLING ================= */
+
+function installGlobalErrorHandlers() {
+
+  if (window.__POSTX_ERROR_HANDLERS) return;
+  window.__POSTX_ERROR_HANDLERS = true;
+
+  window.addEventListener('error', event => {
+    console.error(
+      '[PostX Runtime Error]',
+      event.error || event.message
+    );
+  });
+
+  window.addEventListener('unhandledrejection', event => {
+    console.error(
+      '[PostX Promise Error]',
+      event.reason
+    );
+  });
+}
+
+
+/* ================= 12.7 PAGE VISIBILITY HANDLING ================= */
+
+function handlePageVisibility() {
+  if (document.hidden) return;
+
+  try {
+    /*
+     * Revalidate state when the user returns to the app.
+     * This helps when another browser tab changed storage.
+     */
+    loadState();
+    validateFinalState();
+    render();
+
+  } catch (err) {
+    console.error(
+      '[PostX] Visibility refresh failed:',
+      err
+    );
+  }
+}
+
+function bindVisibilityHandler() {
+
+  if (window.__POSTX_VISIBILITY_BOUND) return;
+  window.__POSTX_VISIBILITY_BOUND = true;
+
+  document.addEventListener(
+    'visibilitychange',
+    handlePageVisibility
+  );
+}
+
+
+/* ================= 12.8 STORAGE SYNCHRONIZATION ================= */
+
+function bindStorageSync() {
+
+  if (window.__POSTX_STORAGE_SYNC_BOUND) return;
+  window.__POSTX_STORAGE_SYNC_BOUND = true;
+
+  window.addEventListener('storage', event => {
+
+    if (event.key !== APP.STORAGE_KEY) return;
+
+    try {
+      loadState();
+      validateFinalState();
+      render();
+
+      showToast(
+        'PostX was synchronized with another tab.',
+        'info'
+      );
+
+    } catch (err) {
+      console.error(
+        '[PostX] Cross-tab synchronization failed:',
+        err
+      );
+    }
+  });
+}
+
+
+/* ================= 12.9 FINAL STARTUP ================= */
+
+function initializePostX() {
+
+  /*
+   * Absolute startup guard.
+   * Prevents duplicate initialization even if this
+   * function is accidentally called more than once.
+   */
+  if (POSTX_FINAL.initialized ||
+      window[POSTX_FINAL.startupKey]) {
+    return;
+  }
+
+  POSTX_FINAL.initialized = true;
+  window[POSTX_FINAL.startupKey] = true;
+
+  try {
+
+    /* 1. Verify browser storage */
+    checkStorageHealth();
+
+    /* 2. Load existing PostX data */
+    loadState();
+
+    /* 3. Validate and repair state */
+    validateFinalState();
+
+    /* 4. Clean invalid scheduled records */
+    maintainScheduledPosts();
+
+    /* 5. Install global error protection */
+    installGlobalErrorHandlers();
+
+    /* 6. Bind navigation */
+    if (typeof bindNavigation === 'function') {
+      bindNavigation();
+    }
+
+    /* 7. Bind cross-tab synchronization */
+    bindStorageSync();
+
+    /* 8. Bind visibility refresh */
+    bindVisibilityHandler();
+
+    /* 9. Render current page */
+    if (typeof render === 'function') {
+      render();
+    }
+
+    /* 10. Final active navigation state */
+    if (typeof updateNavActiveState === 'function') {
+      updateNavActiveState();
+    }
+
+    console.log(
+      `[PostX] v${POSTX_FINAL.version} initialized successfully.`
+    );
+
+  } catch (err) {
+
+    console.error(
+      '[PostX] Fatal initialization error:',
+      err
+    );
+
+    /*
+     * Last-resort recovery.
+     * Never leave the application completely blank
+     * because of corrupted local state.
+     */
+    try {
+      state = JSON.parse(
+        JSON.stringify(DEFAULT_STATE)
+      );
+
+      if (typeof render === 'function') {
+        render();
+      }
+
+      showToast(
+        'PostX recovered from an initialization error.',
+        'warning',
+        5000
+      );
+
+    } catch (recoveryError) {
+
+      console.error(
+        '[PostX] Recovery failed:',
+        recoveryError
+      );
+    }
+  }
+}
+
+
+/* ================= 12.10 START WHEN DOM IS READY ================= */
+
+if (document.readyState === 'loading') {
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    initializePostX,
+    { once: true }
+  );
+
+} else {
+
+  initializePostX();
+
+}
+
+
+/* ================= 12.11 FINAL API ================= */
+
+/*
+ * Expose only safe public helpers.
+ * Internal implementation remains private to this IIFE.
+ */
+window.PostX = window.PostX || {};
+
+window.PostX.version = POSTX_FINAL.version;
+
+window.PostX.navigate = function(page) {
+  if (typeof navigate === 'function') {
+    navigate(page);
+  }
+};
+
+window.PostX.refresh = function() {
+  try {
+    loadState();
+    validateFinalState();
+    render();
+  } catch (err) {
+    console.error('[PostX] Refresh failed:', err);
+  }
+};
+
+window.PostX.getState = function() {
+  return {
+    posts: Array.isArray(state.posts)
+      ? state.posts.map(post => ({ ...post }))
+      : [],
+    activePage: state.activePage,
+    connectedAccounts: {
+      ...state.connectedAccounts
+    },
+    profile: {
+      ...state.profile
+    }
+  };
+};
+
+})();
