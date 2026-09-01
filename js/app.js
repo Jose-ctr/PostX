@@ -3494,3 +3494,453 @@ function initPostLists() {
 /* ================= 48. START PART 5 ================= */
 
 initPostLists();
+
+/* ================= 6. POST ACTIONS ENGINE ================= */
+
+/*
+ * PostX v2.0
+ * Handles:
+ * - Create/update posts
+ * - Save drafts
+ * - Schedule posts
+ * - Publish immediately
+ * - Publish scheduled posts
+ * - Edit posts
+ * - Delete posts
+ * - Safe confirmation dialogs
+ */
+
+/* ---------- Composer Helpers ---------- */
+
+function getComposerData() {
+  return {
+    caption: String($('#composer-caption')?.value || state.composer?.caption || '').trim(),
+    hashtags: String($('#composer-hashtags')?.value || state.composer?.hashtags || '').trim(),
+    media: String(state.composer?.media || ''),
+    platforms: Array.isArray(state.composer?.platforms)
+      ? [...new Set(state.composer.platforms.filter(id => PLATFORM_IDS.includes(id)))]
+      : [],
+    scheduledAt: String($('#composer-schedule')?.value || state.composer?.scheduledAt || '').trim()
+  };
+}
+
+function resetComposer() {
+  state.editingPostId = null;
+
+  state.composer = {
+    caption: '',
+    hashtags: '',
+    media: '',
+    platforms: [],
+    scheduledAt: ''
+  };
+}
+
+/* ---------- Validation ---------- */
+
+function validatePostData(data, mode = 'draft') {
+  if (!data.caption) {
+    showToast('Please add a caption.', 'warning');
+    return false;
+  }
+
+  if (!data.platforms.length) {
+    showToast('Please select at least one platform.', 'warning');
+    return false;
+  }
+
+  if (mode === 'scheduled') {
+    if (!data.scheduledAt) {
+      showToast('Please select a schedule date and time.', 'warning');
+      return false;
+    }
+
+    const scheduledTime = new Date(data.scheduledAt);
+
+    if (isNaN(scheduledTime.getTime())) {
+      showToast('Invalid schedule date and time.', 'error');
+      return false;
+    }
+
+    if (scheduledTime.getTime() <= Date.now()) {
+      showToast('Schedule time must be in the future.', 'warning');
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/* ---------- Create / Update ---------- */
+
+function createOrUpdatePost(status = 'draft') {
+  const data = getComposerData();
+
+  if (!validatePostData(data, status)) return null;
+
+  const now = nowISO();
+
+  if (state.editingPostId) {
+    const index = state.posts.findIndex(
+      p => p.id === state.editingPostId
+    );
+
+    if (index === -1) {
+      showToast('The post being edited no longer exists.', 'error');
+      resetComposer();
+      return null;
+    }
+
+    const existing = state.posts[index];
+
+    const updatedPost = normalizePost({
+      ...existing,
+      caption: data.caption,
+      hashtags: data.hashtags,
+      media: data.media,
+      platforms: data.platforms,
+      status,
+      updatedAt: now,
+      scheduledAt: status === 'scheduled'
+        ? new Date(data.scheduledAt).toISOString()
+        : null,
+      publishedAt: status === 'published'
+        ? now
+        : null
+    });
+
+    state.posts[index] = updatedPost;
+
+    saveState();
+    return updatedPost;
+  }
+
+  const post = normalizePost({
+    id: uid(),
+    caption: data.caption,
+    hashtags: data.hashtags,
+    media: data.media,
+    platforms: data.platforms,
+    status,
+    createdAt: now,
+    updatedAt: now,
+    scheduledAt: status === 'scheduled'
+      ? new Date(data.scheduledAt).toISOString()
+      : null,
+    publishedAt: status === 'published'
+      ? now
+      : null
+  });
+
+  if (!post) {
+    showToast('Unable to create post.', 'error');
+    return null;
+  }
+
+  state.posts.unshift(post);
+
+  saveState();
+  return post;
+}
+
+/* ---------- Save Draft ---------- */
+
+function handleSaveDraft() {
+  const post = createOrUpdatePost('draft');
+
+  if (!post) return;
+
+  resetComposer();
+  showToast('Draft saved successfully.', 'success');
+
+  navigate('drafts');
+}
+
+/* ---------- Schedule ---------- */
+
+function handleSchedulePost() {
+  const post = createOrUpdatePost('scheduled');
+
+  if (!post) return;
+
+  resetComposer();
+  showToast(`Post scheduled for ${formatDate(post.scheduledAt)}.`, 'success');
+
+  navigate('scheduled');
+}
+
+/* ---------- Publish Immediately ---------- */
+
+function handlePublishPost() {
+  const data = getComposerData();
+
+  if (!validatePostData(data, 'publish')) return;
+
+  openModal({
+    title: 'Publish this post now?',
+    body: `
+      <div style="margin-bottom:8px;">
+        Your post will be moved to the <strong style="color:#fff;">Published</strong> list.
+      </div>
+      <div style="color:#6c5ce7;">
+        ${escapeHTML(data.platforms.map(
+          id => PLATFORMS[id]?.label || id
+        ).join(' • '))}
+      </div>
+    `,
+    actions: [
+      {
+        label: 'Cancel',
+        variant: 'secondary',
+        close: true
+      },
+      {
+        label: 'Publish Now',
+        variant: 'primary',
+        close: true,
+        onClick: () => {
+          const post = createOrUpdatePost('published');
+
+          if (!post) return;
+
+          resetComposer();
+
+          showToast(
+            'Post published successfully.',
+            'success'
+          );
+
+          navigate('published');
+        }
+      }
+    ]
+  });
+}
+
+/* ---------- Publish Existing Post ---------- */
+
+function publishPostById(postId) {
+  const post = state.posts.find(p => p.id === postId);
+
+  if (!post) {
+    showToast('Post not found.', 'error');
+    return;
+  }
+
+  if (post.status === 'published') {
+    showToast('This post is already published.', 'info');
+    return;
+  }
+
+  openModal({
+    title: 'Publish this post now?',
+    body: `
+      <div style="color:#9aa0b4;">
+        This will move the post from
+        <strong style="color:#fff;">
+          ${escapeHTML(post.status)}
+        </strong>
+        to
+        <strong style="color:#fff;">
+          Published
+        </strong>.
+      </div>
+    `,
+    actions: [
+      {
+        label: 'Cancel',
+        variant: 'secondary'
+      },
+      {
+        label: 'Publish Now',
+        variant: 'primary',
+        onClick: () => {
+          const now = nowISO();
+
+          post.status = 'published';
+          post.publishedAt = now;
+          post.scheduledAt = null;
+          post.updatedAt = now;
+
+          saveState();
+
+          showToast(
+            'Post published successfully.',
+            'success'
+          );
+
+          render();
+        }
+      }
+    ]
+  });
+}
+
+/* ---------- Edit Post ---------- */
+
+function editPostById(postId) {
+  const post = state.posts.find(p => p.id === postId);
+
+  if (!post) {
+    showToast('Post not found.', 'error');
+    return;
+  }
+
+  state.editingPostId = post.id;
+
+  state.composer = {
+    caption: post.caption || '',
+    hashtags: post.hashtags || '',
+    media: post.media || '',
+    platforms: Array.isArray(post.platforms)
+      ? [...post.platforms]
+      : [],
+    scheduledAt: post.scheduledAt
+      ? toLocalDateTimeInput(post.scheduledAt)
+      : ''
+  };
+
+  navigate('create');
+}
+
+/* ---------- Local DateTime Conversion ---------- */
+
+function toLocalDateTimeInput(iso) {
+  if (!iso || !isValidDateString(iso)) return '';
+
+  const d = new Date(iso);
+
+  const pad = n => String(n).padStart(2, '0');
+
+  return [
+    d.getFullYear(),
+    pad(d.getMonth() + 1),
+    pad(d.getDate())
+  ].join('-') + 'T' +
+  [
+    pad(d.getHours()),
+    pad(d.getMinutes())
+  ].join(':');
+}
+
+/* ---------- Delete Post ---------- */
+
+function deletePostById(postId) {
+  const post = state.posts.find(p => p.id === postId);
+
+  if (!post) {
+    showToast('Post not found.', 'error');
+    return;
+  }
+
+  openModal({
+    title: 'Delete this post?',
+    body: `
+      <div style="color:#9aa0b4;">
+        This action cannot be undone.
+      </div>
+      <div style="margin-top:10px;color:#fff;">
+        ${escapeHTML(
+          post.caption.length > 120
+            ? post.caption.slice(0, 120) + '…'
+            : post.caption
+        )}
+      </div>
+    `,
+    actions: [
+      {
+        label: 'Cancel',
+        variant: 'secondary'
+      },
+      {
+        label: 'Delete',
+        variant: 'danger',
+        onClick: () => {
+          state.posts = state.posts.filter(
+            p => p.id !== postId
+          );
+
+          if (state.editingPostId === postId) {
+            resetComposer();
+          }
+
+          saveState();
+
+          showToast(
+            'Post deleted.',
+            'success'
+          );
+
+          render();
+        }
+      }
+    ]
+  });
+}
+
+/* ---------- Event Binding ---------- */
+
+function bindPostActionEvents() {
+  if (window.__POSTX_POST_ACTIONS_BOUND) return;
+  window.__POSTX_POST_ACTIONS_BOUND = true;
+
+  document.addEventListener('click', e => {
+
+    const editBtn = e.target.closest('.btn-edit');
+
+    if (editBtn) {
+      e.preventDefault();
+
+      const id = editBtn.dataset.id;
+
+      if (id) {
+        editPostById(id);
+      }
+
+      return;
+    }
+
+    const publishBtn = e.target.closest('.btn-publish-now');
+
+    if (publishBtn) {
+      e.preventDefault();
+
+      const id = publishBtn.dataset.id;
+
+      if (id) {
+        publishPostById(id);
+      }
+
+      return;
+    }
+
+    const deleteBtn = e.target.closest('.btn-delete');
+
+    if (deleteBtn) {
+      e.preventDefault();
+
+      const id = deleteBtn.dataset.id;
+
+      if (id) {
+        deletePostById(id);
+      }
+
+      return;
+    }
+  });
+}
+
+/* ---------- Compatibility Aliases ---------- */
+
+function handleSave(mode = 'draft') {
+  if (mode === 'scheduled') {
+    handleSchedulePost();
+    return;
+  }
+
+  handleSaveDraft();
+}
+
+function handlePublishConfirm() {
+  handlePublishPost();
+}
