@@ -7398,3 +7398,1007 @@ if (!window.__POSTX_CALENDAR_ENGINE_INITIALIZED) {
 /* =========================================================
    END OF POSTX v2.0 — PART 10
    ========================================================= */
+
+/* =========================================================
+   POSTX v2.0 — PART 11
+   PROFILE & CONNECTED ACCOUNTS ENGINE
+   ---------------------------------------------------------
+   Responsibilities:
+   - Profile display and editing
+   - Connected account state
+   - Facebook / Instagram / X connection demo
+   - Safe account disconnect
+   - Profile persistence
+   - Account statistics
+   - Compatibility with existing state/storage
+   - No external API calls
+   ========================================================= */
+
+/* ================= 11.1 PROFILE DEFAULTS ================= */
+
+function ensureProfileState() {
+  if (!state.profile || typeof state.profile !== 'object') {
+    state.profile = {
+      name: 'PostX User',
+      email: ''
+    };
+  }
+
+  if (typeof state.profile.name !== 'string' || !state.profile.name.trim()) {
+    state.profile.name = 'PostX User';
+  }
+
+  if (typeof state.profile.email !== 'string') {
+    state.profile.email = '';
+  }
+
+  if (!state.connectedAccounts || typeof state.connectedAccounts !== 'object') {
+    state.connectedAccounts = {};
+  }
+
+  PLATFORM_IDS.forEach(pid => {
+    state.connectedAccounts[pid] =
+      Boolean(state.connectedAccounts[pid]);
+  });
+}
+
+/* ================= 11.2 ACCOUNT HELPERS ================= */
+
+function isPlatformConnected(platformId) {
+  if (!PLATFORMS[platformId]) return false;
+
+  return Boolean(
+    state.connectedAccounts &&
+    state.connectedAccounts[platformId]
+  );
+}
+
+function connectedPlatformCount() {
+  return PLATFORM_IDS.filter(
+    pid => isPlatformConnected(pid)
+  ).length;
+}
+
+function getConnectedPlatforms() {
+  return PLATFORM_IDS.filter(
+    pid => isPlatformConnected(pid)
+  );
+}
+
+/* ================= 11.3 PROFILE VALIDATION ================= */
+
+function validateProfileName(name) {
+  const value = String(name || '').trim();
+
+  if (!value) {
+    showToast(
+      'Please enter your name',
+      'warning'
+    );
+    return null;
+  }
+
+  if (value.length > 80) {
+    showToast(
+      'Name is too long',
+      'warning'
+    );
+    return null;
+  }
+
+  return value;
+}
+
+function validateProfileEmail(email) {
+  const value = String(email || '').trim();
+
+  if (!value) return '';
+
+  if (value.length > 160) {
+    showToast(
+      'Email address is too long',
+      'warning'
+    );
+    return null;
+  }
+
+  /*
+   * Basic email validation.
+   * This is frontend validation only.
+   */
+  const valid =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  if (!valid) {
+    showToast(
+      'Please enter a valid email address',
+      'warning'
+    );
+    return null;
+  }
+
+  return value;
+}
+
+/* ================= 11.4 SAVE PROFILE ================= */
+
+function saveProfile(name, email) {
+  const validName = validateProfileName(name);
+
+  if (validName === null) {
+    return false;
+  }
+
+  const validEmail = validateProfileEmail(email);
+
+  if (validEmail === null) {
+    return false;
+  }
+
+  state.profile.name = validName;
+  state.profile.email = validEmail;
+
+  saveState();
+
+  showToast(
+    'Profile updated successfully',
+    'success'
+  );
+
+  return true;
+}
+
+/* ================= 11.5 CONNECT ACCOUNT ================= */
+
+function connectPlatform(platformId) {
+  if (!PLATFORMS[platformId]) {
+    showToast(
+      'Unknown platform',
+      'error'
+    );
+    return;
+  }
+
+  if (isPlatformConnected(platformId)) {
+    showToast(
+      `${PLATFORMS[platformId].label} is already connected`,
+      'info'
+    );
+    return;
+  }
+
+  const platform = PLATFORMS[platformId];
+
+  /*
+   * Frontend demo connection.
+   * No real OAuth/API request is performed here.
+   */
+  const performConnect = () => {
+    ensureProfileState();
+
+    state.connectedAccounts[platformId] = true;
+
+    saveState();
+
+    showToast(
+      `${platform.label} connected successfully (Demo)`,
+      'success'
+    );
+
+    renderProfile();
+  };
+
+  if (typeof openModal === 'function') {
+    openModal({
+      title: `Connect ${platform.label}`,
+      body: `
+        <div style="line-height:1.7;">
+          <strong style="color:#fff;">
+            ${escapeHTML(platform.label)}
+          </strong>
+          will be marked as connected for this
+          frontend demo.
+          <br><br>
+          No real social-media authorization or API
+          connection is performed yet.
+        </div>
+      `,
+      actions: [
+        {
+          label: 'Cancel',
+          variant: ''
+        },
+        {
+          label: 'Connect Demo',
+          variant: 'primary',
+          onClick: performConnect
+        }
+      ]
+    });
+  } else {
+    performConnect();
+  }
+}
+
+/* ================= 11.6 DISCONNECT ACCOUNT ================= */
+
+function disconnectPlatform(platformId) {
+  if (!PLATFORMS[platformId]) {
+    showToast(
+      'Unknown platform',
+      'error'
+    );
+    return;
+  }
+
+  if (!isPlatformConnected(platformId)) {
+    showToast(
+      `${PLATFORMS[platformId].label} is not connected`,
+      'info'
+    );
+    return;
+  }
+
+  const platform = PLATFORMS[platformId];
+
+  const performDisconnect = () => {
+    ensureProfileState();
+
+    state.connectedAccounts[platformId] = false;
+
+    /*
+     * Remove this platform from currently selected
+     * composer platforms so the user cannot accidentally
+     * publish to a disconnected account.
+     */
+    if (
+      state.composer &&
+      Array.isArray(state.composer.platforms)
+    ) {
+      state.composer.platforms =
+        state.composer.platforms.filter(
+          pid => pid !== platformId
+        );
+    }
+
+    saveState();
+
+    showToast(
+      `${platform.label} disconnected`,
+      'success'
+    );
+
+    renderProfile();
+  };
+
+  if (typeof openModal === 'function') {
+    openModal({
+      title: `Disconnect ${platform.label}?`,
+      body: `
+        <div>
+          This will remove the local demo connection
+          for <strong style="color:#fff;">
+          ${escapeHTML(platform.label)}</strong>.
+        </div>
+      `,
+      actions: [
+        {
+          label: 'Cancel',
+          variant: ''
+        },
+        {
+          label: 'Disconnect',
+          variant: 'primary',
+          onClick: performDisconnect
+        }
+      ]
+    });
+  } else {
+    if (
+      window.confirm(
+        `Disconnect ${platform.label}?`
+      )
+    ) {
+      performDisconnect();
+    }
+  }
+}
+
+/* ================= 11.7 ACCOUNT CARD ================= */
+
+function renderAccountCard(platformId) {
+  const platform = PLATFORMS[platformId];
+
+  if (!platform) return '';
+
+  const connected =
+    isPlatformConnected(platformId);
+
+  return `
+    <div
+      class="postx-account-card"
+      data-account-id="${escapeHTML(platformId)}"
+      style="
+        background:#15151f;
+        border:1px solid #2a2a3a;
+        border-radius:16px;
+        padding:18px;
+      "
+    >
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-width:0;
+          "
+        >
+
+          <div
+            style="
+              width:42px;
+              height:42px;
+              flex-shrink:0;
+              border-radius:12px;
+              background:#1e1e2e;
+              border:1px solid #2a2a3a;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              color:#fff;
+              font-size:17px;
+              font-weight:800;
+            "
+          >
+            ${escapeHTML(
+              platform.label.charAt(0)
+            )}
+          </div>
+
+          <div style="min-width:0;">
+            <div
+              style="
+                color:#fff;
+                font-size:14px;
+                font-weight:700;
+              "
+            >
+              ${escapeHTML(platform.label)}
+            </div>
+
+            <div
+              style="
+                color:#6a708a;
+                font-size:11px;
+                margin-top:3px;
+                overflow-wrap:anywhere;
+              "
+            >
+              ${escapeHTML(platform.desc)}
+            </div>
+          </div>
+
+        </div>
+
+        <span
+          style="
+            flex-shrink:0;
+            background:${connected ? '#173624' : '#2a2a2a'};
+            color:${connected ? '#25D366' : '#9aa0b4'};
+            padding:5px 9px;
+            border-radius:20px;
+            font-size:10px;
+            font-weight:700;
+            text-transform:uppercase;
+          "
+        >
+          ${connected ? 'Connected' : 'Not Connected'}
+        </span>
+
+      </div>
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          flex-wrap:wrap;
+          margin-top:15px;
+          padding-top:13px;
+          border-top:1px solid #242432;
+        "
+      >
+
+        <div
+          style="
+            color:#6a708a;
+            font-size:11px;
+          "
+        >
+          ${
+            connected
+              ? 'Ready for publishing'
+              : 'Connection required'
+          }
+        </div>
+
+        ${
+          connected
+            ? `
+              <button
+                type="button"
+                class="postx-disconnect-account"
+                data-platform-id="${escapeHTML(platformId)}"
+                style="
+                  background:#2a1a1a;
+                  border:1px solid #3a2a2a;
+                  color:#ff6b6b;
+                  padding:7px 11px;
+                  border-radius:8px;
+                  cursor:pointer;
+                "
+              >
+                Disconnect
+              </button>
+            `
+            : `
+              <button
+                type="button"
+                class="postx-connect-account"
+                data-platform-id="${escapeHTML(platformId)}"
+                style="
+                  background:#6c5ce7;
+                  border:none;
+                  color:#fff;
+                  padding:7px 13px;
+                  border-radius:8px;
+                  cursor:pointer;
+                  font-weight:700;
+                "
+              >
+                Connect
+              </button>
+            `
+        }
+
+      </div>
+
+    </div>
+  `;
+}
+
+/* ================= 11.8 PROFILE RENDERER ================= */
+
+function renderProfile() {
+  ensureProfileState();
+
+  const container =
+    safeEl('profile-page') ||
+    safeEl('settings-page') ||
+    $('[data-page-content="profile"]') ||
+    $('[data-page-content="settings"]');
+
+  if (!container) return;
+
+  const profileName =
+    state.profile.name || 'PostX User';
+
+  const initials =
+    profileName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(part => part.charAt(0).toUpperCase())
+      .join('') || 'P';
+
+  const connectedCount =
+    connectedPlatformCount();
+
+  container.innerHTML = `
+    <div
+      style="
+        max-width:900px;
+        margin:0 auto;
+      "
+    >
+
+      <!-- HEADER -->
+
+      <div
+        style="
+          margin-bottom:20px;
+        "
+      >
+        <h2
+          style="
+            color:#fff;
+            margin:0;
+            font-size:24px;
+          "
+        >
+          Profile & Accounts
+        </h2>
+
+        <div
+          style="
+            color:#6a708a;
+            font-size:12px;
+            margin-top:5px;
+          "
+        >
+          Manage your PostX profile and social connections.
+        </div>
+      </div>
+
+      <!-- PROFILE CARD -->
+
+      <div
+        style="
+          background:#15151f;
+          border:1px solid #2a2a3a;
+          border-radius:18px;
+          padding:20px;
+          margin-bottom:18px;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:14px;
+            margin-bottom:20px;
+          "
+        >
+
+          <div
+            style="
+              width:58px;
+              height:58px;
+              border-radius:16px;
+              background:#6c5ce7;
+              color:#fff;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-size:20px;
+              font-weight:800;
+              flex-shrink:0;
+            "
+          >
+            ${escapeHTML(initials)}
+          </div>
+
+          <div>
+            <h3
+              style="
+                margin:0;
+                color:#fff;
+                font-size:18px;
+              "
+            >
+              ${escapeHTML(profileName)}
+            </h3>
+
+            <div
+              style="
+                color:#6a708a;
+                font-size:11px;
+                margin-top:4px;
+              "
+            >
+              ${connectedCount} of ${PLATFORM_IDS.length}
+              platforms connected
+            </div>
+          </div>
+
+        </div>
+
+        <div
+          style="
+            display:grid;
+            gap:14px;
+          "
+        >
+
+          <div>
+            <label
+              for="postx-profile-name"
+              style="
+                display:block;
+                color:#9aa0b4;
+                font-size:11px;
+                margin-bottom:6px;
+              "
+            >
+              Display Name
+            </label>
+
+            <input
+              id="postx-profile-name"
+              type="text"
+              maxlength="80"
+              value="${escapeHTML(state.profile.name)}"
+              placeholder="Your name"
+              style="
+                width:100%;
+                box-sizing:border-box;
+                background:#1a1a24;
+                border:1px solid #2a2a3a;
+                border-radius:10px;
+                padding:11px 13px;
+                color:#fff;
+                outline:none;
+              "
+            >
+          </div>
+
+          <div>
+            <label
+              for="postx-profile-email"
+              style="
+                display:block;
+                color:#9aa0b4;
+                font-size:11px;
+                margin-bottom:6px;
+              "
+            >
+              Email
+            </label>
+
+            <input
+              id="postx-profile-email"
+              type="email"
+              maxlength="160"
+              value="${escapeHTML(state.profile.email)}"
+              placeholder="you@example.com"
+              style="
+                width:100%;
+                box-sizing:border-box;
+                background:#1a1a24;
+                border:1px solid #2a2a3a;
+                border-radius:10px;
+                padding:11px 13px;
+                color:#fff;
+                outline:none;
+              "
+            >
+          </div>
+
+          <div>
+            <button
+              type="button"
+              id="postx-save-profile"
+              style="
+                background:#6c5ce7;
+                border:none;
+                color:#fff;
+                padding:11px 17px;
+                border-radius:10px;
+                cursor:pointer;
+                font-weight:700;
+              "
+            >
+              Save Profile
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- CONNECTION SUMMARY -->
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+          gap:12px;
+          margin-bottom:18px;
+        "
+      >
+
+        <div
+          style="
+            background:#15151f;
+            border:1px solid #2a2a3a;
+            border-radius:14px;
+            padding:16px;
+          "
+        >
+          <div
+            style="
+              color:#6a708a;
+              font-size:10px;
+              text-transform:uppercase;
+              letter-spacing:.08em;
+            "
+          >
+            Connected
+          </div>
+
+          <div
+            style="
+              color:#fff;
+              font-size:25px;
+              font-weight:800;
+              margin-top:5px;
+            "
+          >
+            ${connectedCount}
+          </div>
+        </div>
+
+        <div
+          style="
+            background:#15151f;
+            border:1px solid #2a2a3a;
+            border-radius:14px;
+            padding:16px;
+          "
+        >
+          <div
+            style="
+              color:#6a708a;
+              font-size:10px;
+              text-transform:uppercase;
+              letter-spacing:.08em;
+            "
+          >
+            Available
+          </div>
+
+          <div
+            style="
+              color:#fff;
+              font-size:25px;
+              font-weight:800;
+              margin-top:5px;
+            "
+          >
+            ${PLATFORM_IDS.length}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ACCOUNTS -->
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          flex-wrap:wrap;
+          margin-bottom:12px;
+        "
+      >
+
+        <div>
+          <h3
+            style="
+              color:#fff;
+              margin:0;
+              font-size:17px;
+            "
+          >
+            Connected Accounts
+          </h3>
+
+          <div
+            style="
+              color:#6a708a;
+              font-size:11px;
+              margin-top:4px;
+            "
+          >
+            Frontend demo connections
+          </div>
+        </div>
+
+      </div>
+
+      <div
+        style="
+          display:grid;
+          gap:12px;
+        "
+      >
+        ${PLATFORM_IDS.map(renderAccountCard).join('')}
+      </div>
+
+      <div
+        style="
+          margin-top:18px;
+          padding:14px;
+          background:#11111a;
+          border:1px dashed #2a2a3a;
+          border-radius:12px;
+          color:#6a708a;
+          font-size:11px;
+          line-height:1.6;
+        "
+      >
+        <strong style="color:#9aa0b4;">
+          Demo mode:
+        </strong>
+        Account connections are stored locally in this
+        browser. Real Facebook, Instagram and X OAuth/API
+        authentication will be added in the backend phase.
+      </div>
+
+    </div>
+  `;
+
+  bindProfileEvents();
+}
+
+/* ================= 11.9 PROFILE EVENTS ================= */
+
+function bindProfileEvents() {
+  const saveBtn =
+    safeEl('postx-save-profile');
+
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const name =
+        safeEl('postx-profile-name')?.value || '';
+
+      const email =
+        safeEl('postx-profile-email')?.value || '';
+
+      if (saveProfile(name, email)) {
+        renderProfile();
+      }
+    };
+  }
+
+  $$('.postx-connect-account').forEach(btn => {
+    btn.onclick = () => {
+      const platformId =
+        btn.dataset.platformId;
+
+      if (platformId) {
+        connectPlatform(platformId);
+      }
+    };
+  });
+
+  $$('.postx-disconnect-account').forEach(btn => {
+    btn.onclick = () => {
+      const platformId =
+        btn.dataset.platformId;
+
+      if (platformId) {
+        disconnectPlatform(platformId);
+      }
+    };
+  });
+}
+
+/* ================= 11.10 PROFILE ROUTE SUPPORT ================= */
+
+function openProfilePage() {
+  /*
+   * Profile/settings can exist under either route.
+   * Prefer profile when available.
+   */
+  const profileExists =
+    safeEl('profile-page') ||
+    $('[data-page-content="profile"]');
+
+  if (profileExists) {
+    state.activePage = 'profile';
+  } else {
+    state.activePage = 'settings';
+  }
+
+  saveState();
+
+  renderProfile();
+
+  updateNavActiveState();
+}
+
+/* ================= 11.11 RENDER HOOK ================= */
+
+/*
+ * Extend the existing render router without replacing it.
+ *
+ * IMPORTANT:
+ * We wrap the previous render function only once.
+ * Existing dashboard/composer/calendar/list rendering
+ * remains intact.
+ */
+if (!window.__POSTX_PROFILE_RENDER_HOOK) {
+  window.__POSTX_PROFILE_RENDER_HOOK = true;
+
+  const previousRender =
+    typeof render === 'function'
+      ? render
+      : null;
+
+  if (previousRender) {
+    window.__POSTX_PREVIOUS_RENDER =
+      previousRender;
+
+    /*
+     * Re-declare render so profile/settings can be
+     * handled while all existing routes continue working.
+     */
+    render = function() {
+      try {
+        /*
+         * Existing router handles normal pages.
+         * Profile is handled separately.
+         */
+        if (
+          state.activePage === 'profile' ||
+          state.activePage === 'settings'
+        ) {
+          const profilePage =
+            safeEl('profile-page') ||
+            $('[data-page-content="profile"]');
+
+          const settingsPage =
+            safeEl('settings-page') ||
+            $('[data-page-content="settings"]');
+
+          if (profilePage) {
+            if (settingsPage && settingsPage !== profilePage) {
+              settingsPage.style.display = 'none';
+            }
+
+            profilePage.style.display = 'block';
+            renderProfile();
+            updateNavActiveState();
+            return;
+          }
+
+          if (settingsPage) {
+            settingsPage.style.display = 'block';
+            renderProfile();
+            updateNavActiveState();
+            return;
+          }
+        }
+
+        /*
+         * All original routes continue through the
+         * Part 9 render engine.
+         */
+        previousRender();
+
+      } catch (err) {
+        console.error(
+          '[PostX Profile Render Error]',
+          err
+        );
+      }
+    };
+  }
+}
+
+/* ================= 11.12 INITIALIZATION ================= */
+
+if (!window.__POSTX_PROFILE_ENGINE_INITIALIZED) {
+  window.__POSTX_PROFILE_ENGINE_INITIALIZED = true;
+
+  ensureProfileState();
+}
+
+/* =========================================================
+   END OF POSTX v2.0 — PART 11
+   ========================================================= */
