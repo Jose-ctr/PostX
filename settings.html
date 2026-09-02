@@ -1,1 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#05080d"
+  >
+
+  <meta
+    name="description"
+    content="PostX settings — account, notifications, connected platforms, Pro, payments and security."
+  >
+
+  <title>Settings • PostX</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
+
+  <style>
+    /* =========================================================
+       POSTX SETTINGS
+       Premium dark navy + neon cyan
+       ========================================================= */
+
+    .settings-page {
+      padding-bottom: 110px;
+    }
+
+    .settings-header {
+      margin-bottom: 24px;
+    }
+
+    .settings-header .eyebrow {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      margin-bottom: 7px;
+    }
+
+    .settings-header h1 {
+      margin: 0;
+      font-size: clamp(28px, 6vw, 40px);
+      line-height: 1.08;
+    }
+
+    .settings-header p {
+      margin: 10px 0 0;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+
+    .settings-section {
+      margin-top: 20px;
+    }
+
+    .settings-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .settings-section-title h2 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .settings-section-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .profile-avatar {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      border-radius: 18px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(0,229,255,.2),
+          rgba(0,229,255,.04)
+        );
+      border: 1px solid rgba(0,229,255,.3);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow: 0 0 24px rgba(0,229,255,.08);
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .profile-avatar span {
+      color: var(--cyan);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .profile-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .profile-name {
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .profile-email {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .settings-list {
+      overflow: hidden;
+    }
+
+    .setting-row {
+      min-height: 68px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-row:last-child {
+      border-bottom: 0;
+    }
+
+    .setting-icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      border-radius: 13px;
+      background: rgba(0,229,255,.08);
+      border: 1px solid rgba(0,229,255,.12);
+      display: grid;
+      place-items: center;
+      color: var(--cyan);
+      font-size: 18px;
+    }
+
+    .setting-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .setting-title {
+      font-weight: 750;
+      font-size: 14px;
+    }
+
+    .setting-description {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 3px;
+    }
+
+    .setting-control {
+      flex-shrink: 0;
+    }
+
+    .setting-button {
+      border: 1px solid var(--border);
+      background: var(--card-light);
+      color: var(--text);
+      padding: 9px 13px;
+      min-height: 40px;
+      border-radius: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .setting-button:hover {
+      border-color: rgba(0,229,255,.35);
+    }
+
+    .setting-button.cyan {
+      background: rgba(0,229,255,.1);
+      border-color: rgba(0,229,255,.28);
+      color: var(--cyan);
+    }
+
+    .setting-button.danger {
+      color: var(--danger);
+      border-color: rgba(255,92,112,.2);
+      background: rgba(255,92,112,.05);
+    }
+
+    /* Toggle */
+
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      display: inline-block;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      background: #182633;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 30px;
+      transition: .2s ease;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      top: 3px;
+      background: #8b9aa7;
+      border-radius: 50%;
+      transition: .2s ease;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: rgba(0,229,255,.18);
+      border-color: rgba(0,229,255,.5);
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,229,255,.5);
+    }
+
+    /* Theme */
+
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .theme-option {
+      min-width: 76px;
+      border: 1px solid var(--border);
+      background: var(--card-light);
+      color: var(--text-soft);
+      border-radius: 10px;
+      padding: 9px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .theme-option.active {
+      color: var(--cyan);
+      border-color: rgba(0,229,255,.45);
+      background: rgba(0,229,255,.08);
+    }
+
+    /* Platform */
+
+    .platform-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .platform-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 900;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+    }
+
+    .platform-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .platform-status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .platform-status.connected {
+      color: var(--success);
+    }
+
+    .platform-status.connected::before {
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(53,224,138,.45);
+    }
+
+    /* Pro */
+
+    .pro-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0,229,255,.24);
+      background:
+        radial-gradient(
+          circle at 90% 10%,
+          rgba(0,229,255,.13),
+          transparent 45%
+        ),
+        var(--card);
+    }
+
+    .pro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(0,229,255,.1);
+      border: 1px solid rgba(0,229,255,.25);
+      color: var(--cyan);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .pro-card h3 {
+      margin: 13px 0 7px;
+      font-size: 21px;
+    }
+
+    .pro-card p {
+      color: var(--text-soft);
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .pro-price {
+      margin: 16px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .pro-price strong {
+      font-size: 27px;
+    }
+
+    .pro-price span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pro-features {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0 18px;
+    }
+
+    .pro-feature {
+      color: var(--text-soft);
+      font-size: 12px;
+    }
+
+    .pro-feature::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 900;
+      margin-right: 8px;
+    }
+
+    /* Install */
+
+    .install-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .install-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: rgba(0,229,255,.09);
+      color: var(--cyan);
+      border: 1px solid rgba(0,229,255,.16);
+      font-size: 20px;
+    }
+
+    .install-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .install-info strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .install-info span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Light theme support */
+
+    body.light-mode {
+      --bg: #f4f8fb;
+      --bg-soft: #eaf1f6;
+      --card: #ffffff;
+      --card-light: #f3f7fa;
+      --border: rgba(10,30,45,.1);
+      --text: #10202d;
+      --text-soft: #526270;
+      --muted: #71808c;
+    }
+
+    @media (max-width: 600px) {
+      .setting-row {
+        padding: 13px 12px;
+      }
+
+      .setting-description {
+        max-width: 210px;
+      }
+
+      .setting-button {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .profile-card {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+
+      <a
+        href="index.html"
+        class="brand"
+        aria-label="PostX home"
+      >
+        <img
+          src="assets/icons/icon-192.png"
+          alt="PostX"
+        >
+
+        <span>PostX</span>
+      </a>
+
+      <button
+        class="icon-button"
+        id="headerNotificationBtn"
+        type="button"
+        aria-label="Notifications"
+      >
+        🔔
+      </button>
+
+    </header>
+
+
+    <!-- MAIN -->
+    <main
+      class="main-content settings-page"
+      id="main-content"
+    >
+
+      <section class="settings-header">
+
+        <div class="eyebrow">POSTX SETTINGS</div>
+
+        <h1>Settings</h1>
+
+        <p>
+          Manage your account, preferences, connected platforms,
+          payments and PostX experience.
+        </p>
+
+      </section>
+
+
+      <!-- PROFILE -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Account</h2>
+          <span>Profile</span>
+        </div>
+
+        <div class="card profile-card">
+
+          <div class="profile-avatar">
+            <img id="profileAvatar" alt="Profile">
+
+            <span id="profileInitial">
+              P
+            </span>
+          </div>
+
+          <div class="profile-info">
+
+            <div
+              class="profile-name"
+              id="profileName"
+            >
+              PostX User
+            </div>
+
+            <div
+              class="profile-email"
+              id="profileEmail"
+            >
+              Your PostX account
+            </div>
+
+          </div>
+
+          <button
+            class="setting-button"
+            id="editProfileBtn"
+            type="button"
+          >
+            Edit
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- APPEARANCE -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Appearance</h2>
+          <span>Interface</span>
+        </div>
+
+        <div class="card settings-list">
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              ◐
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Theme
+              </div>
+
+              <div class="setting-description">
+                Choose how PostX looks on your device.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <div class="theme-options">
+
+                <button
+                  class="theme-option active"
+                  data-theme="dark"
+                  type="button"
+                >
+                  Dark
+                </button>
+
+                <button
+                  class="theme-option"
+                  data-theme="light"
+                  type="button"
+                >
+                  Light
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- NOTIFICATIONS -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Notifications</h2>
+          <span>Alerts</span>
+        </div>
+
+        <div class="card settings-list">
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              🔔
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Push notifications
+              </div>
+
+              <div class="setting-description">
+                Receive important PostX activity alerts.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <label class="toggle">
+                <input
+                  type="checkbox"
+                  id="notificationsToggle"
+                  checked
+                >
+
+                <span class="toggle-slider"></span>
+              </label>
+
+            </div>
+
+          </div>
+
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              🔊
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Notification sound
+              </div>
+
+              <div class="setting-description">
+                Play a sound when supported notifications arrive.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <label class="toggle">
+                <input
+                  type="checkbox"
+                  id="soundToggle"
+                  checked
+                >
+
+                <span class="toggle-slider"></span>
+              </label>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CONNECTED PLATFORMS -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Connected platforms</h2>
+          <span>Publishing</span>
+        </div>
+
+        <div class="card settings-list">
+
+          <!-- FACEBOOK -->
+
+          <div class="setting-row">
+
+            <div class="platform-logo">
+              f
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Facebook
+              </div>
+
+              <div
+                class="platform-status"
+                id="facebookStatus"
+              >
+                Not connected
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button cyan connect-platform"
+                data-platform="Facebook"
+                type="button"
+              >
+                Connect
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- INSTAGRAM -->
+
+          <div class="setting-row">
+
+            <div class="platform-logo">
+              ◎
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Instagram
+              </div>
+
+              <div
+                class="platform-status"
+                id="instagramStatus"
+              >
+                Not connected
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button cyan connect-platform"
+                data-platform="Instagram"
+                type="button"
+              >
+                Connect
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- WHATSAPP -->
+
+          <div class="setting-row">
+
+            <div class="platform-logo">
+              WA
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                WhatsApp
+              </div>
+
+              <div class="setting-description">
+                Unified messaging integration — coming soon.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button"
+                type="button"
+                disabled
+              >
+                Soon
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- X -->
+
+          <div class="setting-row">
+
+            <div class="platform-logo">
+              𝕏
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                X
+              </div>
+
+              <div class="setting-description">
+                Mentions and messaging integration — coming soon.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button"
+                type="button"
+                disabled
+              >
+                Soon
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- POSTX PRO -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>PostX Pro</h2>
+          <span>Premium</span>
+        </div>
+
+        <div class="card pro-card">
+
+          <span class="pro-badge">
+            ⚡ POSTX PRO
+          </span>
+
+          <h3>
+            Upgrade your publishing.
+          </h3>
+
+          <p>
+            Unlock premium publishing and scheduling capabilities
+            as PostX grows into your complete social workspace.
+          </p>
+
+          <div class="pro-price">
+            <strong>KSh 49</strong>
+            <span>/ month</span>
+          </div>
+
+          <div class="pro-features">
+
+            <div class="pro-feature">
+              Premium scheduling tools
+            </div>
+
+            <div class="pro-feature">
+              Advanced publishing workflow
+            </div>
+
+            <div class="pro-feature">
+              Insights and performance features
+            </div>
+
+            <div class="pro-feature">
+              Premium usage benefits
+            </div>
+
+          </div>
+
+          <button
+            class="primary-button"
+            id="upgradeProBtn"
+            type="button"
+          >
+            Upgrade to Pro
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- PAYMENTS -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Payments</h2>
+          <span>M-PESA</span>
+        </div>
+
+        <div class="card settings-list">
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              KSh
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                M-PESA
+              </div>
+
+              <div class="setting-description">
+                Used for PostX Pro, Boost and marketplace payments.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button cyan"
+                id="paymentBtn"
+                type="button"
+              >
+                Manage
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              ▣
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Payment history
+              </div>
+
+              <div class="setting-description">
+                View your PostX transactions and receipts.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button"
+                id="paymentHistoryBtn"
+                type="button"
+              >
+                View
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SECURITY -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Security</h2>
+          <span>Account protection</span>
+        </div>
+
+        <div class="card settings-list">
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              🔐
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Password & authentication
+              </div>
+
+              <div class="setting-description">
+                Manage your password and authentication methods.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button"
+                id="securityBtn"
+                type="button"
+              >
+                Manage
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              ◉
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Active sessions
+              </div>
+
+              <div class="setting-description">
+                Review devices currently signed into your account.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button"
+                id="sessionsBtn"
+                type="button"
+              >
+                View
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PWA -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>App</h2>
+          <span>PWA</span>
+        </div>
+
+        <div class="card install-card">
+
+          <div class="install-icon">
+            ⇩
+          </div>
+
+          <div class="install-info">
+
+            <strong>
+              Install PostX
+            </strong>
+
+            <span id="installStatus">
+              PostX is built as a Progressive Web App.
+            </span>
+
+          </div>
+
+          <button
+            class="setting-button cyan"
+            id="installBtn"
+            type="button"
+          >
+            Install
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- ACCOUNT ACTIONS -->
+      <section class="settings-section">
+
+        <div class="settings-section-title">
+          <h2>Account actions</h2>
+        </div>
+
+        <div class="card settings-list">
+
+          <div class="setting-row">
+
+            <div class="setting-icon">
+              ↪
+            </div>
+
+            <div class="setting-content">
+
+              <div class="setting-title">
+                Log out
+              </div>
+
+              <div class="setting-description">
+                Sign out of this PostX session.
+              </div>
+
+            </div>
+
+            <div class="setting-control">
+
+              <button
+                class="setting-button danger"
+                id="logoutBtn"
+                type="button"
+              >
+                Log out
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- BOTTOM NAV -->
+    <nav
+      class="bottom-nav"
+      aria-label="Main navigation"
+    >
+
+      <a
+        href="index.html"
+        class="bottom-nav-item"
+        data-nav="create"
+      >
+        <span>＋</span>
+        <small>Create</small>
+      </a>
+
+      <a
+        href="feed.html"
+        class="bottom-nav-item"
+        data-nav="social"
+      >
+        <span>⌂</span>
+        <small>Social</small>
+      </a>
+
+      <a
+        href="inbox.html"
+        class="bottom-nav-item"
+        data-nav="inbox"
+      >
+        <span>◌</span>
+        <small>Inbox</small>
+      </a>
+
+      <a
+        href="settings.html"
+        class="bottom-nav-item active"
+        data-nav="settings"
+      >
+        <span>⚙</span>
+        <small>Settings</small>
+      </a>
+
+    </nav>
+
+
+    <!-- TOAST -->
+    <div
+      class="toast"
+      id="toast"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+  </div>
+
+
+  <!-- CORE APP -->
+  <script src="js/app.js"></script>
+
+
+  <!-- SETTINGS LOGIC -->
+  <script>
+
+    (() => {
+
+      "use strict";
+
+
+      /* =======================================================
+         STATE
+         ======================================================= */
+
+      const PostX = window.PostX;
+
+      if (!PostX) {
+        console.error("PostX app core was not loaded.");
+        return;
+      }
+
+
+      const state = PostX.getState();
+
+
+      /* =======================================================
+         HELPERS
+         ======================================================= */
+
+      const $ = (selector) =>
+        document.querySelector(selector);
+
+      const $$ = (selector) =>
+        document.querySelectorAll(selector);
+
+
+      function saveSettings(changes) {
+
+        PostX.updateState({
+          settings: {
+            ...(PostX.getState().settings || {}),
+            ...changes
+          }
+        });
+
+      }
+
+
+      /* =======================================================
+         PROFILE
+         ======================================================= */
+
+      function loadProfile() {
+
+        const currentState = PostX.getState();
+
+        const user =
+          currentState.user || {};
+
+        const name =
+          user.name || "PostX User";
+
+        const avatar =
+          user.avatar || "";
+
+        $("#profileName").textContent = name;
+
+        $("#profileInitial").textContent =
+          name.trim().charAt(0).toUpperCase() || "P";
+
+        if (avatar) {
+
+          $("#profileAvatar").src = avatar;
+          $("#profileAvatar").style.display = "block";
+          $("#profileInitial").style.display = "none";
+
+        }
+
+      }
+
+
+      /* =======================================================
+         NOTIFICATIONS
+         ======================================================= */
+
+      function loadNotificationSettings() {
+
+        const currentState = PostX.getState();
+
+        const settings =
+          currentState.settings || {};
+
+        $("#notificationsToggle").checked =
+          settings.notifications !== false;
+
+        $("#soundToggle").checked =
+          settings.sound !== false;
+
+      }
+
+
+      $("#notificationsToggle")
+        .addEventListener("change", (event) => {
+
+          saveSettings({
+            notifications: event.target.checked
+          });
+
+          PostX.toast(
+            event.target.checked
+              ? "Notifications enabled."
+              : "Notifications disabled.",
+            "success"
+          );
+
+        });
+
+
+      $("#soundToggle")
+        .addEventListener("change", (event) => {
+
+          saveSettings({
+            sound: event.target.checked
+          });
+
+          PostX.toast(
+            event.target.checked
+              ? "Notification sound enabled."
+              : "Notification sound disabled.",
+            "success"
+          );
+
+        });
+
+
+      /* =======================================================
+         THEME
+         ======================================================= */
+
+      function applyTheme(theme) {
+
+        const buttons =
+          $$(".theme-option");
+
+        buttons.forEach(button => {
+
+          button.classList.toggle(
+            "active",
+            button.dataset.theme === theme
+          );
+
+        });
+
+        if (theme === "light") {
+
+          document.body.classList.add(
+            "light-mode"
+          );
+
+        } else {
+
+          document.body.classList.remove(
+            "light-mode"
+          );
+
+        }
+
+        saveSettings({
+          theme
+        });
+
+      }
+
+
+      const savedTheme =
+        (PostX.getState().settings || {}).theme ||
+        "dark";
+
+
+      applyTheme(savedTheme);
+
+
+      $$(".theme-option").forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            applyTheme(
+              button.dataset.theme
+            );
+
+            PostX.toast(
+              `${button.textContent.trim()} theme enabled.`,
+              "success"
+            );
+
+          }
+        );
+
+      });
+
+
+      /* =======================================================
+         PROFILE BUTTON
+         ======================================================= */
+
+      $("#editProfileBtn")
+        .addEventListener("click", () => {
+
+          PostX.toast(
+            "Profile editing will connect to the PostX account backend.",
+            "info"
+          );
+
+        });
+
+
+      /* =======================================================
+         PLATFORM CONNECTIONS
+         ======================================================= */
+
+      const platformState =
+        (PostX.getState().settings || {})
+          .connectedPlatforms || {};
+
+
+      function updatePlatformUI(
+        platform,
+        connected
+      ) {
+
+        const key =
+          platform.toLowerCase();
+
+        const status =
+          $(`#${key}Status`);
+
+        const button =
+          document.querySelector(
+            `.connect-platform[data-platform="${platform}"]`
+          );
+
+        if (!status || !button) return;
+
+
+        status.classList.toggle(
+          "connected",
+          connected
+        );
+
+        status.textContent =
+          connected
+            ? "Connected"
+            : "Not connected";
+
+
+        button.textContent =
+          connected
+            ? "Manage"
+            : "Connect";
+
+      }
+
+
+      ["Facebook", "Instagram"].forEach(platform => {
+
+        updatePlatformUI(
+          platform,
+          !!platformState[
+            platform.toLowerCase()
+          ]
+        );
+
+      });
+
+
+      $$(".connect-platform").forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const platform =
+              button.dataset.platform;
+
+            /*
+             * Production:
+             * This button will launch the secure
+             * backend OAuth flow.
+             *
+             * No access tokens or client secrets
+             * belong in this PWA.
+             */
+
+            PostX.toast(
+              `${platform} connection will use secure OAuth through the PostX backend.`,
+              "info",
+              4500
+            );
+
+          }
+        );
+
+      });
+
+
+      /* =======================================================
+         POSTX PRO
+         ======================================================= */
+
+      $("#upgradeProBtn")
+        .addEventListener("click", () => {
+
+          PostX.toast(
+            "PostX Pro checkout will use secure M-PESA payment processing.",
+            "info",
+            4500
+          );
+
+        });
+
+
+      /* =======================================================
+         PAYMENTS
+         ======================================================= */
+
+      $("#paymentBtn")
+        .addEventListener("click", () => {
+
+          PostX.toast(
+            "M-PESA payment management will connect to the secure backend.",
+            "info",
+            4500
+          );
+
+        });
+
+
+      $("#paymentHistoryBtn")
+        .addEventListener("click", () => {
+
+          PostX.toast(
+            "Payment history will appear here once the payment backend is connected.",
+            "info",
+            4500
+          );
+
+        });
+
+
+      /* =======================================================
+         SECURITY
+         ======================================================= */
+
+      $("#securityBtn")
+        .addEventListener("click", () => {
+
+          PostX.toast(
+            "Security controls will be handled by the PostX account backend.",
+            "info",
+            4000
+          );
+
+        });
+
+
+      $("#sessionsBtn")
+        .addEventListener("click", () => {
+
+          PostX.toast(
+            "Active sessions will be available through the account backend.",
+            "info",
+            4000
+          );
+
+        });
+
+
+      /* =======================================================
+         PWA INSTALL
+         ======================================================= */
+
+      let deferredInstallPrompt = null;
+
+
+      window.addEventListener(
+        "beforeinstallprompt",
+        event => {
+
+          event.preventDefault();
+
+          deferredInstallPrompt = event;
+
+          $("#installStatus").textContent =
+            "PostX is ready to be installed on your device.";
+
+          $("#installBtn").disabled = false;
+
+        }
+      );
+
+
+      $("#installBtn")
+        .addEventListener("click", async () => {
+
+          if (!deferredInstallPrompt) {
+
+            PostX.toast(
+              "If PostX is already installed, you are all set. Otherwise use your browser's Add to Home Screen option.",
+              "info",
+              5000
+            );
+
+            return;
+
+          }
+
+
+          deferredInstallPrompt.prompt();
+
+          const result =
+            await deferredInstallPrompt.userChoice;
+
+          if (
+            result &&
+            result.outcome === "accepted"
+          ) {
+
+            PostX.toast(
+              "PostX installation started.",
+              "success"
+            );
+
+          } else {
+
+            PostX.toast(
+              "PostX installation was cancelled.",
+              "info"
+            );
+
+          }
+
+          deferredInstallPrompt = null;
+
+        });
+
+
+      window.addEventListener(
+        "appinstalled",
+        () => {
+
+          $("#installStatus").textContent =
+            "PostX is installed on your device.";
+
+          $("#installBtn").textContent =
+            "Installed";
+
+          $("#installBtn").disabled = true;
+
+          PostX.toast(
+            "PostX installed successfully.",
+            "success"
+          );
+
+        }
+      );
+
+
+      /* =======================================================
+         LOGOUT
+         ======================================================= */
+
+      $("#logoutBtn")
+        .addEventListener("click", () => {
+
+          const confirmed =
+            window.confirm(
+              "Log out of PostX?"
+            );
+
+          if (!confirmed) return;
+
+
+          /*
+           * Production:
+           * logout must invalidate the server-side
+           * session/token through the backend.
+           *
+           * Local prototype only:
+           * keep the workspace data intact.
+           */
+
+          PostX.toast(
+            "Logout will be handled by the secure PostX authentication backend.",
+            "info",
+            4500
+          );
+
+        });
+
+
+      /* =======================================================
+         INITIALIZE
+         ======================================================= */
+
+      loadProfile();
+
+      loadNotificationSettings();
+
+
+    })();
+
+  </script>
+
+</body>
+</html>
