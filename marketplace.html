@@ -1,1 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#05080d"
+  >
+
+  <meta
+    name="description"
+    content="PostX Marketplace — discover products and services, connect with sellers and grow your business."
+  >
+
+  <title>Marketplace • PostX</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
+
+  <style>
+    /* =========================================================
+       POSTX MARKETPLACE
+       ========================================================= */
+
+    .marketplace-page {
+      padding-bottom: 110px;
+    }
+
+    .marketplace-header {
+      margin-bottom: 20px;
+    }
+
+    .marketplace-header .eyebrow {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      margin-bottom: 7px;
+    }
+
+    .marketplace-header h1 {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 42px);
+      line-height: 1.08;
+    }
+
+    .marketplace-header p {
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin: 10px 0 0;
+    }
+
+    /* Search */
+
+    .market-search {
+      display: flex;
+      gap: 9px;
+      margin-bottom: 15px;
+    }
+
+    .market-search input {
+      flex: 1;
+      min-width: 0;
+      min-height: 48px;
+      padding: 0 15px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+
+    .market-search input:focus {
+      border-color: rgba(0,229,255,.45);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.06);
+    }
+
+    .market-search button {
+      width: 48px;
+      min-height: 48px;
+      border: 1px solid rgba(0,229,255,.25);
+      border-radius: 13px;
+      background: rgba(0,229,255,.08);
+      color: var(--cyan);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    /* Categories */
+
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px 0 7px;
+      scrollbar-width: none;
+    }
+
+    .category-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-btn {
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text-soft);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .category-btn.active {
+      color: var(--cyan);
+      border-color: rgba(0,229,255,.4);
+      background: rgba(0,229,255,.08);
+    }
+
+    /* Seller CTA */
+
+    .seller-banner {
+      margin-top: 18px;
+      padding: 17px;
+      border: 1px solid rgba(0,229,255,.2);
+      border-radius: 17px;
+      background:
+        radial-gradient(
+          circle at 100% 0,
+          rgba(0,229,255,.13),
+          transparent 48%
+        ),
+        var(--card);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .seller-banner-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .seller-banner h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .seller-banner p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .seller-banner button {
+      flex-shrink: 0;
+    }
+
+    /* Marketplace grid */
+
+    .market-section {
+      margin-top: 24px;
+    }
+
+    .market-section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .market-section-heading h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .market-section-heading span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .market-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: var(--card);
+      transition:
+        transform .18s ease,
+        border-color .18s ease;
+    }
+
+    .market-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0,229,255,.22);
+    }
+
+    .market-card.hidden {
+      display: none;
+    }
+
+    .market-image {
+      position: relative;
+      aspect-ratio: 1 / .82;
+      background:
+        linear-gradient(
+          135deg,
+          #0d2230,
+          #071019
+        );
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .market-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .market-placeholder {
+      color: var(--cyan);
+      font-size: 30px;
+      font-weight: 900;
+      opacity: .6;
+    }
+
+    .market-badge {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(5,8,13,.8);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .market-badge.boosted {
+      color: var(--cyan);
+      border-color: rgba(0,229,255,.3);
+    }
+
+    .market-body {
+      padding: 12px;
+    }
+
+    .market-type {
+      color: var(--cyan);
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .market-title {
+      margin-top: 5px;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .market-price {
+      margin-top: 7px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .market-location {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .market-seller {
+      margin-top: 8px;
+      color: var(--text-soft);
+      font-size: 11px;
+    }
+
+    .market-actions {
+      display: flex;
+      gap: 7px;
+      margin-top: 11px;
+    }
+
+    .market-actions button {
+      flex: 1;
+      min-height: 37px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-light);
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .market-actions .message-btn {
+      color: var(--cyan);
+      border-color: rgba(0,229,255,.25);
+      background: rgba(0,229,255,.07);
+    }
+
+    /* Empty */
+
+    .market-empty {
+      display: none;
+      text-align: center;
+      padding: 35px 20px;
+      border: 1px dashed var(--border);
+      border-radius: 17px;
+      color: var(--muted);
+    }
+
+    .market-empty strong {
+      display: block;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    /* Desktop */
+
+    @media (min-width: 760px) {
+      .market-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .marketplace-page {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (min-width: 1050px) {
+      .market-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .seller-banner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .seller-banner button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- HEADER -->
+
+    <header class="app-header">
+
+      <a
+        href="index.html"
+        class="brand"
+        aria-label="PostX home"
+      >
+        <img
+          src="assets/icons/icon-192.png"
+          alt="PostX"
+        >
+
+        <span>PostX</span>
+      </a>
+
+      <button
+        class="icon-button"
+        id="marketNotificationBtn"
+        type="button"
+        aria-label="Notifications"
+      >
+        🔔
+      </button>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main
+      class="main-content marketplace-page"
+      id="main-content"
+    >
+
+      <section class="marketplace-header">
+
+        <div class="eyebrow">
+          POSTX MARKETPLACE
+        </div>
+
+        <h1>
+          Discover. Connect. Sell.
+        </h1>
+
+        <p>
+          Find products and services from people and
+          businesses around you. Message sellers directly
+          through PostX.
+        </p>
+
+      </section>
+
+
+      <!-- SEARCH -->
+
+      <div class="market-search">
+
+        <input
+          id="marketSearch"
+          type="search"
+          placeholder="Search products or services..."
+          autocomplete="off"
+        >
+
+        <button
+          id="searchButton"
+          type="button"
+          aria-label="Search marketplace"
+        >
+          ⌕
+        </button>
+
+      </div>
+
+
+      <!-- CATEGORIES -->
+
+      <div class="category-scroll">
+
+        <button
+          class="category-btn active"
+          data-category="all"
+          type="button"
+        >
+          All
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="products"
+          type="button"
+        >
+          Products
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="services"
+          type="button"
+        >
+          Services
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="fashion"
+          type="button"
+        >
+          Fashion
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="electronics"
+          type="button"
+        >
+          Electronics
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="food"
+          type="button"
+        >
+          Food
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="homes"
+          type="button"
+        >
+          Homes
+        </button>
+
+        <button
+          class="category-btn"
+          data-category="jobs"
+          type="button"
+        >
+          Jobs
+        </button>
+
+      </div>
+
+
+      <!-- SELLER CTA -->
+
+      <section class="seller-banner">
+
+        <div class="seller-banner-content">
+
+          <h2>
+            Have something to sell?
+          </h2>
+
+          <p>
+            Create a product or service listing and
+            connect with customers through PostX.
+          </p>
+
+        </div>
+
+        <button
+          class="primary-button"
+          id="createListingBtn"
+          type="button"
+        >
+          + Create Listing
+        </button>
+
+      </section>
+
+
+      <!-- LISTINGS -->
+
+      <section class="market-section">
+
+        <div class="market-section-heading">
+
+          <h2>
+            Marketplace
+          </h2>
+
+          <span id="listingCount">
+            6 listings
+          </span>
+
+        </div>
+
+
+        <div
+          class="market-grid"
+          id="marketGrid"
+        >
+
+          <!-- PRODUCT 1 -->
+
+          <article
+            class="market-card"
+            data-category="electronics products"
+            data-search="smartphone samsung phone electronics"
+          >
+
+            <div class="market-image">
+
+              <div class="market-placeholder">
+                📱
+              </div>
+
+              <span class="market-badge boosted">
+                Boosted
+              </span>
+
+            </div>
+
+            <div class="market-body">
+
+              <div class="market-type">
+                Product
+              </div>
+
+              <div class="market-title">
+                Samsung Smartphone
+              </div>
+
+              <div class="market-price">
+                KSh 24,500
+              </div>
+
+              <div class="market-location">
+                📍 Mombasa
+              </div>
+
+              <div class="market-seller">
+                Seller: Coast Electronics
+              </div>
+
+              <div class="market-actions">
+
+                <button
+                  class="message-btn"
+                  data-seller="Coast Electronics"
+                  type="button"
+                >
+                  Message
+                </button>
+
+                <button
+                  class="boost-listing"
+                  type="button"
+                >
+                  Boost
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- PRODUCT 2 -->
+
+          <article
+            class="market-card"
+            data-category="fashion products"
+            data-search="shoes sneakers fashion footwear"
+          >
+
+            <div class="market-image">
+
+              <div class="market-placeholder">
+                👟
+              </div>
+
+            </div>
+
+            <div class="market-body">
+
+              <div class="market-type">
+                Product
+              </div>
+
+              <div class="market-title">
+                Premium Sneakers
+              </div>
+
+              <div class="market-price">
+                KSh 3,500
+              </div>
+
+              <div class="market-location">
+                📍 Kilifi
+              </div>
+
+              <div class="market-seller">
+                Seller: Coastal Styles
+              </div>
+
+              <div class="market-actions">
+
+                <button
+                  class="message-btn"
+                  data-seller="Coastal Styles"
+                  type="button"
+                >
+                  Message
+                </button>
+
+                <button
+                  class="boost-listing"
+                  type="button"
+                >
+                  Boost
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- PRODUCT 3 -->
+
+          <article
+            class="market-card"
+            data-category="food products"
+            data-search="cake birthday cake food bakery"
+          >
+
+            <div class="market-image">
+
+              <div class="market-placeholder">
+                🎂
+              </div>
+
+            </div>
+
+            <div class="market-body">
+
+              <div class="market-type">
+                Product
+              </div>
+
+              <div class="market-title">
+                Custom Celebration Cakes
+              </div>
+
+              <div class="market-price">
+                From KSh 1,500
+              </div>
+
+              <div class="market-location">
+                📍 Mtwapa
+              </div>
+
+              <div class="market-seller">
+                Seller: Sweet Coast Bakery
+              </div>
+
+              <div class="market-actions">
+
+                <button
+                  class="message-btn"
+                  data-seller="Sweet Coast Bakery"
+                  type="button"
+                >
+                  Message
+                </button>
+
+                <button
+                  class="boost-listing"
+                  type="button"
+                >
+                  Boost
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- SERVICE 1 -->
+
+          <article
+            class="market-card"
+            data-category="services"
+            data-search="electrical installation electrician wiring service"
+          >
+
+            <div class="market-image">
+
+              <div class="market-placeholder">
+                ⚡
+              </div>
+
+            </div>
+
+            <div class="market-body">
+
+              <div class="market-type">
+                Service
+              </div>
+
+              <div class="market-title">
+                Electrical Installation
+              </div>
+
+              <div class="market-price">
+                From KSh 2,000
+              </div>
+
+              <div class="market-location">
+                📍 Kilifi
+              </div>
+
+              <div class="market-seller">
+                Provider: Coast Electric
+              </div>
+
+              <div class="market-actions">
+
+                <button
+                  class="message-btn"
+                  data-seller="Coast Electric"
+                  type="button"
+                >
+                  Message
+                </button>
+
+                <button
+                  class="boost-listing"
+                  type="button"
+                >
+                  Boost
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- SERVICE 2 -->
+
+          <article
+            class="market-card"
+            data-category="services"
+            data-search="graphic design logo branding creative service"
+          >
+
+            <div class="market-image">
+
+              <div class="market-placeholder">
+                🎨
+              </div>
+
+            </div>
+
+            <div class="market-body">
+
+              <div class="market-type">
+                Service
+              </div>
+
+              <div class="market-title">
+                Graphic Design & Branding
+              </div>
+
+              <div class="market-price">
+                From KSh 1,000
+              </div>
+
+              <div class="market-location">
+                📍 Mombasa
+              </div>
+
+              <div class="market-seller">
+                Provider: Pixel Studio
+              </div>
+
+              <div class="market-actions">
+
+                <button
+                  class="message-btn"
+                  data-seller="Pixel Studio"
+                  type="button"
+                >
+                  Message
+                </button>
+
+                <button
+                  class="boost-listing"
+                  type="button"
+                >
+                  Boost
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- SERVICE 3 -->
+
+          <article
+            class="market-card"
+            data-category="homes services"
+            data-search="house cleaning cleaning service home"
+          >
+
+            <div class="market-image">
+
+              <div class="market-placeholder">
+                🏠
+              </div>
+
+            </div>
+
+            <div class="market-body">
+
+              <div class="market-type">
+                Service
+              </div>
+
+              <div class="market-title">
+                Home Cleaning Service
+              </div>
+
+              <div class="market-price">
+                From KSh 1,200
+              </div>
+
+              <div class="market-location">
+                📍 Mombasa
+              </div>
+
+              <div class="market-seller">
+                Provider: Clean Coast
+              </div>
+
+              <div class="market-actions">
+
+                <button
+                  class="message-btn"
+                  data-seller="Clean Coast"
+                  type="button"
+                >
+                  Message
+                </button>
+
+                <button
+                  class="boost-listing"
+                  type="button"
+                >
+                  Boost
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        </div>
+
+
+        <!-- EMPTY STATE -->
+
+        <div
+          class="market-empty"
+          id="marketEmpty"
+        >
+
+          <strong>
+            No listings found
+          </strong>
+
+          Try another search or category.
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- BOTTOM NAV -->
+
+    <nav
+      class="bottom-nav"
+      aria-label="Main navigation"
+    >
+
+      <a
+        href="index.html"
+        class="bottom-nav-item"
+        data-nav="create"
+      >
+        <span>＋</span>
+        <small>Create</small>
+      </a>
+
+      <a
+        href="feed.html"
+        class="bottom-nav-item"
+        data-nav="social"
+      >
+        <span>⌂</span>
+        <small>Social</small>
+      </a>
+
+      <a
+        href="marketplace.html"
+        class="bottom-nav-item active"
+        data-nav="marketplace"
+      >
+        <span>🛍</span>
+        <small>Market</small>
+      </a>
+
+      <a
+        href="inbox.html"
+        class="bottom-nav-item"
+        data-nav="inbox"
+      >
+        <span>◌</span>
+        <small>Inbox</small>
+      </a>
+
+      <a
+        href="settings.html"
+        class="bottom-nav-item"
+        data-nav="settings"
+      >
+        <span>⚙</span>
+        <small>Settings</small>
+      </a>
+
+    </nav>
+
+
+    <!-- TOAST -->
+
+    <div
+      class="toast"
+      id="toast"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+  </div>
+
+
+  <!-- POSTX CORE -->
+
+  <script src="js/app.js"></script>
+
+
+  <!-- MARKETPLACE ENGINE -->
+
+  <script>
+    (() => {
+      "use strict";
+
+      const PostX = window.PostX;
+
+      if (!PostX) {
+        console.error("PostX core unavailable.");
+        return;
+      }
+
+      const $ = (selector) =>
+        document.querySelector(selector);
+
+      const $$ = (selector) =>
+        document.querySelectorAll(selector);
+
+
+      /* =======================================================
+         ELEMENTS
+         ======================================================= */
+
+      const searchInput =
+        $("#marketSearch");
+
+      const searchButton =
+        $("#searchButton");
+
+      const grid =
+        $("#marketGrid");
+
+      const empty =
+        $("#marketEmpty");
+
+      const count =
+        $("#listingCount");
+
+
+      /* =======================================================
+         FILTER ENGINE
+         ======================================================= */
+
+      let activeCategory = "all";
+
+
+      function filterListings() {
+
+        const query =
+          (searchInput?.value || "")
+            .trim()
+            .toLowerCase();
+
+        let visible = 0;
+
+        $$(".market-card").forEach(card => {
+
+          const categories =
+            card.dataset.category
+              .toLowerCase();
+
+          const searchableText =
+            (
+              card.dataset.search ||
+              card.textContent
+            ).toLowerCase();
+
+          const categoryMatch =
+            activeCategory === "all" ||
+            categories.includes(activeCategory);
+
+          const searchMatch =
+            !query ||
+            searchableText.includes(query);
+
+          const show =
+            categoryMatch &&
+            searchMatch;
+
+          card.classList.toggle(
+            "hidden",
+            !show
+          );
+
+          if (show) {
+            visible++;
+          }
+
+        });
+
+
+        if (count) {
+          count.textContent =
+            `${visible} ${
+              visible === 1
+                ? "listing"
+                : "listings"
+            }`;
+        }
+
+
+        if (empty) {
+          empty.style.display =
+            visible === 0
+              ? "block"
+              : "none";
+        }
+
+      }
+
+
+      /* =======================================================
+         CATEGORY BUTTONS
+         ======================================================= */
+
+      $$(".category-btn").forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            $$(".category-btn")
+              .forEach(item =>
+                item.classList.remove("active")
+              );
+
+            button.classList.add("active");
+
+            activeCategory =
+              button.dataset.category || "all";
+
+            filterListings();
+
+          }
+        );
+
+      });
+
+
+      /* =======================================================
+         SEARCH
+         ======================================================= */
+
+      if (searchInput) {
+        searchInput.addEventListener(
+          "input",
+          filterListings
+        );
+
+        searchInput.addEventListener(
+          "keydown",
+          event => {
+
+            if (event.key === "Enter") {
+              filterListings();
+            }
+
+          }
+        );
+      }
+
+
+      if (searchButton) {
+        searchButton.addEventListener(
+          "click",
+          filterListings
+        );
+      }
+
+
+      /* =======================================================
+         MESSAGE SELLER
+         ======================================================= */
+
+      $$(".message-btn").forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const seller =
+              button.dataset.seller ||
+              "Seller";
+
+            /*
+             * The production version will create/open
+             * a real PostX conversation through the backend.
+             */
+
+            window.location.href =
+              `inbox.html?seller=${encodeURIComponent(seller)}`;
+
+          }
+        );
+
+      });
+
+
+      /* =======================================================
+         BOOST LISTING
+         ======================================================= */
+
+      $$(".boost-listing").forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            PostX.toast(
+              "Boost setup will connect to the PostX advertising engine and M-PESA backend.",
+              "info",
+              4500
+            );
+
+          }
+        );
+
+      });
+
+
+      /* =======================================================
+         CREATE LISTING
+         ======================================================= */
+
+      $("#createListingBtn")
+        ?.addEventListener(
+          "click",
+          () => {
+
+            /*
+             * Marketplace listings will eventually
+             * use the PostX listing composer.
+             *
+             * Regular user listings:
+             * KSh 10.
+             *
+             * Business listing pricing:
+             * configurable separately.
+             */
+
+            PostX.toast(
+              "Listing creation will open the PostX marketplace composer.",
+              "info",
+              4000
+            );
+
+          }
+        );
+
+
+      /* =======================================================
+         NOTIFICATIONS
+         ======================================================= */
+
+      $("#marketNotificationBtn")
+        ?.addEventListener(
+          "click",
+          () => {
+
+            PostX.toast(
+              "Marketplace notifications will appear here.",
+              "info"
+            );
+
+          }
+        );
+
+
+      /* =======================================================
+         INITIALIZE
+         ======================================================= */
+
+      filterListings();
+
+      console.log(
+        "PostX Marketplace initialized."
+      );
+
+    })();
+  </script>
+
+</body>
+</html>
