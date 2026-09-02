@@ -1,31 +1,855 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#09091A">
-<meta name="description" content="PostX - Social Hub + Marketplace">
-<title>PostX - Social Hub + Marketplace</title>
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="css/style.css">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#09091A;color:#C7D2FE;font-family:Inter,system-ui,sans-serif;min-height:100vh}
-.header{padding:20px 16px;display:flex;justify-content:space-between;align-items:center;max-width:600px;margin:0 auto}
-.logo{font-weight:800;font-size:22px;color:white;letter-spacing:1px}
-.logo span{color:#6366F1}
-.pro-badge{background:#1E1E3A;border:1px solid #6366F1;color:#818CF8;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700}
-.container{max-width:600px;margin:0 auto;padding:0 16px 100px}
-.composer{background:#0F0F24;border:1px solid #1E1E3A;border-radius:16px;padding:16px;margin-top:10px}
-.composer textarea{width:100%;background:#09091A;border:1px solid #1E1E3A;border-radius:12px;color:white;padding:12px;resize:none;min-height:80px;outline:none}
-.composer input{width:100%;background:#09091A;border:1px solid #1E1E3A;border-radius:12px;color:white;padding:12px;margin-top:8px;outline:none}
-.post-btn{width:100%;margin-top:12px;background:#6366F1;border:0;color:white;padding:14px;border-radius:12px;font-weight:700;font-size:15px}
-.post-btn:active{transform:scale(.98)}
-.feed{margin-top:20px}
-.card{background:#0F0F24;border:1px solid #1E1E3A;border-radius:16px;padding:16px;margin-bottom:12px}
-.card.boosted{border-color:#6366F1;box-shadow:0 0 16px rgba(99,102,241,.25)}
-.views{font-size:12px;opacity:.6;margin-top:8px}
-.boost-btn{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:0;font-weight:700}
-.boost-btn.free{background:#6366F1;color:white}
-.boost-btn.done{background:#1E1E3A;color:#818CF8}
-.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#6366F1;border:0;color
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta
+    name="description"
+    content="PostX — Create once. Post everywhere. Connect. Sell. Boost."
+  >
+
+  <meta name="theme-color" content="#07111f">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PostX">
+
+  <title>PostX — Create & Publish</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- =========================================
+       POSTX APP
+  ========================================== -->
+
+  <div class="app">
+
+    <!-- =======================================
+         HEADER
+    ======================================== -->
+
+    <header class="topbar">
+
+      <div class="brand">
+
+        <img
+          src="assets/icons/icon-192.png"
+          alt="PostX"
+          class="brand-icon"
+        >
+
+        <div class="brand-text">
+          <strong>PostX</strong>
+          <span>Create. Publish. Grow.</span>
+        </div>
+
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          type="button"
+          class="icon-btn"
+          id="notificationsBtn"
+          aria-label="Notifications"
+        >
+          🔔
+          <span class="notification-dot"></span>
+        </button>
+
+        <button
+          type="button"
+          class="avatar-btn"
+          id="profileBtn"
+          aria-label="Profile"
+        >
+          J
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================
+         MAIN
+    ======================================== -->
+
+    <main class="main-content">
+
+      <!-- Welcome -->
+
+      <section class="welcome-section">
+
+        <div>
+
+          <p class="eyebrow">POST EVERYWHERE</p>
+
+          <h1>Create your post</h1>
+
+          <p class="welcome-text">
+            Create once. Publish across your connected platforms.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================
+           COMPOSER CARD
+      ====================================== -->
+
+      <section class="composer-card">
+
+        <form id="postForm">
+
+
+          <!-- =================================
+               MEDIA
+          ================================== -->
+
+          <div class="composer-section">
+
+            <div class="section-heading">
+
+              <div>
+                <span class="section-icon">📸</span>
+
+                <div>
+                  <h2>Photo / Video</h2>
+
+                  <p>
+                    Add an image or video to your post.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+
+            <label
+              for="mediaInput"
+              class="media-upload"
+              id="mediaUpload"
+            >
+
+              <div class="upload-icon">
+                ＋
+              </div>
+
+              <strong>
+                Add Photo or Video
+              </strong>
+
+              <span>
+                JPG, PNG, WEBP, MP4 and supported formats
+              </span>
+
+              <input
+                type="file"
+                id="mediaInput"
+                accept="image/*,video/*"
+                hidden
+              >
+
+            </label>
+
+
+            <!-- Preview -->
+
+            <div
+              id="mediaPreview"
+              class="media-preview hidden"
+            ></div>
+
+          </div>
+
+
+          <!-- =================================
+               CAPTION
+          ================================== -->
+
+          <div class="composer-section">
+
+            <label
+              for="caption"
+              class="field-label"
+            >
+              ✍️ Caption
+            </label>
+
+            <textarea
+              id="caption"
+              name="caption"
+              rows="4"
+              maxlength="2200"
+              placeholder="What do you want to share?"
+            ></textarea>
+
+            <div class="character-count">
+              <span id="captionCount">0</span>/2200
+            </div>
+
+          </div>
+
+
+          <!-- =================================
+               TEXT
+          ================================== -->
+
+          <div class="composer-section">
+
+            <label
+              for="postText"
+              class="field-label"
+            >
+              📝 Text
+              <span class="optional">Optional</span>
+            </label>
+
+            <textarea
+              id="postText"
+              name="postText"
+              rows="3"
+              maxlength="5000"
+              placeholder="Add additional text to your post..."
+            ></textarea>
+
+          </div>
+
+
+          <!-- =================================
+               LOCATION
+          ================================== -->
+
+          <div class="composer-section">
+
+            <label
+              for="location"
+              class="field-label"
+            >
+              📍 Location
+              <span class="optional">Optional</span>
+            </label>
+
+            <div class="input-with-icon">
+
+              <span>📍</span>
+
+              <input
+                type="text"
+                id="location"
+                name="location"
+                placeholder="Add a location"
+                autocomplete="off"
+              >
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================
+               HASHTAGS
+          ================================== -->
+
+          <div class="composer-section">
+
+            <label
+              for="hashtags"
+              class="field-label"
+            >
+              #️⃣ Hashtags
+              <span class="optional">Optional</span>
+            </label>
+
+            <input
+              type="text"
+              id="hashtags"
+              name="hashtags"
+              placeholder="#PostX #Kenya #Business"
+              autocomplete="off"
+            >
+
+            <p class="field-help">
+              Separate hashtags with spaces.
+            </p>
+
+          </div>
+
+
+          <!-- =================================
+               PUBLISH TO
+          ================================== -->
+
+          <div class="composer-section">
+
+            <div class="section-heading">
+
+              <div>
+                <span class="section-icon">🌐</span>
+
+                <div>
+
+                  <h2>Publish to</h2>
+
+                  <p>
+                    Choose where your content should appear.
+                  </p>
+
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="platform-list">
+
+
+              <!-- PostX -->
+
+              <label class="platform-option active">
+
+                <input
+                  type="checkbox"
+                  name="platform"
+                  value="postx"
+                  checked
+                >
+
+                <span class="platform-logo postx-logo">
+                  X
+                </span>
+
+                <span class="platform-info">
+
+                  <strong>PostX</strong>
+
+                  <small>
+                    PostX Social Hub
+                  </small>
+
+                </span>
+
+                <span class="checkmark">
+                  ✓
+                </span>
+
+              </label>
+
+
+              <!-- Facebook -->
+
+              <label class="platform-option">
+
+                <input
+                  type="checkbox"
+                  name="platform"
+                  value="facebook"
+                >
+
+                <span class="platform-logo facebook-logo">
+                  f
+                </span>
+
+                <span class="platform-info">
+
+                  <strong>Facebook</strong>
+
+                  <small>
+                    Connected account required
+                  </small>
+
+                </span>
+
+                <span class="checkmark">
+                  ✓
+                </span>
+
+              </label>
+
+
+              <!-- Instagram -->
+
+              <label class="platform-option">
+
+                <input
+                  type="checkbox"
+                  name="platform"
+                  value="instagram"
+                >
+
+                <span class="platform-logo instagram-logo">
+                  ◎
+                </span>
+
+                <span class="platform-info">
+
+                  <strong>Instagram</strong>
+
+                  <small>
+                    Professional account required
+                  </small>
+
+                </span>
+
+                <span class="checkmark">
+                  ✓
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <p class="integration-note">
+              External platforms will use their official APIs,
+              OAuth authorization, and required permissions.
+            </p>
+
+          </div>
+
+
+          <!-- =================================
+               PUBLISHING MODE
+          ================================== -->
+
+          <div class="composer-section">
+
+            <div class="section-heading">
+
+              <div>
+                <span class="section-icon">🗓️</span>
+
+                <div>
+
+                  <h2>Publishing</h2>
+
+                  <p>
+                    Publish now or schedule for later.
+                  </p>
+
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="publish-mode">
+
+              <label class="mode-option active">
+
+                <input
+                  type="radio"
+                  name="publishMode"
+                  value="now"
+                  checked
+                >
+
+                <span class="mode-radio"></span>
+
+                <span>
+                  <strong>Post now</strong>
+                  <small>Publish immediately</small>
+                </span>
+
+              </label>
+
+
+              <label class="mode-option premium">
+
+                <input
+                  type="radio"
+                  name="publishMode"
+                  value="schedule"
+                >
+
+                <span class="mode-radio"></span>
+
+                <span>
+
+                  <strong>
+                    Schedule
+                    <em>PRO</em>
+                  </strong>
+
+                  <small>
+                    Automatically publish later
+                  </small>
+
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <!-- Schedule Controls -->
+
+            <div
+              id="scheduleControls"
+              class="schedule-controls hidden"
+            >
+
+              <div class="schedule-grid">
+
+                <div>
+
+                  <label for="scheduleDate">
+                    Date
+                  </label>
+
+                  <input
+                    type="date"
+                    id="scheduleDate"
+                    name="scheduleDate"
+                  >
+
+                </div>
+
+
+                <div>
+
+                  <label for="scheduleTime">
+                    Time
+                  </label>
+
+                  <input
+                    type="time"
+                    id="scheduleTime"
+                    name="scheduleTime"
+                  >
+
+                </div>
+
+              </div>
+
+
+              <div class="premium-notice">
+
+                <span>⭐</span>
+
+                <div>
+
+                  <strong>PostX Pro</strong>
+
+                  <p>
+                    Scheduled autoposting is a premium feature.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================
+               BOOST
+          ================================== -->
+
+          <div class="composer-section boost-section">
+
+            <div class="boost-header">
+
+              <div>
+
+                <span class="boost-icon">
+                  🚀
+                </span>
+
+                <div>
+
+                  <h2>Boost this post</h2>
+
+                  <p>
+                    Reach more people with paid promotion.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  id="boostToggle"
+                >
+
+                <span class="slider"></span>
+
+              </label>
+
+            </div>
+
+
+            <div
+              id="boostControls"
+              class="boost-controls hidden"
+            >
+
+              <div class="boost-options">
+
+                <button
+                  type="button"
+                  class="boost-location"
+                  data-price="30"
+                  data-location="Kilifi"
+                >
+                  <strong>Kilifi</strong>
+                  <span>KSh 30</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="boost-location"
+                  data-price="80"
+                  data-location="Mombasa"
+                >
+                  <strong>Mombasa</strong>
+                  <span>KSh 80</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="boost-location"
+                  data-price="80"
+                  data-location="Kwale"
+                >
+                  <strong>Kwale</strong>
+                  <span>KSh 80</span>
+                </button>
+
+              </div>
+
+
+              <div class="duration-options">
+
+                <span class="small-label">
+                  Duration
+                </span>
+
+                <div class="duration-list">
+
+                  <button
+                    type="button"
+                    class="duration active"
+                    data-duration="24"
+                  >
+                    24 hours
+                  </button>
+
+                  <button
+                    type="button"
+                    class="duration"
+                    data-duration="72"
+                  >
+                    3 days
+                  </button>
+
+                  <button
+                    type="button"
+                    class="duration"
+                    data-duration="168"
+                  >
+                    7 days
+                  </button>
+
+                </div>
+
+              </div>
+
+
+              <div class="boost-summary">
+
+                <span>
+                  Boost budget
+                </span>
+
+                <strong id="boostPrice">
+                  KSh 0
+                </strong>
+
+              </div>
+
+
+              <div class="sponsored-note">
+
+                🚀 Boosted content will be displayed as
+                <strong>Sponsored / Ad</strong> where required.
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================
+               ACTIONS
+          ================================== -->
+
+          <div class="composer-actions">
+
+            <button
+              type="button"
+              class="secondary-btn"
+              id="saveDraftBtn"
+            >
+              💾 Save Draft
+            </button>
+
+
+            <button
+              type="submit"
+              class="primary-btn"
+              id="publishBtn"
+            >
+              <span>🚀</span>
+              <span id="publishButtonText">
+                Post Everywhere
+              </span>
+            </button>
+
+          </div>
+
+
+        </form>
+
+      </section>
+
+
+      <!-- =====================================
+           QUICK STATS
+      ====================================== -->
+
+      <section class="quick-stats">
+
+        <div class="stat-card">
+
+          <span>📝</span>
+
+          <div>
+            <strong id="draftCount">0</strong>
+            <small>Drafts</small>
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>🗓️</span>
+
+          <div>
+            <strong id="scheduledCount">0</strong>
+            <small>Scheduled</small>
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>🚀</span>
+
+          <div>
+            <strong id="boostCount">0</strong>
+            <small>Active Boosts</small>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- =======================================
+         BOTTOM NAVIGATION
+    ======================================== -->
+
+    <nav class="bottom-nav">
+
+      <a
+        href="index.html"
+        class="nav-item active"
+        aria-label="Create"
+      >
+        <span>＋</span>
+        <small>Create</small>
+      </a>
+
+
+      <a
+        href="feed.html"
+        class="nav-item"
+        aria-label="Social Hub"
+      >
+        <span>⌂</span>
+        <small>Social</small>
+      </a>
+
+
+      <a
+        href="inbox.html"
+        class="nav-item"
+        aria-label="Inbox"
+      >
+        <span>💬</span>
+        <small>Inbox</small>
+      </a>
+
+
+      <a
+        href="settings.html"
+        class="nav-item"
+        aria-label="Settings"
+      >
+        <span>⚙</span>
+        <small>Settings</small>
+      </a>
+
+    </nav>
+
+  </div>
+
+
+  <!-- =========================================
+       TOAST
+  ========================================== -->
+
+  <div
+    id="toast"
+    class="toast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- =========================================
+       APP JAVASCRIPT
+  ========================================== -->
+
+  <script src="js/app.js"></script>
+  <script src="js/composer.js"></script>
+
+</body>
+</html>
