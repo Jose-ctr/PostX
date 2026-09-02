@@ -15,7 +15,7 @@
 
   <meta
     name="description"
-    content="PostX settings — account, notifications, connected platforms, Pro, payments and security."
+    content="PostX Settings — account, notifications, connected platforms, Pro, payments and security."
   >
 
   <title>Settings • PostX</title>
@@ -39,11 +39,6 @@
   >
 
   <style>
-    /* =========================================================
-       POSTX SETTINGS
-       Premium dark navy + neon cyan
-       ========================================================= */
-
     .settings-page {
       padding-bottom: 110px;
     }
@@ -56,7 +51,7 @@
       color: var(--cyan);
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: 0.14em;
+      letter-spacing: .14em;
       margin-bottom: 7px;
     }
 
@@ -105,17 +100,11 @@
       height: 58px;
       flex: 0 0 58px;
       border-radius: 18px;
-      background:
-        linear-gradient(
-          145deg,
-          rgba(0,229,255,.2),
-          rgba(0,229,255,.04)
-        );
+      background: rgba(0,229,255,.08);
       border: 1px solid rgba(0,229,255,.3);
       display: grid;
       place-items: center;
       overflow: hidden;
-      box-shadow: 0 0 24px rgba(0,229,255,.08);
     }
 
     .profile-avatar img {
@@ -177,7 +166,8 @@
       display: grid;
       place-items: center;
       color: var(--cyan);
-      font-size: 18px;
+      font-size: 16px;
+      font-weight: 800;
     }
 
     .setting-content {
@@ -212,10 +202,6 @@
       cursor: pointer;
     }
 
-    .setting-button:hover {
-      border-color: rgba(0,229,255,.35);
-    }
-
     .setting-button.cyan {
       background: rgba(0,229,255,.1);
       border-color: rgba(0,229,255,.28);
@@ -226,6 +212,11 @@
       color: var(--danger);
       border-color: rgba(255,92,112,.2);
       background: rgba(255,92,112,.05);
+    }
+
+    .setting-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
     }
 
     /* Toggle */
@@ -279,18 +270,16 @@
     /* Theme */
 
     .theme-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      display: flex;
+      gap: 7px;
     }
 
     .theme-option {
-      min-width: 76px;
       border: 1px solid var(--border);
       background: var(--card-light);
       color: var(--text-soft);
       border-radius: 10px;
-      padding: 9px 10px;
+      padding: 9px 11px;
       cursor: pointer;
       font-size: 12px;
       font-weight: 700;
@@ -302,28 +291,23 @@
       background: rgba(0,229,255,.08);
     }
 
-    /* Platform */
-
-    .platform-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    /* Platforms */
 
     .platform-logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      border-radius: 12px;
       display: grid;
       place-items: center;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 900;
       background: rgba(255,255,255,.05);
       border: 1px solid var(--border);
     }
 
     .platform-status {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
@@ -367,7 +351,6 @@
     .pro-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
       padding: 5px 9px;
       border-radius: 999px;
       background: rgba(0,229,255,.1);
@@ -376,7 +359,6 @@
       font-size: 10px;
       font-weight: 900;
       letter-spacing: .08em;
-      text-transform: uppercase;
     }
 
     .pro-card h3 {
@@ -463,19 +445,6 @@
       line-height: 1.4;
     }
 
-    /* Light theme support */
-
-    body.light-mode {
-      --bg: #f4f8fb;
-      --bg-soft: #eaf1f6;
-      --card: #ffffff;
-      --card-light: #f3f7fa;
-      --border: rgba(10,30,45,.1);
-      --text: #10202d;
-      --text-soft: #526270;
-      --muted: #71808c;
-    }
-
     @media (max-width: 600px) {
       .setting-row {
         padding: 13px 12px;
@@ -488,10 +457,6 @@
       .setting-button {
         padding: 8px 10px;
         font-size: 12px;
-      }
-
-      .profile-card {
-        padding: 15px;
       }
     }
   </style>
@@ -537,19 +502,25 @@
 
       <section class="settings-header">
 
-        <div class="eyebrow">POSTX SETTINGS</div>
+        <div class="eyebrow">
+          POSTX SETTINGS
+        </div>
 
-        <h1>Settings</h1>
+        <h1>
+          Settings
+        </h1>
 
         <p>
-          Manage your account, preferences, connected platforms,
-          payments and PostX experience.
+          Manage your account, preferences,
+          connected platforms, payments and
+          PostX experience.
         </p>
 
       </section>
 
 
-      <!-- PROFILE -->
+      <!-- ACCOUNT -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -560,11 +531,16 @@
         <div class="card profile-card">
 
           <div class="profile-avatar">
-            <img id="profileAvatar" alt="Profile">
+
+            <img
+              id="profileAvatar"
+              alt="Profile"
+            >
 
             <span id="profileInitial">
               P
             </span>
+
           </div>
 
           <div class="profile-info">
@@ -599,6 +575,7 @@
 
 
       <!-- APPEARANCE -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -658,6 +635,7 @@
 
 
       <!-- NOTIFICATIONS -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -688,6 +666,7 @@
             <div class="setting-control">
 
               <label class="toggle">
+
                 <input
                   type="checkbox"
                   id="notificationsToggle"
@@ -695,6 +674,7 @@
                 >
 
                 <span class="toggle-slider"></span>
+
               </label>
 
             </div>
@@ -723,6 +703,7 @@
             <div class="setting-control">
 
               <label class="toggle">
+
                 <input
                   type="checkbox"
                   id="soundToggle"
@@ -730,6 +711,7 @@
                 >
 
                 <span class="toggle-slider"></span>
+
               </label>
 
             </div>
@@ -742,6 +724,7 @@
 
 
       <!-- CONNECTED PLATFORMS -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -750,8 +733,6 @@
         </div>
 
         <div class="card settings-list">
-
-          <!-- FACEBOOK -->
 
           <div class="setting-row">
 
@@ -789,8 +770,6 @@
           </div>
 
 
-          <!-- INSTAGRAM -->
-
           <div class="setting-row">
 
             <div class="platform-logo">
@@ -827,8 +806,6 @@
           </div>
 
 
-          <!-- WHATSAPP -->
-
           <div class="setting-row">
 
             <div class="platform-logo">
@@ -861,8 +838,6 @@
 
           </div>
 
-
-          <!-- X -->
 
           <div class="setting-row">
 
@@ -902,6 +877,7 @@
 
 
       <!-- POSTX PRO -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -920,8 +896,10 @@
           </h3>
 
           <p>
-            Unlock premium publishing and scheduling capabilities
-            as PostX grows into your complete social workspace.
+            Unlock premium publishing and
+            scheduling capabilities as PostX
+            grows into your complete social
+            workspace.
           </p>
 
           <div class="pro-price">
@@ -963,6 +941,7 @@
 
 
       <!-- PAYMENTS -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -1043,6 +1022,7 @@
 
 
       <!-- SECURITY -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -1123,6 +1103,7 @@
 
 
       <!-- PWA -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -1162,6 +1143,7 @@
 
 
       <!-- ACCOUNT ACTIONS -->
+
       <section class="settings-section">
 
         <div class="settings-section-title">
@@ -1210,6 +1192,7 @@
 
 
     <!-- BOTTOM NAV -->
+
     <nav
       class="bottom-nav"
       aria-label="Main navigation"
@@ -1255,6 +1238,7 @@
 
 
     <!-- TOAST -->
+
     <div
       class="toast"
       id="toast"
@@ -1265,522 +1249,13 @@
   </div>
 
 
-  <!-- CORE APP -->
+  <!-- POSTX CORE -->
+
   <script src="js/app.js"></script>
 
+  <!-- SETTINGS ENGINE -->
 
-  <!-- SETTINGS LOGIC -->
-  <script>
-
-    (() => {
-
-      "use strict";
-
-
-      /* =======================================================
-         STATE
-         ======================================================= */
-
-      const PostX = window.PostX;
-
-      if (!PostX) {
-        console.error("PostX app core was not loaded.");
-        return;
-      }
-
-
-      const state = PostX.getState();
-
-
-      /* =======================================================
-         HELPERS
-         ======================================================= */
-
-      const $ = (selector) =>
-        document.querySelector(selector);
-
-      const $$ = (selector) =>
-        document.querySelectorAll(selector);
-
-
-      function saveSettings(changes) {
-
-        PostX.updateState({
-          settings: {
-            ...(PostX.getState().settings || {}),
-            ...changes
-          }
-        });
-
-      }
-
-
-      /* =======================================================
-         PROFILE
-         ======================================================= */
-
-      function loadProfile() {
-
-        const currentState = PostX.getState();
-
-        const user =
-          currentState.user || {};
-
-        const name =
-          user.name || "PostX User";
-
-        const avatar =
-          user.avatar || "";
-
-        $("#profileName").textContent = name;
-
-        $("#profileInitial").textContent =
-          name.trim().charAt(0).toUpperCase() || "P";
-
-        if (avatar) {
-
-          $("#profileAvatar").src = avatar;
-          $("#profileAvatar").style.display = "block";
-          $("#profileInitial").style.display = "none";
-
-        }
-
-      }
-
-
-      /* =======================================================
-         NOTIFICATIONS
-         ======================================================= */
-
-      function loadNotificationSettings() {
-
-        const currentState = PostX.getState();
-
-        const settings =
-          currentState.settings || {};
-
-        $("#notificationsToggle").checked =
-          settings.notifications !== false;
-
-        $("#soundToggle").checked =
-          settings.sound !== false;
-
-      }
-
-
-      $("#notificationsToggle")
-        .addEventListener("change", (event) => {
-
-          saveSettings({
-            notifications: event.target.checked
-          });
-
-          PostX.toast(
-            event.target.checked
-              ? "Notifications enabled."
-              : "Notifications disabled.",
-            "success"
-          );
-
-        });
-
-
-      $("#soundToggle")
-        .addEventListener("change", (event) => {
-
-          saveSettings({
-            sound: event.target.checked
-          });
-
-          PostX.toast(
-            event.target.checked
-              ? "Notification sound enabled."
-              : "Notification sound disabled.",
-            "success"
-          );
-
-        });
-
-
-      /* =======================================================
-         THEME
-         ======================================================= */
-
-      function applyTheme(theme) {
-
-        const buttons =
-          $$(".theme-option");
-
-        buttons.forEach(button => {
-
-          button.classList.toggle(
-            "active",
-            button.dataset.theme === theme
-          );
-
-        });
-
-        if (theme === "light") {
-
-          document.body.classList.add(
-            "light-mode"
-          );
-
-        } else {
-
-          document.body.classList.remove(
-            "light-mode"
-          );
-
-        }
-
-        saveSettings({
-          theme
-        });
-
-      }
-
-
-      const savedTheme =
-        (PostX.getState().settings || {}).theme ||
-        "dark";
-
-
-      applyTheme(savedTheme);
-
-
-      $$(".theme-option").forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            applyTheme(
-              button.dataset.theme
-            );
-
-            PostX.toast(
-              `${button.textContent.trim()} theme enabled.`,
-              "success"
-            );
-
-          }
-        );
-
-      });
-
-
-      /* =======================================================
-         PROFILE BUTTON
-         ======================================================= */
-
-      $("#editProfileBtn")
-        .addEventListener("click", () => {
-
-          PostX.toast(
-            "Profile editing will connect to the PostX account backend.",
-            "info"
-          );
-
-        });
-
-
-      /* =======================================================
-         PLATFORM CONNECTIONS
-         ======================================================= */
-
-      const platformState =
-        (PostX.getState().settings || {})
-          .connectedPlatforms || {};
-
-
-      function updatePlatformUI(
-        platform,
-        connected
-      ) {
-
-        const key =
-          platform.toLowerCase();
-
-        const status =
-          $(`#${key}Status`);
-
-        const button =
-          document.querySelector(
-            `.connect-platform[data-platform="${platform}"]`
-          );
-
-        if (!status || !button) return;
-
-
-        status.classList.toggle(
-          "connected",
-          connected
-        );
-
-        status.textContent =
-          connected
-            ? "Connected"
-            : "Not connected";
-
-
-        button.textContent =
-          connected
-            ? "Manage"
-            : "Connect";
-
-      }
-
-
-      ["Facebook", "Instagram"].forEach(platform => {
-
-        updatePlatformUI(
-          platform,
-          !!platformState[
-            platform.toLowerCase()
-          ]
-        );
-
-      });
-
-
-      $$(".connect-platform").forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const platform =
-              button.dataset.platform;
-
-            /*
-             * Production:
-             * This button will launch the secure
-             * backend OAuth flow.
-             *
-             * No access tokens or client secrets
-             * belong in this PWA.
-             */
-
-            PostX.toast(
-              `${platform} connection will use secure OAuth through the PostX backend.`,
-              "info",
-              4500
-            );
-
-          }
-        );
-
-      });
-
-
-      /* =======================================================
-         POSTX PRO
-         ======================================================= */
-
-      $("#upgradeProBtn")
-        .addEventListener("click", () => {
-
-          PostX.toast(
-            "PostX Pro checkout will use secure M-PESA payment processing.",
-            "info",
-            4500
-          );
-
-        });
-
-
-      /* =======================================================
-         PAYMENTS
-         ======================================================= */
-
-      $("#paymentBtn")
-        .addEventListener("click", () => {
-
-          PostX.toast(
-            "M-PESA payment management will connect to the secure backend.",
-            "info",
-            4500
-          );
-
-        });
-
-
-      $("#paymentHistoryBtn")
-        .addEventListener("click", () => {
-
-          PostX.toast(
-            "Payment history will appear here once the payment backend is connected.",
-            "info",
-            4500
-          );
-
-        });
-
-
-      /* =======================================================
-         SECURITY
-         ======================================================= */
-
-      $("#securityBtn")
-        .addEventListener("click", () => {
-
-          PostX.toast(
-            "Security controls will be handled by the PostX account backend.",
-            "info",
-            4000
-          );
-
-        });
-
-
-      $("#sessionsBtn")
-        .addEventListener("click", () => {
-
-          PostX.toast(
-            "Active sessions will be available through the account backend.",
-            "info",
-            4000
-          );
-
-        });
-
-
-      /* =======================================================
-         PWA INSTALL
-         ======================================================= */
-
-      let deferredInstallPrompt = null;
-
-
-      window.addEventListener(
-        "beforeinstallprompt",
-        event => {
-
-          event.preventDefault();
-
-          deferredInstallPrompt = event;
-
-          $("#installStatus").textContent =
-            "PostX is ready to be installed on your device.";
-
-          $("#installBtn").disabled = false;
-
-        }
-      );
-
-
-      $("#installBtn")
-        .addEventListener("click", async () => {
-
-          if (!deferredInstallPrompt) {
-
-            PostX.toast(
-              "If PostX is already installed, you are all set. Otherwise use your browser's Add to Home Screen option.",
-              "info",
-              5000
-            );
-
-            return;
-
-          }
-
-
-          deferredInstallPrompt.prompt();
-
-          const result =
-            await deferredInstallPrompt.userChoice;
-
-          if (
-            result &&
-            result.outcome === "accepted"
-          ) {
-
-            PostX.toast(
-              "PostX installation started.",
-              "success"
-            );
-
-          } else {
-
-            PostX.toast(
-              "PostX installation was cancelled.",
-              "info"
-            );
-
-          }
-
-          deferredInstallPrompt = null;
-
-        });
-
-
-      window.addEventListener(
-        "appinstalled",
-        () => {
-
-          $("#installStatus").textContent =
-            "PostX is installed on your device.";
-
-          $("#installBtn").textContent =
-            "Installed";
-
-          $("#installBtn").disabled = true;
-
-          PostX.toast(
-            "PostX installed successfully.",
-            "success"
-          );
-
-        }
-      );
-
-
-      /* =======================================================
-         LOGOUT
-         ======================================================= */
-
-      $("#logoutBtn")
-        .addEventListener("click", () => {
-
-          const confirmed =
-            window.confirm(
-              "Log out of PostX?"
-            );
-
-          if (!confirmed) return;
-
-
-          /*
-           * Production:
-           * logout must invalidate the server-side
-           * session/token through the backend.
-           *
-           * Local prototype only:
-           * keep the workspace data intact.
-           */
-
-          PostX.toast(
-            "Logout will be handled by the secure PostX authentication backend.",
-            "info",
-            4500
-          );
-
-        });
-
-
-      /* =======================================================
-         INITIALIZE
-         ======================================================= */
-
-      loadProfile();
-
-      loadNotificationSettings();
-
-
-    })();
-
-  </script>
+  <script src="js/settings.js"></script>
 
 </body>
 </html>
