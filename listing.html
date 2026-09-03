@@ -1,1 +1,357 @@
+/* =========================================================
+   PostX Marketplace
+   Frontend Marketplace Engine
+   ========================================================= */
 
+(function () {
+    "use strict";
+
+    let currentTypeFilter = "all";
+
+    const searchInput = document.getElementById("marketplace-search");
+    const categoryFilter = document.getElementById("category-filter");
+    const sortFilter = document.getElementById("sort-filter");
+    const grid = document.getElementById("listings-grid");
+    const emptyState = document.getElementById("no-results-state");
+
+    if (!grid) return;
+
+    function getCards() {
+        return Array.from(grid.querySelectorAll(".listing-card"));
+    }
+
+    window.switchType = function (type, button) {
+        currentTypeFilter = type;
+
+        document.querySelectorAll(".type-btn").forEach(function (btn) {
+            btn.classList.remove("active");
+        });
+
+        if (button) {
+            button.classList.add("active");
+        }
+
+        filterListings();
+    };
+
+    window.filterListings = function () {
+        const query = searchInput
+            ? searchInput.value.toLowerCase().trim()
+            : "";
+
+        const category = categoryFilter
+            ? categoryFilter.value
+            : "all";
+
+        const sort = sortFilter
+            ? sortFilter.value
+            : "featured";
+
+        const cards = getCards();
+        let visibleCount = 0;
+
+        cards.forEach(function (card) {
+            const type = card.dataset.type || "";
+            const cardCategory = card.dataset.category || "";
+
+            const title =
+                card.querySelector(".listing-title")?.textContent
+                    .toLowerCase() || "";
+
+            const description =
+                card.querySelector(".listing-description")?.textContent
+                    .toLowerCase() || "";
+
+            const seller =
+                card.querySelector(".seller-name")?.textContent
+                    .toLowerCase() || "";
+
+            const location =
+                card.querySelector(".listing-location")?.textContent
+                    .toLowerCase() || "";
+
+            const matchesType =
+                currentTypeFilter === "all" ||
+                type === currentTypeFilter;
+
+            const matchesCategory =
+                category === "all" ||
+                cardCategory === category;
+
+            const matchesSearch =
+                !query ||
+                title.includes(query) ||
+                description.includes(query) ||
+                seller.includes(query) ||
+                location.includes(query);
+
+            const visible =
+                matchesType &&
+                matchesCategory &&
+                matchesSearch;
+
+            card.style.display = visible ? "flex" : "none";
+
+            if (visible) {
+                visibleCount++;
+            }
+        });
+
+        sortCards(sort);
+
+        if (emptyState) {
+            emptyState.classList.toggle(
+                "hidden",
+                visibleCount !== 0
+            );
+        }
+    };
+
+    function sortCards(sort) {
+        const cards = getCards();
+
+        cards.sort(function (a, b) {
+            const priceA =
+                Number(a.dataset.price || 0);
+
+            const priceB =
+                Number(b.dataset.price || 0);
+
+            const sponsoredA =
+                a.dataset.sponsored === "true";
+
+            const sponsoredB =
+                b.dataset.sponsored === "true";
+
+            if (sort === "featured") {
+                return Number(sponsoredB) - Number(sponsoredA);
+            }
+
+            if (sort === "price-low") {
+                return priceA - priceB;
+            }
+
+            if (sort === "price-high") {
+                return priceB - priceA;
+            }
+
+            return 0;
+        });
+
+        cards.forEach(function (card) {
+            grid.appendChild(card);
+        });
+    }
+
+    window.resetFilters = function () {
+        if (searchInput) {
+            searchInput.value = "";
+        }
+
+        if (categoryFilter) {
+            categoryFilter.value = "all";
+        }
+
+        if (sortFilter) {
+            sortFilter.value = "featured";
+        }
+
+        currentTypeFilter = "all";
+
+        const buttons =
+            document.querySelectorAll(".type-btn");
+
+        buttons.forEach(function (btn) {
+            btn.classList.remove("active");
+        });
+
+        if (buttons.length) {
+            buttons[0].classList.add("active");
+        }
+
+        filterListings();
+    };
+
+    /*
+     * Load locally created marketplace listings.
+     * These are frontend/demo listings until the backend API
+     * is connected.
+     */
+    function loadLocalListings() {
+        try {
+            if (
+                !window.PostX ||
+                typeof window.PostX.getState !== "function"
+            ) {
+                return;
+            }
+
+            const state = window.PostX.getState();
+
+            const listings =
+                Array.isArray(state.marketplaceListings)
+                    ? state.marketplaceListings
+                    : [];
+
+            listings
+                .filter(function (listing) {
+                    return listing.status !== "deleted";
+                })
+                .forEach(function (listing) {
+                    addLocalListing(listing);
+                });
+
+        } catch (error) {
+            console.warn(
+                "PostX Marketplace local listings unavailable:",
+                error
+            );
+        }
+    }
+
+    function addLocalListing(listing) {
+        if (!listing || !listing.id) return;
+
+        if (
+            grid.querySelector(
+                '[data-listing-id="' + listing.id + '"]'
+            )
+        ) {
+            return;
+        }
+
+        const card =
+            document.createElement("article");
+
+        card.className = "listing-card";
+
+        card.dataset.listingId = listing.id;
+        card.dataset.type = listing.type || "product";
+        card.dataset.category = listing.category || "";
+        card.dataset.price = listing.price || 0;
+        card.dataset.sponsored =
+            listing.boost?.enabled ? "true" : "false";
+
+        const unit =
+            listing.priceUnit &&
+            listing.priceUnit !== "fixed"
+                ? " / " + listing.priceUnit
+                : "";
+
+        const typeLabel =
+            listing.type === "service"
+                ? "Service"
+                : "Product";
+
+        const typeIcon =
+            listing.type === "service"
+                ? "fa-briefcase"
+                : "fa-box";
+
+        const contactLabel =
+            listing.type === "service"
+                ? "Contact Provider"
+                : "Message Seller";
+
+        const contactIcon =
+            listing.type === "service"
+                ? "fa-paper-plane"
+                : "fa-comment-dots";
+
+        const boostBadge =
+            listing.boost?.enabled
+                ? `
+                    <span class="badge-sponsored">
+                        <i class="fa-solid fa-bolt"></i>
+                        Boosted
+                    </span>
+                  `
+                : "";
+
+        card.innerHTML = `
+            <div class="card-image-wrapper">
+                <div class="marketplace-image-placeholder">
+                    <i class="fa-solid ${typeIcon}"></i>
+                </div>
+
+                ${boostBadge}
+
+                <span class="badge-type ${listing.type || "product"}">
+                    <i class="fa-solid ${typeIcon}"></i>
+                    ${typeLabel}
+                </span>
+            </div>
+
+            <div class="card-content">
+
+                <div class="card-header">
+                    <span class="listing-price">
+                        KSh ${Number(listing.price || 0).toLocaleString()}
+                        <small>${unit}</small>
+                    </span>
+
+                    <span class="listing-location">
+                        <i class="fa-solid fa-location-dot"></i>
+                        ${escapeHTML(listing.location || "Kenya")}
+                    </span>
+                </div>
+
+                <h3 class="listing-title">
+                    ${escapeHTML(listing.title || "Untitled Listing")}
+                </h3>
+
+                <p class="listing-description">
+                    ${escapeHTML(listing.description || "")}
+                </p>
+
+                <div class="seller-info">
+                    <div class="seller-avatar marketplace-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <div class="seller-details">
+                        <span class="seller-name">
+                            PostX Seller
+                        </span>
+
+                        <span class="seller-rating">
+                            <i class="fa-solid fa-location-dot"></i>
+                            ${escapeHTML(listing.location || "Kenya")}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <a
+                        href="inbox.html?listing=${encodeURIComponent(listing.id)}"
+                        class="btn-message"
+                    >
+                        <i class="fa-solid ${contactIcon}"></i>
+                        ${contactLabel}
+                    </a>
+                </div>
+
+            </div>
+        `;
+
+        grid.prepend(card);
+    }
+
+    function escapeHTML(value) {
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /*
+     * Initialisation
+     */
+    document.addEventListener("DOMContentLoaded", function () {
+        loadLocalListings();
+        filterListings();
+    });
+
+})();
