@@ -1,1703 +1,2326 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>PostX Marketplace</title>
-<meta name="description" content="PostX Marketplace — Buy, sell and discover products and services.">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Marketplace • PostX</title>
+
+<meta
+    name="description"
+    content="PostX Marketplace — Buy, sell and discover products and services."
+>
+
+<meta name="theme-color" content="#05080D">
 
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
 
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
-    /* =========================================================
-       POSTX MARKETPLACE
-       ========================================================= */
-
-    .marketplace-page {
-        min-height: 100vh;
-        padding-bottom: 90px;
-    }
 
-    .marketplace-container {
-        width: min(1200px, 94%);
-        margin: 0 auto;
-    }
+:root{
+    --bg:#05080D;
+    --bg2:#08111B;
+    --card:#0B1622;
+    --card2:#102031;
 
-    /* Header */
-
-    .marketplace-header {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: rgba(5, 8, 13, .94);
-        backdrop-filter: blur(18px);
-        border-bottom: 1px solid rgba(0, 229, 255, .10);
-    }
+    --cyan:#00E5FF;
+    --cyan-soft:rgba(0,229,255,.07);
+    --cyan-border:rgba(0,229,255,.22);
 
-    .marketplace-header-inner {
-        min-height: 70px;
-        width: min(1200px, 94%);
-        margin: auto;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
+    --border:rgba(255,255,255,.07);
 
-    .marketplace-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        color: #f4f8fb;
-        font-weight: 800;
-        font-size: 20px;
-        white-space: nowrap;
-    }
+    --text:#F4F8FB;
+    --muted:#718292;
 
-    .marketplace-brand img {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        object-fit: cover;
-        box-shadow: 0 0 18px rgba(0, 229, 255, .18);
-    }
+    --gold:#FFC857;
+    --green:#21D07A;
+}
 
-    .marketplace-brand span {
-        color: #00e5ff;
-    }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-    .marketplace-search {
-        flex: 1;
-        position: relative;
-    }
+html{
+    scroll-behavior:smooth;
+}
 
-    .marketplace-search i {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #718292;
-    }
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(0,229,255,.07),
+            transparent 38%
+        ),
+        var(--bg);
 
-    .marketplace-search input {
-        width: 100%;
-        height: 44px;
-        padding: 0 16px 0 44px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,.08);
-        background: #0b1622;
-        color: #f4f8fb;
-        outline: none;
-        box-sizing: border-box;
-    }
+    color:var(--text);
 
-    .marketplace-search input:focus {
-        border-color: rgba(0,229,255,.55);
-        box-shadow: 0 0 0 3px rgba(0,229,255,.08);
-    }
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
 
-    .marketplace-header-actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
+button,
+input,
+select{
+    font:inherit;
+}
 
-    .header-icon {
-        width: 42px;
-        height: 42px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        color: #aab8c5;
-        text-decoration: none;
-        background: #0b1622;
-        border: 1px solid rgba(255,255,255,.07);
-    }
+button,
+a{
+    -webkit-tap-highlight-color:transparent;
+}
 
-    .header-icon:hover {
-        color: #00e5ff;
-        border-color: rgba(0,229,255,.35);
-    }
+a{
+    color:inherit;
+}
 
-    /* Hero */
-
-    .marketplace-hero {
-        margin-top: 28px;
-        padding: 30px;
-        border-radius: 20px;
-        background:
-            radial-gradient(circle at 85% 20%, rgba(0,229,255,.10), transparent 35%),
-            linear-gradient(145deg, #0b1622, #08111b);
-        border: 1px solid rgba(0,229,255,.10);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 25px;
-        box-shadow: 0 15px 45px rgba(0,0,0,.18);
-    }
 
-    .marketplace-hero h1 {
-        margin: 0 0 10px;
-        font-size: clamp(28px, 5vw, 42px);
-        color: #f4f8fb;
-    }
+/* =========================================================
+   HEADER
+========================================================= */
 
-    .marketplace-hero h1 span {
-        color: #00e5ff;
-    }
+.marketplace-header{
 
-    .marketplace-hero p {
-        margin: 0;
-        max-width: 680px;
-        color: #aab8c5;
-        line-height: 1.6;
-    }
+    position:sticky;
+    top:0;
+    z-index:100;
 
-    .create-listing-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 13px 18px;
-        border-radius: 12px;
-        background: #00e5ff;
-        color: #031016;
-        text-decoration: none;
-        font-weight: 800;
-        white-space: nowrap;
-        box-shadow: 0 0 22px rgba(0,229,255,.18);
-    }
+    background:rgba(5,8,13,.95);
 
-    .create-listing-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 0 28px rgba(0,229,255,.30);
-    }
+    backdrop-filter:blur(18px);
 
-    /* Marketplace notice */
-
-    .marketplace-notice {
-        margin-top: 18px;
-        padding: 14px 17px;
-        border-radius: 13px;
-        background: rgba(0,229,255,.055);
-        border: 1px solid rgba(0,229,255,.10);
-        color: #aab8c5;
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-        font-size: 14px;
-    }
+    border-bottom:
+        1px solid var(--border);
+}
 
-    .marketplace-notice i {
-        color: #00e5ff;
-        margin-top: 2px;
-    }
+.marketplace-header-inner{
 
-    /* Controls */
-
-    .marketplace-controls {
-        margin: 22px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
+    width:min(1200px,94%);
 
-    .type-tabs {
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        padding-bottom: 2px;
-    }
+    min-height:68px;
 
-    .type-btn {
-        border: 1px solid rgba(255,255,255,.08);
-        background: #0b1622;
-        color: #aab8c5;
-        border-radius: 10px;
-        padding: 10px 15px;
-        cursor: pointer;
-        white-space: nowrap;
-        font-weight: 700;
-    }
+    margin:auto;
 
-    .type-btn:hover,
-    .type-btn.active {
-        color: #00e5ff;
-        border-color: rgba(0,229,255,.35);
-        background: rgba(0,229,255,.07);
-    }
+    display:flex;
 
-    .filter-group {
-        display: flex;
-        gap: 10px;
-    }
+    align-items:center;
 
-    .filter-select {
-        height: 42px;
-        padding: 0 35px 0 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,.08);
-        background: #0b1622;
-        color: #aab8c5;
-        outline: none;
-    }
+    gap:15px;
+}
 
-    .filter-select:focus {
-        border-color: rgba(0,229,255,.35);
-    }
+.marketplace-brand{
 
-    /* Results */
+    display:flex;
 
-    .results-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
-    }
+    align-items:center;
 
-    .results-count {
-        color: #718292;
-        font-size: 14px;
-    }
+    gap:9px;
 
-    .results-count strong {
-        color: #f4f8fb;
-    }
+    text-decoration:none;
 
-    /* Grid */
+    font-size:19px;
 
-    .marketplace-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 18px;
-    }
+    font-weight:900;
 
-    .listing-card {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        overflow: hidden;
-        border-radius: 17px;
-        background: #0b1622;
-        border: 1px solid rgba(255,255,255,.07);
-        transition: .2s ease;
-    }
+    white-space:nowrap;
+}
 
-    .listing-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(0,229,255,.22);
-        box-shadow: 0 15px 35px rgba(0,0,0,.20);
-    }
+.marketplace-brand img{
 
-    .listing-card.boosted {
-        border-color: rgba(0,229,255,.24);
-    }
+    width:38px;
+    height:38px;
 
-    .listing-image {
-        height: 210px;
-        position: relative;
-        background: #08111b;
-        overflow: hidden;
-    }
+    border-radius:10px;
 
-    .listing-image img {
-        width: 100%;
-        height: 100%;
-        display: block;
-        object-fit: cover;
-    }
+    object-fit:cover;
 
-    .listing-badges {
-        position: absolute;
-        top: 11px;
-        left: 11px;
-        right: 11px;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 8px;
-    }
+    box-shadow:
+        0 0 20px rgba(0,229,255,.18);
+}
 
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 6px 9px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 800;
-        backdrop-filter: blur(10px);
-    }
+.marketplace-brand span{
+    color:var(--cyan);
+}
 
-    .badge-type {
-        color: #fff;
-        background: rgba(5,8,13,.78);
-    }
 
-    .badge-boosted {
-        color: #031016;
-        background: #00e5ff;
-    }
+/* =========================================================
+   SEARCH
+========================================================= */
 
-    .listing-body {
-        padding: 17px;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
+.marketplace-search{
 
-    .listing-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        align-items: flex-start;
-    }
+    flex:1;
 
-    .listing-price {
-        color: #00e5ff;
-        font-size: 20px;
-        font-weight: 850;
-    }
+    position:relative;
+}
 
-    .listing-price small {
-        font-size: 11px;
-        color: #718292;
-        font-weight: 600;
-    }
+.marketplace-search i{
 
-    .listing-location {
-        color: #718292;
-        font-size: 11px;
-        text-align: right;
-    }
+    position:absolute;
 
-    .listing-location i {
-        color: #00e5ff;
-    }
+    left:14px;
+    top:50%;
 
-    .listing-title {
-        margin: 12px 0 7px;
-        color: #f4f8fb;
-        font-size: 16px;
-        line-height: 1.35;
-    }
+    transform:translateY(-50%);
 
-    .listing-description {
-        margin: 0;
-        color: #8d9cab;
-        font-size: 13px;
-        line-height: 1.5;
-    }
+    color:var(--muted);
 
-    .seller {
-        margin-top: 16px;
-        padding-top: 13px;
-        border-top: 1px solid rgba(255,255,255,.06);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+    pointer-events:none;
+}
 
-    .seller-avatar {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 1px solid rgba(0,229,255,.18);
-    }
+.marketplace-search input{
 
-    .seller-info {
-        min-width: 0;
-    }
+    width:100%;
 
-    .seller-name {
-        display: block;
-        color: #dce5eb;
-        font-size: 13px;
-        font-weight: 700;
-    }
+    height:43px;
 
-    .seller-name i {
-        color: #00e5ff;
-        font-size: 11px;
-    }
+    padding:
+        0
+        15px
+        0
+        42px;
 
-    .seller-meta {
-        display: block;
-        margin-top: 3px;
-        color: #718292;
-        font-size: 11px;
-    }
+    border:
+        1px solid var(--border);
+
+    border-radius:12px;
+
+    outline:none;
+
+    background:var(--card);
+
+    color:var(--text);
+}
+
+.marketplace-search input::placeholder{
+    color:#607080;
+}
+
+.marketplace-search input:focus{
+
+    border-color:var(--cyan-border);
+
+    box-shadow:
+        0 0 0 3px var(--cyan-soft);
+}
+
+
+/* =========================================================
+   HEADER ACTIONS
+========================================================= */
+
+.marketplace-header-actions{
+
+    display:flex;
+
+    gap:8px;
+}
+
+.header-icon{
+
+    width:42px;
+    height:42px;
+
+    display:grid;
+
+    place-items:center;
+
+    border-radius:11px;
+
+    background:var(--card);
+
+    border:
+        1px solid var(--border);
+
+    color:#AAB8C5;
+
+    text-decoration:none;
+}
+
+.header-icon:hover{
+
+    color:var(--cyan);
+
+    border-color:var(--cyan-border);
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.marketplace-page{
+
+    width:min(1200px,94%);
+
+    margin:auto;
+
+    padding-bottom:100px;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.marketplace-hero{
+
+    margin-top:26px;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    border:
+        1px solid var(--cyan-border);
+
+    background:
+
+        radial-gradient(
+            circle at 90% 20%,
+            rgba(0,229,255,.11),
+            transparent 34%
+        ),
+
+        linear-gradient(
+            145deg,
+            #0B1622,
+            #08111B
+        );
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:25px;
+}
+
+.marketplace-hero h1{
+
+    font-size:
+        clamp(28px,5vw,42px);
+
+    line-height:1.15;
+
+    margin-bottom:10px;
+}
+
+.marketplace-hero h1 span{
+    color:var(--cyan);
+}
+
+.marketplace-hero p{
+
+    max-width:680px;
+
+    color:#AAB8C5;
+
+    font-size:14px;
+
+    line-height:1.6;
+}
+
+.create-listing-btn{
+
+    min-width:175px;
+
+    padding:13px 18px;
+
+    border-radius:12px;
+
+    background:var(--cyan);
+
+    color:#031016;
+
+    text-decoration:none;
+
+    font-weight:900;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    box-shadow:
+        0 0 25px rgba(0,229,255,.16);
+}
+
+.create-listing-btn:hover{
+    transform:translateY(-1px);
+}
+
+
+/* =========================================================
+   NOTICE
+========================================================= */
+
+.marketplace-notice{
+
+    margin-top:17px;
+
+    padding:14px 16px;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:10px;
+
+    border-radius:13px;
+
+    background:var(--cyan-soft);
+
+    border:
+        1px solid rgba(0,229,255,.12);
+
+    color:#AAB8C5;
+
+    font-size:13px;
+
+    line-height:1.5;
+}
+
+.marketplace-notice i{
+    color:var(--cyan);
+    margin-top:2px;
+}
+
+.marketplace-notice strong{
+    color:var(--text);
+}
+
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+.marketplace-controls{
+
+    margin:22px 0 16px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:14px;
+
+    flex-wrap:wrap;
+}
+
+.type-tabs{
+
+    display:flex;
+
+    gap:8px;
+
+    overflow-x:auto;
+
+    scrollbar-width:none;
+}
+
+.type-tabs::-webkit-scrollbar{
+    display:none;
+}
+
+.type-btn{
+
+    flex-shrink:0;
+
+    padding:10px 15px;
+
+    border-radius:10px;
+
+    border:
+        1px solid var(--border);
+
+    background:var(--card);
+
+    color:#AAB8C5;
+
+    cursor:pointer;
+
+    font-size:13px;
+
+    font-weight:800;
+}
+
+.type-btn:hover,
+.type-btn.active{
+
+    color:var(--cyan);
+
+    border-color:var(--cyan-border);
+
+    background:var(--cyan-soft);
+}
+
+.filter-group{
+
+    display:flex;
+
+    gap:9px;
+}
+
+.filter-select{
+
+    height:42px;
+
+    padding:0 12px;
+
+    border-radius:10px;
+
+    border:
+        1px solid var(--border);
+
+    outline:none;
+
+    background:var(--card);
+
+    color:#AAB8C5;
+
+    cursor:pointer;
+}
+
+
+/* =========================================================
+   RESULTS
+========================================================= */
+
+.results-bar{
+
+    margin-bottom:13px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+}
+
+.results-count{
+
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+.results-count strong{
+    color:var(--text);
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.marketplace-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+    gap:18px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.listing-card{
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-width:0;
+
+    border-radius:17px;
 
-    .seller-meta i {
-        color: #ffc857;
+    background:var(--card);
+
+    border:
+        1px solid var(--border);
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.listing-card:hover{
+
+    transform:translateY(-3px);
+
+    border-color:var(--cyan-border);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.25);
+}
+
+.listing-card.boosted{
+
+    border-color:
+        rgba(0,229,255,.30);
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.listing-image{
+
+    position:relative;
+
+    height:215px;
+
+    background:var(--bg2);
+
+    overflow:hidden;
+}
+
+.listing-image img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    display:block;
+}
+
+.no-image{
+
+    width:100%;
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    color:var(--muted);
+
+    font-size:12px;
+}
+
+.no-image-icon{
+    font-size:32px;
+    opacity:.55;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.listing-badges{
+
+    position:absolute;
+
+    top:11px;
+    left:11px;
+    right:11px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:8px;
+}
+
+.badge{
+
+    padding:6px 9px;
+
+    border-radius:8px;
+
+    font-size:10px;
+
+    font-weight:900;
+
+    backdrop-filter:blur(10px);
+}
+
+.badge-type{
+
+    color:#fff;
+
+    background:
+        rgba(5,8,13,.80);
+}
+
+.badge-boosted{
+
+    color:#031016;
+
+    background:var(--cyan);
+}
+
+
+/* =========================================================
+   CARD BODY
+========================================================= */
+
+.listing-body{
+
+    padding:16px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+}
+
+.listing-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:10px;
+}
+
+.listing-price{
+
+    color:var(--cyan);
+
+    font-size:20px;
+
+    font-weight:900;
+}
+
+.listing-price small{
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    font-weight:600;
+}
+
+.listing-location{
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    text-align:right;
+
+    white-space:nowrap;
+}
+
+.listing-location i{
+    color:var(--cyan);
+}
+
+.listing-title{
+
+    margin-top:11px;
+
+    color:var(--text);
+
+    font-size:16px;
+
+    line-height:1.35;
+}
+
+.listing-description{
+
+    margin-top:7px;
+
+    color:#8D9CAB;
+
+    font-size:13px;
+
+    line-height:1.5;
+}
+
+
+/* =========================================================
+   SELLER
+========================================================= */
+
+.seller{
+
+    margin-top:15px;
+
+    padding-top:13px;
+
+    border-top:
+        1px solid var(--border);
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+}
+
+.seller-avatar{
+
+    width:38px;
+    height:38px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    background:var(--card2);
+
+    border:
+        1px solid var(--cyan-border);
+}
+
+.seller-info{
+    min-width:0;
+}
+
+.seller-name{
+
+    display:block;
+
+    color:#DCE5EB;
+
+    font-size:13px;
+
+    font-weight:800;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+}
+
+.verified{
+    color:var(--cyan);
+    font-size:10px;
+}
+
+.seller-meta{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:var(--muted);
+
+    font-size:11px;
+}
+
+.rating{
+    color:var(--gold);
+}
+
+
+/* =========================================================
+   VIEW BUTTON
+========================================================= */
+
+.view-btn{
+
+    margin-top:14px;
+
+    min-height:43px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:7px;
+
+    border-radius:10px;
+
+    background:var(--card2);
+
+    border:
+        1px solid var(--border);
+
+    color:#DCE5EB;
+
+    text-decoration:none;
+
+    font-size:13px;
+
+    font-weight:800;
+}
+
+.view-btn:hover{
+
+    color:var(--cyan);
+
+    border-color:var(--cyan-border);
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state{
+
+    display:none;
+
+    padding:65px 20px;
+
+    text-align:center;
+
+    border-radius:17px;
+
+    border:
+        1px dashed rgba(255,255,255,.10);
+
+    background:var(--card);
+}
+
+.empty-state.show{
+    display:block;
+}
+
+.empty-state i{
+
+    color:var(--cyan);
+
+    font-size:42px;
+
+    margin-bottom:14px;
+}
+
+.empty-state h3{
+
+    font-size:18px;
+
+    margin-bottom:7px;
+}
+
+.empty-state p{
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    margin-bottom:17px;
+}
+
+.reset-btn{
+
+    padding:10px 15px;
+
+    border-radius:10px;
+
+    border:
+        1px solid var(--cyan-border);
+
+    background:var(--cyan-soft);
+
+    color:var(--cyan);
+
+    cursor:pointer;
+
+    font-weight:800;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.marketplace-footer{
+
+    margin-top:45px;
+
+    padding:25px 0;
+
+    border-top:
+        1px solid var(--border);
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    text-align:center;
+}
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.marketplace-bottom-nav{
+
+    position:fixed;
+
+    bottom:0;
+    left:0;
+    right:0;
+
+    z-index:150;
+
+    height:67px;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:space-around;
+
+    background:
+        rgba(5,8,13,.97);
+
+    backdrop-filter:blur(18px);
+
+    border-top:
+        1px solid var(--border);
+}
+
+.marketplace-bottom-nav a{
+
+    color:var(--muted);
+
+    text-decoration:none;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:4px;
+
+    font-size:10px;
+}
+
+.marketplace-bottom-nav i{
+    font-size:18px;
+}
+
+.marketplace-bottom-nav a.active,
+.marketplace-bottom-nav a:hover{
+    color:var(--cyan);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:950px){
+
+    .marketplace-grid{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
     }
+}
 
-    .message-btn {
-        margin-top: 14px;
-        width: 100%;
-        height: 42px;
-        border-radius: 10px;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        gap: 7px;
-        text-decoration: none;
-        color: #dce5eb;
-        background: #102031;
-        border: 1px solid rgba(255,255,255,.07);
-        font-weight: 700;
-        font-size: 13px;
-        box-sizing: border-box;
+@media(max-width:700px){
+
+    .marketplace-page{
+        padding-bottom:85px;
     }
 
-    .message-btn:hover {
-        color: #00e5ff;
-        border-color: rgba(0,229,255,.30);
+    .marketplace-header-inner{
+        min-height:62px;
+        gap:9px;
     }
 
-    /* Empty */
-
-    .empty-state {
-        display: none;
-        text-align: center;
-        padding: 70px 20px;
-        border-radius: 17px;
-        border: 1px dashed rgba(255,255,255,.10);
-        background: #0b1622;
+    .marketplace-brand strong{
+        display:none;
     }
 
-    .empty-state.show {
-        display: block;
+    .marketplace-brand img{
+        width:36px;
+        height:36px;
     }
+
+    .marketplace-hero{
+
+        margin-top:18px;
 
-    .empty-state i {
-        font-size: 40px;
-        color: #00e5ff;
-        margin-bottom: 15px;
+        padding:22px;
+
+        flex-direction:column;
+
+        align-items:flex-start;
     }
 
-    .empty-state h3 {
-        margin: 0 0 7px;
-        color: #f4f8fb;
+    .marketplace-hero h1{
+        font-size:29px;
     }
 
-    .empty-state p {
-        color: #718292;
-        margin: 0 0 18px;
+    .create-listing-btn{
+        width:100%;
     }
 
-    .reset-btn {
-        border: 1px solid rgba(0,229,255,.28);
-        background: rgba(0,229,255,.06);
-        color: #00e5ff;
-        border-radius: 10px;
-        padding: 10px 15px;
-        cursor: pointer;
-        font-weight: 700;
+    .marketplace-controls{
+        align-items:stretch;
     }
 
-    /* Footer */
-
-    .marketplace-footer {
-        margin-top: 45px;
-        padding: 25px 0;
-        border-top: 1px solid rgba(255,255,255,.06);
-        color: #718292;
-        font-size: 12px;
-        text-align: center;
+    .type-tabs{
+        width:100%;
     }
 
-    /* Mobile bottom navigation */
-
-    .marketplace-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 150;
-        display: none;
-        height: 67px;
-        background: rgba(5,8,13,.96);
-        backdrop-filter: blur(18px);
-        border-top: 1px solid rgba(255,255,255,.08);
-        justify-content: space-around;
-        align-items: center;
+    .filter-group{
+        width:100%;
     }
 
-    .marketplace-bottom-nav a {
-        color: #718292;
-        text-decoration: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        font-size: 10px;
+    .filter-select{
+        flex:1;
+        min-width:0;
     }
 
-    .marketplace-bottom-nav a i {
-        font-size: 18px;
+    .marketplace-grid{
+        grid-template-columns:1fr;
     }
 
-    .marketplace-bottom-nav a.active,
-    .marketplace-bottom-nav a:hover {
-        color: #00e5ff;
+    .listing-image{
+        height:225px;
     }
 
-    /* Responsive */
+    .marketplace-bottom-nav{
+        display:flex;
+    }
+}
 
-    @media (max-width: 950px) {
-        .marketplace-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+@media(max-width:420px){
 
-        .marketplace-header-actions .optional-desktop {
-            display: none;
-        }
+    .marketplace-header-actions{
+        display:none;
     }
 
-    @media (max-width: 700px) {
-        .marketplace-page {
-            padding-bottom: 85px;
-        }
-
-        .marketplace-header-inner {
-            min-height: 62px;
-            gap: 9px;
-        }
-
-        .marketplace-brand strong {
-            display: none;
-        }
-
-        .marketplace-brand img {
-            width: 36px;
-            height: 36px;
-        }
-
-        .marketplace-search input {
-            height: 40px;
-        }
-
-        .marketplace-hero {
-            margin-top: 18px;
-            padding: 22px;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .marketplace-hero h1 {
-            font-size: 29px;
-        }
-
-        .create-listing-btn {
-            width: 100%;
-        }
-
-        .marketplace-controls {
-            align-items: stretch;
-        }
-
-        .type-tabs {
-            width: 100%;
-        }
-
-        .filter-group {
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .marketplace-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .listing-image {
-            height: 225px;
-        }
-
-        .marketplace-bottom-nav {
-            display: flex;
-        }
-
-        .marketplace-footer {
-            margin-bottom: 10px;
-        }
+    .marketplace-search{
+        width:100%;
     }
 
-    @media (max-width: 420px) {
-        .marketplace-header-actions {
-            display: none;
-        }
-
-        .marketplace-search {
-            width: 100%;
-        }
-
-        .marketplace-notice {
-            font-size: 12px;
-        }
+    .marketplace-notice{
+        font-size:12px;
     }
+}
+
 </style>
 
-</head><body class="postx-dark-theme"><div class="marketplace-page"><!-- =========================================================
+</head>
+
+<body>
+
+
+<!-- =========================================================
      HEADER
-     ========================================================= -->
+========================================================= -->
+
 <header class="marketplace-header">
+
     <div class="marketplace-header-inner">
 
-        <a href="index.html" class="marketplace-brand">
-            <img src="assets/icons/icon-192.png" alt="PostX">
-            <strong>Post<span>X</span></strong>
+        <a
+            href="index.html"
+            class="marketplace-brand"
+        >
+
+            <img
+                src="assets/icons/icon-192.png"
+                alt="PostX"
+            >
+
+            <strong>
+                Post<span>X</span>
+            </strong>
+
         </a>
 
+
         <div class="marketplace-search">
+
             <i class="fa-solid fa-magnifying-glass"></i>
+
             <input
-                type="search"
                 id="marketplaceSearch"
+                type="search"
                 placeholder="Search products, services..."
                 autocomplete="off"
             >
+
         </div>
+
 
         <div class="marketplace-header-actions">
 
-            <a href="inbox.html" class="header-icon optional-desktop" aria-label="Messages">
-                <i class="fa-solid fa-message"></i>
+            <a
+                href="inbox.html"
+                class="header-icon"
+                aria-label="Inbox"
+            >
+                💬
             </a>
 
-            <a href="index.html" class="header-icon" aria-label="Create">
-                <i class="fa-solid fa-plus"></i>
+            <a
+                href="index.html"
+                class="header-icon"
+                aria-label="Create"
+            >
+                ＋
             </a>
 
         </div>
+
     </div>
+
 </header>
 
 
-<main class="marketplace-container">
 
-    <!-- =====================================================
-         HERO
-         ===================================================== -->
-    <section class="marketplace-hero">
+<main class="marketplace-page">
 
-        <div>
-            <h1>PostX <span>Marketplace</span></h1>
 
-            <p>
-                Discover products and services from people and businesses
-                across your community.
-            </p>
-        </div>
+<!-- =========================================================
+     HERO
+========================================================= -->
 
-        <a href="create-listing.html" class="create-listing-btn">
-            <i class="fa-solid fa-plus"></i>
-            Create Listing
-        </a>
+<section class="marketplace-hero">
 
-    </section>
+    <div>
 
-
-    <!-- =====================================================
-         MARKETPLACE NOTICE
-         ===================================================== -->
-    <div class="marketplace-notice">
-
-        <i class="fa-solid fa-circle-info"></i>
-
-        <div>
-            <strong>Sell on PostX</strong><br>
-            Create a product or service listing and connect directly
-            with interested customers. Boosting is optional.
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         CONTROLS
-         ===================================================== -->
-    <section class="marketplace-controls">
-
-        <div class="type-tabs">
-
-            <button
-                class="type-btn active"
-                data-type="all"
-                type="button">
-                All
-            </button>
-
-            <button
-                class="type-btn"
-                data-type="product"
-                type="button">
-                <i class="fa-solid fa-box"></i>
-                Products
-            </button>
-
-            <button
-                class="type-btn"
-                data-type="service"
-                type="button">
-                <i class="fa-solid fa-briefcase"></i>
-                Services
-            </button>
-
-        </div>
-
-
-        <div class="filter-group">
-
-            <select id="categoryFilter" class="filter-select">
-                <option value="all">All Categories</option>
-                <option value="electronics">Electronics & Tech</option>
-                <option value="software">Software & IT</option>
-                <option value="design">Design & Creative</option>
-                <option value="fashion">Fashion</option>
-                <option value="home">Home & Lifestyle</option>
-                <option value="marketing">Marketing</option>
-                <option value="professional">Professional Services</option>
-            </select>
-
-
-            <select id="sortFilter" class="filter-select">
-                <option value="featured">Featured</option>
-                <option value="newest">Newest</option>
-                <option value="price-low">Price: Low</option>
-                <option value="price-high">Price: High</option>
-            </select>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         RESULTS
-         ===================================================== -->
-    <div class="results-bar">
-
-        <div class="results-count">
-            <strong id="listingCount">6</strong>
-            listings available
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         LISTINGS
-         ===================================================== -->
-    <section id="marketplaceGrid" class="marketplace-grid">
-
-
-        <!-- PRODUCT 1 -->
-        <article
-            class="listing-card boosted"
-            data-type="product"
-            data-category="electronics"
-            data-price="4500"
-            data-date="6"
-            data-sponsored="true"
-            data-search="smart watch bluetooth electronics fitness kilifi">
-
-            <div class="listing-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&auto=format&fit=crop&q=80"
-                    alt="Smart Watch"
-                    loading="lazy"
-                >
-
-                <div class="listing-badges">
-
-                    <span class="badge badge-boosted">
-                        <i class="fa-solid fa-bolt"></i>
-                        Boosted
-                    </span>
-
-                    <span class="badge badge-type">
-                        Product
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="listing-body">
-
-                <div class="listing-top">
-
-                    <div class="listing-price">
-                        KSh 4,500
-                    </div>
-
-                    <div class="listing-location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        Kilifi
-                    </div>
-
-                </div>
-
-                <h3 class="listing-title">
-                    Premium Smart Watch
-                </h3>
-
-                <p class="listing-description">
-                    Smart fitness watch with health tracking,
-                    Bluetooth calling and long battery life.
-                </p>
-
-
-                <div class="seller">
-
-                    <img
-                        class="seller-avatar"
-                        src="https://i.pravatar.cc/100?img=12"
-                        alt="Seller"
-                        loading="lazy"
-                    >
-
-                    <div class="seller-info">
-
-                        <span class="seller-name">
-                            Tech Hub Kilifi
-                            <i class="fa-solid fa-circle-check"></i>
-                        </span>
-
-                        <span class="seller-meta">
-                            <i class="fa-solid fa-star"></i>
-                            4.9 · Business
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <a
-                    href="inbox.html?item=smart-watch"
-                    class="message-btn">
-                    <i class="fa-solid fa-comment-dots"></i>
-                    Message Seller
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- SERVICE 2 -->
-        <article
-            class="listing-card boosted"
-            data-type="service"
-            data-category="software"
-            data-price="2500"
-            data-date="5"
-            data-sponsored="true"
-            data-search="website software developer web app kenya remote">
-
-            <div class="listing-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&auto=format&fit=crop&q=80"
-                    alt="Web Development"
-                    loading="lazy"
-                >
-
-                <div class="listing-badges">
-
-                    <span class="badge badge-boosted">
-                        <i class="fa-solid fa-bolt"></i>
-                        Sponsored
-                    </span>
-
-                    <span class="badge badge-type">
-                        Service
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="listing-body">
-
-                <div class="listing-top">
-
-                    <div class="listing-price">
-                        KSh 2,500
-                        <small>/ project</small>
-                    </div>
-
-                    <div class="listing-location">
-                        <i class="fa-solid fa-globe"></i>
-                        Kenya
-                    </div>
-
-                </div>
-
-                <h3 class="listing-title">
-                    Website & Web App Development
-                </h3>
-
-                <p class="listing-description">
-                    Professional websites, PWAs, dashboards,
-                    APIs and custom business applications.
-                </p>
-
-
-                <div class="seller">
-
-                    <img
-                        class="seller-avatar"
-                        src="https://i.pravatar.cc/100?img=33"
-                        alt="Service Provider"
-                        loading="lazy"
-                    >
-
-                    <div class="seller-info">
-
-                        <span class="seller-name">
-                            Digital Developer
-                            <i class="fa-solid fa-circle-check"></i>
-                        </span>
-
-                        <span class="seller-meta">
-                            <i class="fa-solid fa-star"></i>
-                            5.0 · Professional
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <a
-                    href="inbox.html?item=web-development"
-                    class="message-btn">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Contact Provider
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- PRODUCT 3 -->
-        <article
-            class="listing-card"
-            data-type="product"
-            data-category="electronics"
-            data-price="28000"
-            data-date="4"
-            data-sponsored="false"
-            data-search="laptop computer hp dell electronics mombasa">
-
-            <div class="listing-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700&auto=format&fit=crop&q=80"
-                    alt="Laptop"
-                    loading="lazy"
-                >
-
-                <div class="listing-badges">
-
-                    <span></span>
-
-                    <span class="badge badge-type">
-                        Product
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="listing-body">
-
-                <div class="listing-top">
-
-                    <div class="listing-price">
-                        KSh 28,000
-                    </div>
-
-                    <div class="listing-location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        Mombasa
-                    </div>
-
-                </div>
-
-                <h3 class="listing-title">
-                    Business Laptop — 8GB RAM / 256GB SSD
-                </h3>
-
-                <p class="listing-description">
-                    Clean and reliable laptop suitable for business,
-                    school, programming and everyday work.
-                </p>
-
-
-                <div class="seller">
-
-                    <img
-                        class="seller-avatar"
-                        src="https://i.pravatar.cc/100?img=60"
-                        alt="Seller"
-                        loading="lazy"
-                    >
-
-                    <div class="seller-info">
-
-                        <span class="seller-name">
-                            Mombasa Computers
-                        </span>
-
-                        <span class="seller-meta">
-                            <i class="fa-solid fa-star"></i>
-                            4.8 · Seller
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <a
-                    href="inbox.html?item=business-laptop"
-                    class="message-btn">
-                    <i class="fa-solid fa-comment-dots"></i>
-                    Message Seller
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- SERVICE 4 -->
-        <article
-            class="listing-card"
-            data-type="service"
-            data-category="design"
-            data-price="3500"
-            data-date="3"
-            data-sponsored="false"
-            data-search="logo graphic design branding poster kilifi">
-
-            <div class="listing-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1626785774573-4b799315345d?w=700&auto=format&fit=crop&q=80"
-                    alt="Graphic Design"
-                    loading="lazy"
-                >
-
-                <div class="listing-badges">
-
-                    <span></span>
-
-                    <span class="badge badge-type">
-                        Service
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="listing-body">
-
-                <div class="listing-top">
-
-                    <div class="listing-price">
-                        KSh 3,500
-                        <small>/ project</small>
-                    </div>
-
-                    <div class="listing-location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        Kilifi
-                    </div>
-
-                </div>
-
-                <h3 class="listing-title">
-                    Logo & Brand Identity Design
-                </h3>
-
-                <p class="listing-description">
-                    Professional logos, posters, social media graphics
-                    and complete visual identity packages.
-                </p>
-
-
-                <div class="seller">
-
-                    <img
-                        class="seller-avatar"
-                        src="https://i.pravatar.cc/100?img=47"
-                        alt="Designer"
-                        loading="lazy"
-                    >
-
-                    <div class="seller-info">
-
-                        <span class="seller-name">
-                            Creative Studio
-                            <i class="fa-solid fa-circle-check"></i>
-                        </span>
-
-                        <span class="seller-meta">
-                            <i class="fa-solid fa-star"></i>
-                            4.9 · Designer
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <a
-                    href="inbox.html?item=brand-design"
-                    class="message-btn">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Contact Provider
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- PRODUCT 5 -->
-        <article
-            class="listing-card"
-            data-type="product"
-            data-category="fashion"
-            data-price="2500"
-            data-date="2"
-            data-sponsored="false"
-            data-search="shoes sneakers fashion clothing mombasa kenya">
-
-            <div class="listing-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&auto=format&fit=crop&q=80"
-                    alt="Sneakers"
-                    loading="lazy"
-                >
-
-                <div class="listing-badges">
-
-                    <span></span>
-
-                    <span class="badge badge-type">
-                        Product
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="listing-body">
-
-                <div class="listing-top">
-
-                    <div class="listing-price">
-                        KSh 2,500
-                    </div>
-
-                    <div class="listing-location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        Mombasa
-                    </div>
-
-                </div>
-
-                <h3 class="listing-title">
-                    Premium Casual Sneakers
-                </h3>
-
-                <p class="listing-description">
-                    Comfortable everyday sneakers available in multiple
-                    sizes and styles.
-                </p>
-
-
-                <div class="seller">
-
-                    <img
-                        class="seller-avatar"
-                        src="https://i.pravatar.cc/100?img=22"
-                        alt="Seller"
-                        loading="lazy"
-                    >
-
-                    <div class="seller-info">
-
-                        <span class="seller-name">
-                            Coast Fashion
-                        </span>
-
-                        <span class="seller-meta">
-                            <i class="fa-solid fa-star"></i>
-                            4.7 · Seller
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <a
-                    href="inbox.html?item=sneakers"
-                    class="message-btn">
-                    <i class="fa-solid fa-comment-dots"></i>
-                    Message Seller
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- SERVICE 6 -->
-        <article
-            class="listing-card"
-            data-type="service"
-            data-category="professional"
-            data-price="1500"
-            data-date="1"
-            data-sponsored="false"
-            data-search="electrical electrician installation repair kenya kilifi">
-
-            <div class="listing-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=700&auto=format&fit=crop&q=80"
-                    alt="Electrical Services"
-                    loading="lazy"
-                >
-
-                <div class="listing-badges">
-
-                    <span></span>
-
-                    <span class="badge badge-type">
-                        Service
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="listing-body">
-
-                <div class="listing-top">
-
-                    <div class="listing-price">
-                        KSh 1,500
-                        <small>/ visit</small>
-                    </div>
-
-                    <div class="listing-location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        Kilifi
-                    </div>
-
-                </div>
-
-                <h3 class="listing-title">
-                    Electrical Installation & Repair
-                </h3>
-
-                <p class="listing-description">
-                    Residential and commercial electrical installation,
-                    troubleshooting and maintenance services.
-                </p>
-
-
-                <div class="seller">
-
-                    <img
-                        class="seller-avatar"
-                        src="https://i.pravatar.cc/100?img=68"
-                        alt="Service Provider"
-                        loading="lazy"
-                    >
-
-                    <div class="seller-info">
-
-                        <span class="seller-name">
-                            Coast Electrical Services
-                        </span>
-
-                        <span class="seller-meta">
-                            <i class="fa-solid fa-star"></i>
-                            5.0 · Professional
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <a
-                    href="inbox.html?item=electrical-service"
-                    class="message-btn">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Contact Provider
-                </a>
-
-            </div>
-
-        </article>
-
-    </section>
-
-
-    <!-- =====================================================
-         EMPTY STATE
-         ===================================================== -->
-    <section id="emptyState" class="empty-state">
-
-        <i class="fa-solid fa-box-open"></i>
-
-        <h3>No listings found</h3>
+        <h1>
+            PostX <span>Marketplace</span>
+        </h1>
 
         <p>
-            Try another search or change your filters.
+            Buy, sell and discover products and services
+            directly through PostX.
         </p>
 
-        <button id="resetFilters" class="reset-btn">
-            Reset Filters
+    </div>
+
+
+    <a
+        href="create-listing.html"
+        class="create-listing-btn"
+    >
+        ＋ Create Listing
+    </a>
+
+</section>
+
+
+
+<!-- =========================================================
+     NOTICE
+========================================================= -->
+
+<div class="marketplace-notice">
+
+    <i>ℹ️</i>
+
+    <div>
+
+        <strong>Sell on PostX</strong><br>
+
+        Create a product or service listing and connect
+        directly with interested customers.
+        Boosting is optional.
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     CONTROLS
+========================================================= -->
+
+<section class="marketplace-controls">
+
+    <div class="type-tabs">
+
+        <button
+            class="type-btn active"
+            data-type="all"
+            type="button"
+        >
+            All
         </button>
 
-    </section>
+        <button
+            class="type-btn"
+            data-type="product"
+            type="button"
+        >
+            📦 Products
+        </button>
+
+        <button
+            class="type-btn"
+            data-type="service"
+            type="button"
+        >
+            🛠 Services
+        </button>
+
+    </div>
 
 
-    <!-- =====================================================
-         FOOTER
-         ===================================================== -->
-    <footer class="marketplace-footer">
+    <div class="filter-group">
 
-        <div>
-            © 2026 PostX Network
-        </div>
+        <select
+            id="categoryFilter"
+            class="filter-select"
+        >
 
-        <div style="margin-top:7px;">
-            Buy · Sell · Discover · Connect
-        </div>
+            <option value="all">
+                All Categories
+            </option>
 
-    </footer>
+            <option value="electronics">
+                Electronics & Tech
+            </option>
+
+            <option value="software">
+                Software & IT
+            </option>
+
+            <option value="design">
+                Design & Creative
+            </option>
+
+            <option value="fashion">
+                Fashion
+            </option>
+
+            <option value="home">
+                Home & Lifestyle
+            </option>
+
+            <option value="marketing">
+                Marketing
+            </option>
+
+            <option value="professional">
+                Professional Services
+            </option>
+
+        </select>
+
+
+        <select
+            id="sortFilter"
+            class="filter-select"
+        >
+
+            <option value="featured">
+                Featured
+            </option>
+
+            <option value="newest">
+                Newest
+            </option>
+
+            <option value="price-low">
+                Price: Low
+            </option>
+
+            <option value="price-high">
+                Price: High
+            </option>
+
+        </select>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     RESULTS
+========================================================= -->
+
+<div class="results-bar">
+
+    <div class="results-count">
+
+        <strong id="listingCount">0</strong>
+        listings available
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     DYNAMIC MARKETPLACE
+========================================================= -->
+
+<section
+    id="marketplaceGrid"
+    class="marketplace-grid"
+></section>
+
+
+
+<!-- =========================================================
+     EMPTY
+========================================================= -->
+
+<section
+    id="emptyState"
+    class="empty-state"
+>
+
+    <i>📦</i>
+
+    <h3>
+        No listings found
+    </h3>
+
+    <p>
+        Try another search or change your filters.
+    </p>
+
+    <button
+        id="resetFilters"
+        class="reset-btn"
+        type="button"
+    >
+        Reset Filters
+    </button>
+
+</section>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="marketplace-footer">
+
+    <div>
+        © 2026 PostX Network
+    </div>
+
+    <div style="margin-top:7px;">
+        Buy · Sell · Discover · Connect
+    </div>
+
+</footer>
 
 </main>
 
 
+
 <!-- =========================================================
-     MOBILE NAVIGATION
-     ========================================================= -->
+     MOBILE NAV
+========================================================= -->
+
 <nav class="marketplace-bottom-nav">
 
     <a href="index.html">
-        <i class="fa-solid fa-plus"></i>
+        <span>＋</span>
         <span>Create</span>
     </a>
 
     <a href="feed.html">
-        <i class="fa-solid fa-house"></i>
+        <span>⌂</span>
         <span>Social</span>
     </a>
 
-    <a href="marketplace.html" class="active">
-        <i class="fa-solid fa-store"></i>
+    <a
+        href="marketplace.html"
+        class="active"
+    >
+        <span>▣</span>
         <span>Market</span>
     </a>
 
     <a href="inbox.html">
-        <i class="fa-solid fa-message"></i>
+        <span>💬</span>
         <span>Inbox</span>
     </a>
 
     <a href="settings.html">
-        <i class="fa-solid fa-gear"></i>
+        <span>⚙</span>
         <span>Settings</span>
     </a>
 
 </nav>
 
-</div><script src="js/app.js"></script><script>
-/* =============================================================
-   POSTX MARKETPLACE ENGINE
-   ============================================================= */
 
-(function () {
+
+<script>
+
+/* =========================================================
+   POSTX MARKETPLACE ENGINE
+========================================================= */
+
+(function(){
 
     "use strict";
 
-    const searchInput = document.getElementById("marketplaceSearch");
-    const categoryFilter = document.getElementById("categoryFilter");
-    const sortFilter = document.getElementById("sortFilter");
-    const grid = document.getElementById("marketplaceGrid");
-    const emptyState = document.getElementById("emptyState");
-    const listingCount = document.getElementById("listingCount");
-    const resetButton = document.getElementById("resetFilters");
 
-    const typeButtons = document.querySelectorAll(".type-btn");
-    const cards = Array.from(document.querySelectorAll(".listing-card"));
+    const grid =
+        document.getElementById("marketplaceGrid");
+
+    const searchInput =
+        document.getElementById("marketplaceSearch");
+
+    const categoryFilter =
+        document.getElementById("categoryFilter");
+
+    const sortFilter =
+        document.getElementById("sortFilter");
+
+    const listingCount =
+        document.getElementById("listingCount");
+
+    const emptyState =
+        document.getElementById("emptyState");
+
+    const resetButton =
+        document.getElementById("resetFilters");
+
+
+    const typeButtons =
+        document.querySelectorAll(".type-btn");
+
 
     let currentType = "all";
 
 
-    /* ---------------------------------------------------------
-       TYPE FILTER
-       --------------------------------------------------------- */
 
-    typeButtons.forEach(button => {
+    /* =======================================================
+       LOAD POSTX LISTINGS
+    ======================================================= */
 
-        button.addEventListener("click", function () {
+    function loadListings(){
 
-            typeButtons.forEach(btn => {
-                btn.classList.remove("active");
+        let posts = [];
+
+        try{
+
+            posts =
+                JSON.parse(
+                    localStorage.getItem("postx_posts")
+                    || "[]"
+                );
+
+        }catch(error){
+
+            console.error(
+                "PostX marketplace data error:",
+                error
+            );
+
+            posts = [];
+
+        }
+
+
+        /*
+         Only marketplace listings should appear here.
+
+         Supported flags:
+
+         marketplace
+         isListing
+         listing
+         type = product/service
+        */
+
+        const marketplacePosts =
+            posts.filter(function(post){
+
+                return (
+                    post.marketplace === true ||
+                    post.isListing === true ||
+                    post.listing === true ||
+                    post.type === "product" ||
+                    post.type === "service"
+                );
+
             });
 
-            this.classList.add("active");
 
-            currentType = this.dataset.type;
+        return marketplacePosts;
 
-            applyFilters();
-
-        });
-
-    });
-
-
-    /* ---------------------------------------------------------
-       SEARCH
-       --------------------------------------------------------- */
-
-    if (searchInput) {
-        searchInput.addEventListener("input", applyFilters);
     }
 
 
-    /* ---------------------------------------------------------
-       CATEGORY
-       --------------------------------------------------------- */
 
-    if (categoryFilter) {
-        categoryFilter.addEventListener("change", applyFilters);
+    /* =======================================================
+       FALLBACK DEMO LISTINGS
+    ======================================================= */
+
+    function demoListings(){
+
+        return [
+
+            {
+                id:"demo-smartwatch",
+                title:"Premium Smart Watch",
+                caption:
+                    "Smart fitness watch with Bluetooth calling and long battery life.",
+                description:
+                    "Smart fitness watch with health tracking, Bluetooth calling and long battery life.",
+                price:4500,
+                type:"product",
+                category:"electronics",
+                location:"Kilifi",
+                seller:"Tech Hub Kilifi",
+                rating:"4.9",
+                boosted:true,
+                mediaUrl:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&auto=format&fit=crop&q=80"
+            },
+
+            {
+                id:"demo-web-development",
+                title:"Website & Web App Development",
+                caption:
+                    "Professional websites, PWAs, dashboards and custom business applications.",
+                description:
+                    "Professional websites, PWAs, dashboards, APIs and custom business applications.",
+                price:2500,
+                type:"service",
+                category:"software",
+                location:"Kenya",
+                seller:"Digital Developer",
+                rating:"5.0",
+                boosted:true,
+                mediaUrl:"https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&auto=format&fit=crop&q=80"
+            },
+
+            {
+                id:"demo-laptop",
+                title:"Business Laptop",
+                caption:
+                    "Clean and reliable laptop suitable for business, school and programming.",
+                description:
+                    "Clean and reliable laptop suitable for business, school, programming and everyday work.",
+                price:28000,
+                type:"product",
+                category:"electronics",
+                location:"Mombasa",
+                seller:"Mombasa Computers",
+                rating:"4.8",
+                boosted:false,
+                mediaUrl:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700&auto=format&fit=crop&q=80"
+            }
+
+        ];
+
     }
 
 
-    /* ---------------------------------------------------------
-       SORT
-       --------------------------------------------------------- */
 
-    if (sortFilter) {
-        sortFilter.addEventListener("change", applyFilters);
+    /* =======================================================
+       DATA
+    ======================================================= */
+
+    let listings = loadListings();
+
+
+    /*
+      Keep demo marketplace visible while testing.
+
+      Once real listings exist, the demos disappear.
+    */
+
+    if(listings.length === 0){
+
+        listings = demoListings();
+
     }
 
 
-    /* ---------------------------------------------------------
-       APPLY FILTERS
-       --------------------------------------------------------- */
 
-    function applyFilters() {
+    /* =======================================================
+       HELPERS
+    ======================================================= */
 
-        const query = searchInput
-            ? searchInput.value.toLowerCase().trim()
-            : "";
+    function escapeHTML(value){
 
-        const category = categoryFilter
-            ? categoryFilter.value
-            : "all";
+        return String(value ?? "")
+            .replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;")
+            .replace(/'/g,"&#039;");
 
-        const sort = sortFilter
-            ? sortFilter.value
-            : "featured";
+    }
 
 
-        let visibleCards = [];
+
+    function getTitle(post){
+
+        return (
+            post.title ||
+            post.name ||
+            post.caption?.slice(0,70) ||
+            "PostX Listing"
+        );
+
+    }
 
 
-        cards.forEach(card => {
 
-            const type = card.dataset.type;
-            const cardCategory = card.dataset.category;
-            const searchableText = (
-                card.dataset.search || ""
+    function getDescription(post){
+
+        return (
+            post.description ||
+            post.caption ||
+            "No description provided."
+        );
+
+    }
+
+
+
+    function getType(post){
+
+        const type =
+            String(
+                post.type ||
+                post.listingType ||
+                "product"
             ).toLowerCase();
 
-            const matchesType =
-                currentType === "all" ||
-                type === currentType;
+        return type === "service"
+            ? "service"
+            : "product";
 
-            const matchesCategory =
-                category === "all" ||
-                cardCategory === category;
-
-            const matchesSearch =
-                !query ||
-                searchableText.includes(query);
+    }
 
 
-            const visible =
-                matchesType &&
-                matchesCategory &&
-                matchesSearch;
+
+    function getCategory(post){
+
+        return (
+            post.category ||
+            "all"
+        ).toLowerCase();
+
+    }
 
 
-            card.style.display = visible ? "flex" : "none";
+
+    function getPrice(post){
+
+        const value =
+            Number(post.price || 0);
+
+        if(value <= 0){
+
+            return "Price on request";
+
+        }
+
+        return (
+            "KSh " +
+            value.toLocaleString("en-KE")
+        );
+
+    }
 
 
-            if (visible) {
-                visibleCards.push(card);
-            }
 
-        });
+    function getImage(post){
+
+        return (
+            post.mediaUrl ||
+            post.imageUrl ||
+            post.image ||
+            ""
+        );
+
+    }
 
 
-        /* -----------------------------------------------------
+
+    function isBoosted(post){
+
+        return (
+            post.boosted === true ||
+            post.isBoosted === true ||
+            post.status === "boosted"
+        );
+
+    }
+
+
+
+    function getSeller(post){
+
+        return (
+            post.seller ||
+            post.author ||
+            post.username ||
+            "PostX Seller"
+        );
+
+    }
+
+
+
+    function getLocation(post){
+
+        return (
+            post.location ||
+            post.city ||
+            "Kenya"
+        );
+
+    }
+
+
+
+    /* =======================================================
+       RENDER
+    ======================================================= */
+
+    function renderListings(){
+
+        const query =
+            searchInput.value
+                .toLowerCase()
+                .trim();
+
+
+        const category =
+            categoryFilter.value;
+
+
+        const sort =
+            sortFilter.value;
+
+
+        let filtered =
+            listings.filter(function(post){
+
+                const type =
+                    getType(post);
+
+                const postCategory =
+                    getCategory(post);
+
+
+                const searchable = (
+
+                    getTitle(post) +
+                    " " +
+                    getDescription(post) +
+                    " " +
+                    postCategory +
+                    " " +
+                    getSeller(post) +
+                    " " +
+                    getLocation(post)
+
+                ).toLowerCase();
+
+
+                const matchesType =
+                    currentType === "all" ||
+                    type === currentType;
+
+
+                const matchesCategory =
+                    category === "all" ||
+                    postCategory === category;
+
+
+                const matchesSearch =
+                    !query ||
+                    searchable.includes(query);
+
+
+                return (
+                    matchesType &&
+                    matchesCategory &&
+                    matchesSearch
+                );
+
+            });
+
+
+
+        /* ===================================================
            SORT
-           ----------------------------------------------------- */
+        =================================================== */
 
-        visibleCards.sort(function (a, b) {
+        filtered.sort(function(a,b){
 
-            const priceA =
-                Number(a.dataset.price || 0);
+            if(sort === "price-low"){
 
-            const priceB =
-                Number(b.dataset.price || 0);
+                return (
+                    Number(a.price || 0) -
+                    Number(b.price || 0)
+                );
 
-            const dateA =
-                Number(a.dataset.date || 0);
-
-            const dateB =
-                Number(b.dataset.date || 0);
-
-            const sponsoredA =
-                a.dataset.sponsored === "true";
-
-            const sponsoredB =
-                b.dataset.sponsored === "true";
-
-
-            if (sort === "price-low") {
-                return priceA - priceB;
             }
 
 
-            if (sort === "price-high") {
-                return priceB - priceA;
+            if(sort === "price-high"){
+
+                return (
+                    Number(b.price || 0) -
+                    Number(a.price || 0)
+                );
+
             }
 
 
-            if (sort === "newest") {
-                return dateB - dateA;
+            if(sort === "newest"){
+
+                return (
+                    Number(b.createdAt || b.id || 0) -
+                    Number(a.createdAt || a.id || 0)
+                );
+
             }
 
 
-            /* Featured */
+            /*
+              Featured:
+              Boosted listings first.
+            */
 
-            if (sponsoredA !== sponsoredB) {
-                return sponsoredB - sponsoredA;
+            const boostA =
+                isBoosted(a) ? 1 : 0;
+
+            const boostB =
+                isBoosted(b) ? 1 : 0;
+
+
+            if(boostA !== boostB){
+
+                return boostB - boostA;
+
             }
 
-            return dateB - dateA;
+
+            return 0;
 
         });
 
 
-        visibleCards.forEach(card => {
+
+        /* ===================================================
+           RENDER GRID
+        =================================================== */
+
+        grid.innerHTML = "";
+
+
+        filtered.forEach(function(post){
+
+            const type =
+                getType(post);
+
+            const title =
+                getTitle(post);
+
+            const description =
+                getDescription(post);
+
+            const image =
+                getImage(post);
+
+            const seller =
+                getSeller(post);
+
+            const location =
+                getLocation(post);
+
+            const price =
+                getPrice(post);
+
+            const boosted =
+                isBoosted(post);
+
+
+            const id =
+                post.id ||
+                ("listing-" + Date.now());
+
+
+            const card =
+                document.createElement("article");
+
+
+            card.className =
+                "listing-card" +
+                (boosted ? " boosted" : "");
+
+
+            card.dataset.type =
+                type;
+
+            card.dataset.category =
+                getCategory(post);
+
+            card.dataset.price =
+                Number(post.price || 0);
+
+
+
+            const imageHTML = image
+
+                ? `
+                    <img
+                        src="${escapeHTML(image)}"
+                        alt="${escapeHTML(title)}"
+                        loading="lazy"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                    >
+
+                    <div
+                        class="no-image"
+                        style="display:none"
+                    >
+                        <div class="no-image-icon">📷</div>
+                        No photo available
+                    </div>
+                  `
+
+                : `
+                    <div class="no-image">
+                        <div class="no-image-icon">📷</div>
+                        No photo available
+                    </div>
+                  `;
+
+
+
+            card.innerHTML = `
+
+                <div class="listing-image">
+
+                    ${imageHTML}
+
+                    <div class="listing-badges">
+
+                        ${
+                            boosted
+
+                            ? `
+                                <span class="badge badge-boosted">
+                                    ⚡ Boosted
+                                </span>
+                              `
+
+                            : `<span></span>`
+                        }
+
+
+                        <span class="badge badge-type">
+
+                            ${
+                                type === "service"
+                                ? "Service"
+                                : "Product"
+                            }
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="listing-body">
+
+
+                    <div class="listing-top">
+
+                        <div class="listing-price">
+
+                            ${escapeHTML(price)}
+
+                        </div>
+
+
+                        <div class="listing-location">
+
+                            <span>📍</span>
+
+                            ${escapeHTML(location)}
+
+                        </div>
+
+                    </div>
+
+
+                    <h3 class="listing-title">
+
+                        ${escapeHTML(title)}
+
+                    </h3>
+
+
+                    <p class="listing-description">
+
+                        ${escapeHTML(
+                            description.slice(0,140)
+                        )}
+
+                    </p>
+
+
+                    <div class="seller">
+
+                        <div class="seller-avatar"
+                             style="
+                                display:grid;
+                                place-items:center;
+                                font-size:15px;
+                             ">
+                            👤
+                        </div>
+
+
+                        <div class="seller-info">
+
+                            <span class="seller-name">
+
+                                ${escapeHTML(seller)}
+
+                                ${
+                                    post.verified
+
+                                    ? `
+                                      <span class="verified">
+                                        ✓
+                                      </span>
+                                      `
+
+                                    : ""
+                                }
+
+                            </span>
+
+
+                            <span class="seller-meta">
+
+                                <span class="rating">
+                                    ★
+                                </span>
+
+                                ${escapeHTML(
+                                    String(
+                                        post.rating || "New seller"
+                                    )
+                                )}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        class="view-btn"
+                        href="listing.html?id=${encodeURIComponent(id)}"
+                    >
+
+                        View Listing →
+
+                    </a>
+
+                </div>
+
+            `;
+
+
             grid.appendChild(card);
+
         });
 
 
-        /* -----------------------------------------------------
+
+        /* ===================================================
            COUNT
-           ----------------------------------------------------- */
+        =================================================== */
 
-        listingCount.textContent = visibleCards.length;
+        listingCount.textContent =
+            filtered.length;
 
 
-        /* -----------------------------------------------------
+
+        /* ===================================================
            EMPTY STATE
-           ----------------------------------------------------- */
+        =================================================== */
 
-        if (visibleCards.length === 0) {
+        if(filtered.length === 0){
+
             emptyState.classList.add("show");
-        } else {
+
+        }else{
+
             emptyState.classList.remove("show");
+
         }
 
     }
 
 
-    /* ---------------------------------------------------------
+
+    /* =======================================================
+       TYPE BUTTONS
+    ======================================================= */
+
+    typeButtons.forEach(function(button){
+
+        button.addEventListener(
+            "click",
+            function(){
+
+                typeButtons.forEach(function(btn){
+
+                    btn.classList.remove("active");
+
+                });
+
+
+                button.classList.add("active");
+
+
+                currentType =
+                    button.dataset.type;
+
+
+                renderListings();
+
+            }
+        );
+
+    });
+
+
+
+    /* =======================================================
+       SEARCH
+    ======================================================= */
+
+    searchInput.addEventListener(
+        "input",
+        renderListings
+    );
+
+
+    /* =======================================================
+       CATEGORY
+    ======================================================= */
+
+    categoryFilter.addEventListener(
+        "change",
+        renderListings
+    );
+
+
+    /* =======================================================
+       SORT
+    ======================================================= */
+
+    sortFilter.addEventListener(
+        "change",
+        renderListings
+    );
+
+
+
+    /* =======================================================
        RESET
-       --------------------------------------------------------- */
+    ======================================================= */
 
-    if (resetButton) {
+    resetButton.addEventListener(
+        "click",
+        function(){
 
-        resetButton.addEventListener("click", function () {
+            searchInput.value = "";
 
-            if (searchInput) {
-                searchInput.value = "";
-            }
+            categoryFilter.value =
+                "all";
 
-            if (categoryFilter) {
-                categoryFilter.value = "all";
-            }
+            sortFilter.value =
+                "featured";
 
-            if (sortFilter) {
-                sortFilter.value = "featured";
-            }
 
-            currentType = "all";
+            currentType =
+                "all";
 
-            typeButtons.forEach(btn => {
+
+            typeButtons.forEach(function(btn){
+
                 btn.classList.remove("active");
+
             });
 
-            const allButton =
-                document.querySelector('.type-btn[data-type="all"]');
 
-            if (allButton) {
+            const allButton =
+                document.querySelector(
+                    '.type-btn[data-type="all"]'
+                );
+
+
+            if(allButton){
+
                 allButton.classList.add("active");
+
             }
 
-            applyFilters();
 
-        });
+            renderListings();
 
-    }
+        }
+    );
 
 
-    /* ---------------------------------------------------------
+
+    /* =======================================================
        INITIALIZE
-       --------------------------------------------------------- */
+    ======================================================= */
 
-    applyFilters();
+    renderListings();
+
 
 })();
-</script></body>
+
+</script>
+
+</body>
 </html>
