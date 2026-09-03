@@ -3,6 +3,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const { testDatabase } = require("./config/database");
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -19,12 +21,27 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/api/health", (req, res) => {
-    res.json({
-        success: true,
-        service: "PostX API",
-        status: "healthy"
-    });
+app.get("/api/health", async (req, res) => {
+    try {
+        const database = await testDatabase();
+
+        res.json({
+            success: true,
+            service: "PostX API",
+            status: "healthy",
+            database: "connected",
+            server_time: database.current_time
+        });
+    } catch (error) {
+        console.error("Database health check failed:", error);
+
+        res.status(500).json({
+            success: false,
+            service: "PostX API",
+            status: "unhealthy",
+            database: "disconnected"
+        });
+    }
 });
 
 app.listen(PORT, () => {
