@@ -1,357 +1,541 @@
-/* =========================================================
-   PostX Marketplace
-   Frontend Marketplace Engine
-   ========================================================= */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05080D">
 
-(function () {
-    "use strict";
+<title>Listing • PostX</title>
 
-    let currentTypeFilter = "all";
+<style>
+:root{
+  --bg:#05080D;
+  --bg2:#08111B;
+  --card:#0B1622;
+  --card2:#102031;
+  --cyan:#00E5FF;
+  --cyan-bd:rgba(0,229,255,.18);
+  --bd:rgba(255,255,255,.07);
+  --text:#F4F8FB;
+  --mut:#718292;
+  --green:#21D07A;
+  --red:#FF5C6C;
+}
 
-    const searchInput = document.getElementById("marketplace-search");
-    const categoryFilter = document.getElementById("category-filter");
-    const sortFilter = document.getElementById("sort-filter");
-    const grid = document.getElementById("listings-grid");
-    const emptyState = document.getElementById("no-results-state");
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-    if (!grid) return;
+body{
+  background:
+    radial-gradient(circle at top,rgba(0,229,255,.06),transparent 35%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  max-width:600px;
+  margin:0 auto;
+  min-height:100vh;
+  padding-bottom:30px;
+}
 
-    function getCards() {
-        return Array.from(grid.querySelectorAll(".listing-card"));
-    }
+.top{
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
 
-    window.switchType = function (type, button) {
-        currentTypeFilter = type;
+.back{
+  color:var(--cyan);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:700;
+}
 
-        document.querySelectorAll(".type-btn").forEach(function (btn) {
-            btn.classList.remove("active");
-        });
+.market{
+  color:var(--mut);
+  text-decoration:none;
+  font-size:12px;
+}
 
-        if (button) {
-            button.classList.add("active");
-        }
+.card{
+  margin:0 16px;
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.28);
+}
 
-        filterListings();
+.image-wrap{
+  height:360px;
+  background:var(--bg2);
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.image-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.no-photo{
+  color:var(--mut);
+  text-align:center;
+  padding:30px;
+  font-size:14px;
+}
+
+.status{
+  position:absolute;
+  top:14px;
+  left:14px;
+  background:rgba(5,8,13,.82);
+  border:1px solid var(--cyan-bd);
+  color:var(--cyan);
+  backdrop-filter:blur(10px);
+  padding:7px 11px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+.info{
+  padding:18px;
+}
+
+.category{
+  color:var(--cyan);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  margin-bottom:8px;
+}
+
+.title{
+  font-size:23px;
+  line-height:1.25;
+  margin-bottom:8px;
+}
+
+.price{
+  color:var(--cyan);
+  font-size:24px;
+  font-weight:900;
+}
+
+.meta{
+  color:var(--mut);
+  font-size:12px;
+  margin-top:8px;
+  line-height:1.6;
+}
+
+.description{
+  color:#A9B6C1;
+  font-size:14px;
+  line-height:1.65;
+  margin-top:15px;
+}
+
+.seller{
+  margin-top:18px;
+  padding:13px;
+  background:var(--card2);
+  border:1px solid var(--bd);
+  border-radius:13px;
+}
+
+.seller-title{
+  font-size:11px;
+  color:var(--mut);
+  margin-bottom:5px;
+}
+
+.seller-name{
+  font-size:14px;
+  font-weight:800;
+}
+
+.rating{
+  color:#FFD166;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.btn{
+  flex:1;
+  min-height:48px;
+  padding:13px 12px;
+  border-radius:12px;
+  border:1px solid var(--bd);
+  font-size:13px;
+  font-weight:800;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.message{
+  background:var(--card2);
+  border-color:var(--cyan-bd);
+  color:var(--cyan);
+}
+
+.boost{
+  background:var(--cyan);
+  color:#05080D;
+  border-color:var(--cyan);
+}
+
+.boost.hidden{
+  display:none;
+}
+
+.details{
+  margin-top:18px;
+  border-top:1px solid var(--bd);
+  padding-top:16px;
+}
+
+.detail-row{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:9px 0;
+  font-size:12px;
+}
+
+.detail-label{
+  color:var(--mut);
+}
+
+.detail-value{
+  color:var(--text);
+  font-weight:700;
+  text-align:right;
+}
+
+.error{
+  margin:30px 16px;
+  padding:25px 18px;
+  text-align:center;
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:16px;
+}
+
+.error h2{
+  font-size:18px;
+  margin-bottom:8px;
+}
+
+.error p{
+  color:var(--mut);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.error a{
+  display:inline-block;
+  margin-top:15px;
+  color:var(--cyan);
+  text-decoration:none;
+  font-weight:800;
+}
+
+@media(max-width:420px){
+  .image-wrap{
+    height:300px;
+  }
+
+  .title{
+    font-size:21px;
+  }
+
+  .price{
+    font-size:22px;
+  }
+
+  .actions{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+  <a class="back" href="marketplace.html">← Marketplace</a>
+  <a class="market" href="index.html">PostX</a>
+</header>
+
+<main id="listingContainer"></main>
+
+<script>
+(function(){
+
+  const container = document.getElementById("listingContainer");
+
+  let posts = [];
+
+  try{
+    posts = JSON.parse(
+      localStorage.getItem("postx_posts") || "[]"
+    );
+  }catch(error){
+    posts = [];
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const requestedId = params.get("id");
+
+  /*
+    Find the requested listing.
+    If no ID exists, use the first marketplace post.
+  */
+  let post = requestedId
+    ? posts.find(item => String(item.id) === String(requestedId))
+    : posts[0];
+
+  /*
+    Demo fallback.
+    Remove this object if you want listing.html
+    to show ONLY real marketplace listings.
+  */
+  if(!post && posts.length === 0){
+    post = {
+      id:"demo",
+      caption:"Premium Sneakers",
+      price:3500,
+      category:"Fashion",
+      location:"Mariakani",
+      seller:"PostX Seller",
+      rating:"4.8",
+      mediaUrl:"",
+      boosted:false,
+      description:
+        "Quality sneakers available now. Sizes 39–44. Delivery available in Mariakani, Kilifi, Mombasa and Kwale."
     };
+  }
 
-    window.filterListings = function () {
-        const query = searchInput
-            ? searchInput.value.toLowerCase().trim()
-            : "";
+  if(!post){
+    container.innerHTML = `
+      <section class="error">
+        <h2>Listing not found</h2>
+        <p>
+          This listing may have been removed or is no longer available.
+        </p>
+        <a href="marketplace.html">← Return to Marketplace</a>
+      </section>
+    `;
+    return;
+  }
 
-        const category = categoryFilter
-            ? categoryFilter.value
-            : "all";
+  const title =
+    post.title ||
+    post.caption?.slice(0,80) ||
+    "PostX Listing";
 
-        const sort = sortFilter
-            ? sortFilter.value
-            : "featured";
+  const description =
+    post.description ||
+    post.caption ||
+    "No description provided.";
 
-        const cards = getCards();
-        let visibleCount = 0;
+  const price =
+    Number(post.price) > 0
+      ? "KSh " + Number(post.price).toLocaleString("en-KE")
+      : "Price on request";
 
-        cards.forEach(function (card) {
-            const type = card.dataset.type || "";
-            const cardCategory = card.dataset.category || "";
+  const category =
+    post.category ||
+    post.type ||
+    "Marketplace";
 
-            const title =
-                card.querySelector(".listing-title")?.textContent
-                    .toLowerCase() || "";
+  const location =
+    post.location ||
+    "Kenya";
 
-            const description =
-                card.querySelector(".listing-description")?.textContent
-                    .toLowerCase() || "";
+  const seller =
+    post.seller ||
+    post.author ||
+    "PostX Seller";
 
-            const seller =
-                card.querySelector(".seller-name")?.textContent
-                    .toLowerCase() || "";
+  const rating =
+    post.rating ||
+    "—";
 
-            const location =
-                card.querySelector(".listing-location")?.textContent
-                    .toLowerCase() || "";
+  const image =
+    post.mediaUrl ||
+    post.image ||
+    post.imageUrl ||
+    "";
 
-            const matchesType =
-                currentTypeFilter === "all" ||
-                type === currentTypeFilter;
+  const boosted =
+    post.boosted === true ||
+    post.isBoosted === true ||
+    post.status === "boosted";
 
-            const matchesCategory =
-                category === "all" ||
-                cardCategory === category;
+  const imageHTML = image
+    ? `<img
+         src="${escapeHTML(image)}"
+         alt="${escapeHTML(title)}"
+         onerror="showNoPhoto(this)"
+       >`
+    : `<div class="no-photo">📷<br><br>No photo available</div>`;
 
-            const matchesSearch =
-                !query ||
-                title.includes(query) ||
-                description.includes(query) ||
-                seller.includes(query) ||
-                location.includes(query);
+  container.innerHTML = `
+    <article class="card">
 
-            const visible =
-                matchesType &&
-                matchesCategory &&
-                matchesSearch;
+      <div class="image-wrap">
 
-            card.style.display = visible ? "flex" : "none";
+        ${imageHTML}
 
-            if (visible) {
-                visibleCount++;
-            }
-        });
-
-        sortCards(sort);
-
-        if (emptyState) {
-            emptyState.classList.toggle(
-                "hidden",
-                visibleCount !== 0
-            );
-        }
-    };
-
-    function sortCards(sort) {
-        const cards = getCards();
-
-        cards.sort(function (a, b) {
-            const priceA =
-                Number(a.dataset.price || 0);
-
-            const priceB =
-                Number(b.dataset.price || 0);
-
-            const sponsoredA =
-                a.dataset.sponsored === "true";
-
-            const sponsoredB =
-                b.dataset.sponsored === "true";
-
-            if (sort === "featured") {
-                return Number(sponsoredB) - Number(sponsoredA);
-            }
-
-            if (sort === "price-low") {
-                return priceA - priceB;
-            }
-
-            if (sort === "price-high") {
-                return priceB - priceA;
-            }
-
-            return 0;
-        });
-
-        cards.forEach(function (card) {
-            grid.appendChild(card);
-        });
-    }
-
-    window.resetFilters = function () {
-        if (searchInput) {
-            searchInput.value = "";
+        ${
+          boosted
+          ? `<div class="status">⚡ BOOSTED</div>`
+          : ""
         }
 
-        if (categoryFilter) {
-            categoryFilter.value = "all";
-        }
+      </div>
 
-        if (sortFilter) {
-            sortFilter.value = "featured";
-        }
+      <div class="info">
 
-        currentTypeFilter = "all";
+        <div class="category">
+          ${escapeHTML(category)}
+        </div>
 
-        const buttons =
-            document.querySelectorAll(".type-btn");
+        <h1 class="title">
+          ${escapeHTML(title)}
+        </h1>
 
-        buttons.forEach(function (btn) {
-            btn.classList.remove("active");
-        });
+        <div class="price">
+          ${escapeHTML(price)}
+        </div>
 
-        if (buttons.length) {
-            buttons[0].classList.add("active");
-        }
+        <div class="meta">
+          📍 ${escapeHTML(location)}
+        </div>
 
-        filterListings();
-    };
+        <p class="description">
+          ${escapeHTML(description)}
+        </p>
 
-    /*
-     * Load locally created marketplace listings.
-     * These are frontend/demo listings until the backend API
-     * is connected.
-     */
-    function loadLocalListings() {
-        try {
-            if (
-                !window.PostX ||
-                typeof window.PostX.getState !== "function"
-            ) {
-                return;
-            }
+        <div class="seller">
 
-            const state = window.PostX.getState();
+          <div class="seller-title">
+            SELLER
+          </div>
 
-            const listings =
-                Array.isArray(state.marketplaceListings)
-                    ? state.marketplaceListings
-                    : [];
+          <div class="seller-name">
+            ${escapeHTML(seller)}
+          </div>
 
-            listings
-                .filter(function (listing) {
-                    return listing.status !== "deleted";
-                })
-                .forEach(function (listing) {
-                    addLocalListing(listing);
-                });
+          <div class="rating">
+            ★ ${escapeHTML(String(rating))}
+          </div>
 
-        } catch (error) {
-            console.warn(
-                "PostX Marketplace local listings unavailable:",
-                error
-            );
-        }
-    }
+        </div>
 
-    function addLocalListing(listing) {
-        if (!listing || !listing.id) return;
+        <div class="actions">
 
-        if (
-            grid.querySelector(
-                '[data-listing-id="' + listing.id + '"]'
-            )
-        ) {
-            return;
-        }
+          <a
+            class="btn message"
+            href="inbox.html"
+          >
+            💬 Message Seller
+          </a>
 
-        const card =
-            document.createElement("article");
+          <a
+            id="boostButton"
+            class="btn boost ${boosted ? "hidden" : ""}"
+            href="boost.html?id=${encodeURIComponent(post.id || "")}"
+          >
+            🚀 Boost This
+          </a>
 
-        card.className = "listing-card";
+        </div>
 
-        card.dataset.listingId = listing.id;
-        card.dataset.type = listing.type || "product";
-        card.dataset.category = listing.category || "";
-        card.dataset.price = listing.price || 0;
-        card.dataset.sponsored =
-            listing.boost?.enabled ? "true" : "false";
+        <div class="details">
 
-        const unit =
-            listing.priceUnit &&
-            listing.priceUnit !== "fixed"
-                ? " / " + listing.priceUnit
-                : "";
+          <div class="detail-row">
+            <span class="detail-label">Listing ID</span>
+            <span class="detail-value">
+              ${escapeHTML(String(post.id || "—"))}
+            </span>
+          </div>
 
-        const typeLabel =
-            listing.type === "service"
-                ? "Service"
-                : "Product";
+          <div class="detail-row">
+            <span class="detail-label">Category</span>
+            <span class="detail-value">
+              ${escapeHTML(category)}
+            </span>
+          </div>
 
-        const typeIcon =
-            listing.type === "service"
-                ? "fa-briefcase"
-                : "fa-box";
+          <div class="detail-row">
+            <span class="detail-label">Location</span>
+            <span class="detail-value">
+              ${escapeHTML(location)}
+            </span>
+          </div>
 
-        const contactLabel =
-            listing.type === "service"
-                ? "Contact Provider"
-                : "Message Seller";
+          <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+              ${boosted ? "Boosted" : "Active"}
+            </span>
+          </div>
 
-        const contactIcon =
-            listing.type === "service"
-                ? "fa-paper-plane"
-                : "fa-comment-dots";
+        </div>
 
-        const boostBadge =
-            listing.boost?.enabled
-                ? `
-                    <span class="badge-sponsored">
-                        <i class="fa-solid fa-bolt"></i>
-                        Boosted
-                    </span>
-                  `
-                : "";
+      </div>
 
-        card.innerHTML = `
-            <div class="card-image-wrapper">
-                <div class="marketplace-image-placeholder">
-                    <i class="fa-solid ${typeIcon}"></i>
-                </div>
+    </article>
+  `;
 
-                ${boostBadge}
+  document.title = title + " • PostX";
 
-                <span class="badge-type ${listing.type || "product"}">
-                    <i class="fa-solid ${typeIcon}"></i>
-                    ${typeLabel}
-                </span>
-            </div>
+  window.showNoPhoto = function(img){
 
-            <div class="card-content">
+    const wrapper = img.parentElement;
 
-                <div class="card-header">
-                    <span class="listing-price">
-                        KSh ${Number(listing.price || 0).toLocaleString()}
-                        <small>${unit}</small>
-                    </span>
+    wrapper.innerHTML =
+      '<div class="no-photo">📷<br><br>No photo available</div>' +
+      (boosted
+        ? '<div class="status">⚡ BOOSTED</div>'
+        : '');
+  };
 
-                    <span class="listing-location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        ${escapeHTML(listing.location || "Kenya")}
-                    </span>
-                </div>
-
-                <h3 class="listing-title">
-                    ${escapeHTML(listing.title || "Untitled Listing")}
-                </h3>
-
-                <p class="listing-description">
-                    ${escapeHTML(listing.description || "")}
-                </p>
-
-                <div class="seller-info">
-                    <div class="seller-avatar marketplace-avatar">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div class="seller-details">
-                        <span class="seller-name">
-                            PostX Seller
-                        </span>
-
-                        <span class="seller-rating">
-                            <i class="fa-solid fa-location-dot"></i>
-                            ${escapeHTML(listing.location || "Kenya")}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="card-actions">
-                    <a
-                        href="inbox.html?listing=${encodeURIComponent(listing.id)}"
-                        class="btn-message"
-                    >
-                        <i class="fa-solid ${contactIcon}"></i>
-                        ${contactLabel}
-                    </a>
-                </div>
-
-            </div>
-        `;
-
-        grid.prepend(card);
-    }
-
-    function escapeHTML(value) {
-        return String(value)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    /*
-     * Initialisation
-     */
-    document.addEventListener("DOMContentLoaded", function () {
-        loadLocalListings();
-        filterListings();
-    });
+  function escapeHTML(value){
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
 
 })();
+</script>
+
+</body>
+</html>
