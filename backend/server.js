@@ -4,6 +4,9 @@ const express = require("express");
 const cors = require("cors");
 
 const { testDatabase } = require("./config/database");
+const { findUserById } = require("./models/User");
+const authRoutes = require("./routes/auth");
+const authenticate = require("./middleware/auth");
 
 const app = express();
 
@@ -42,6 +45,40 @@ app.get("/api/health", async (req, res) => {
             database: "disconnected"
         });
     }
+});
+
+app.use("/api/auth", authRoutes);
+
+app.get("/api/me", authenticate, async (req, res) => {
+    try {
+        const user = await findUserById(req.user.userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+        res.json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.error("Profile error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Unable to retrieve user."
+        });
+    }
+});
+
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: "API endpoint not found."
+    });
 });
 
 app.listen(PORT, () => {
