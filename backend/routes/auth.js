@@ -30,16 +30,18 @@ function createToken(user) {
 
 router.post("/register", async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, username, email, password } = req.body;
 
-        if (!name || !email || !password) {
+        const rawName = name || username;
+
+        if (!rawName || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Name, email and password are required."
+                message: "Name/username, email and password are required."
             });
         }
 
-        const cleanName = String(name).trim();
+        const cleanName = String(rawName).trim();
         const cleanEmail = String(email).trim().toLowerCase();
 
         if (cleanName.length < 2) {
