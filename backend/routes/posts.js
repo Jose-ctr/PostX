@@ -1,112 +1,122 @@
-const { query } = require("../config/database");
+const express = require("express");
 
-async function createPost(
-    userId,
-    content,
-    mediaUrl = null,
-    mediaType = null,
-    location = null,
-    postType = "social"
-) {
-    const result = await query(
-        `
-        INSERT INTO posts (
-            user_id,
+const authenticate = require("../middleware/auth");
+
+const {
+    createPost,
+    getPosts,
+    getPostById
+} = require("../models/posts");
+
+const router = express.Router();
+
+/*
+ * GET /api/posts
+ * Get all PostX posts
+ */
+router.get("/", async (req, res) => {
+    try {
+        const posts = await getPosts();
+
+        return res.json({
+            success: true,
+            posts
+        });
+
+    } catch (error) {
+        console.error("Get posts error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load posts."
+        });
+    }
+});
+
+/*
+ * GET /api/posts/:id
+ * Get one post
+ */
+router.get("/:id", async (req, res) => {
+    try {
+        const post = await getPostById(req.params.id);
+
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found."
+            });
+        }
+
+        return res.json({
+            success: true,
+            post
+        });
+
+    } catch (error) {
+        console.error("Get post error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load post."
+        });
+    }
+});
+
+/*
+ * POST /api/posts
+ * Create a FREE PostX post
+ * Protected by JWT
+ */
+router.post("/", authenticate, async (req, res) => {
+    try {
+        const {
             content,
             media_url,
             media_type,
             location,
             post_type
-        )
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING
-            id,
-            user_id,
-            content,
-            media_url,
-            media_type,
-            location,
-            post_type,
-            is_boosted,
-            views_count,
-            likes_count,
-            comments_count,
-            shares_count,
-            created_at
-        `,
-        [
-            userId,
-            content,
-            mediaUrl,
-            mediaType,
-            location,
-            postType
-        ]
-    );
+        } = req.body;
 
-    return result.rows[0];
-}
+        if (!content || String(content).trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Post content is required."
+            });
+        }
 
-async function getPosts() {
-    const result = await query(
-        `
-        SELECT
-            posts.id,
-            posts.user_id,
-            users.name AS author_name,
-            posts.content,
-            posts.media_url,
-            posts.media_type,
-            posts.location,
-            posts.post_type,
-            posts.is_boosted,
-            posts.views_count,
-            posts.likes_count,
-            posts.comments_count,
-            posts.shares_count,
-            posts.created_at
-        FROM posts
-        INNER JOIN users
-            ON users.id = posts.user_id
-        ORDER BY posts.created_at DESC
-        `
-    );
+        const cleanContent = String(content).trim();
 
-    return result.rows;
-}
+        if (cleanContent.length > 5000) {
+            return res.status(400).json({
+                success: false,
+                message: "Post content cannot exceed 5000 characters."
+            });
+        }
 
-async function getPostById(id) {
-    const result = await query(
-        `
-        SELECT
-            posts.id,
-            posts.user_id,
-            users.name AS author_name,
-            posts.content,
-            posts.media_url,
-            posts.media_type,
-            posts.location,
-            posts.post_type,
-            posts.is_boosted,
-            posts.views_count,
-            posts.likes_count,
-            posts.comments_count,
-            posts.shares_count,
-            posts.created_at
-        FROM posts
-        INNER JOIN users
-            ON users.id = posts.user_id
-        WHERE posts.id = $1
-        LIMIT 1
-        `,
-        [id]
-    );
+        const post = await createPost(
+            req.user.userId,
+            cleanContent,
+            media_url || null,
+            media_type || null,
+            location || null,
+            post_type || "social"
+        );
 
-    return result.rows[0] || null;
-}
+        return res.status(201).json({
+            success: true,
+            message: "Post published successfully.",
+            post
+        });
 
-module.exports = {
-    createPost,
-    getPosts,
-    getPostById
-};
+    } catch (error) {
+        console.error("Create post error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to create post."
+        });
+    }
+});
+
+module.exports = router;
