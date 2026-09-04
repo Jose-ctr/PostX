@@ -1,26 +1,45 @@
 {
-  "name": "PostX - Smart Social Media Publisher",
+  "name": "PostX — Social • Marketplace",
   "short_name": "PostX",
-  "description": "Smart social media publishing and scheduling platform.",
-  "start_url": "./",
+  "description": "Post, discover, connect and sell with PostX.",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f5f7fb",
-  "theme_color": "#0f172a",
+
+  "background_color": "#07111f",
+  "theme_color": "#00d4ff",
+
+  "categories": [
+    "social",
+    "shopping",
+    "business"
+  ],
 
   "icons": [
     {
       "src": "assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
