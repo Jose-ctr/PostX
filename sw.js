@@ -1,7 +1,7 @@
 /*
 =========================================================
                          POSTX
-              Smart Social Media Publisher
+             Social • Marketplace • PWA
 =========================================================
 
 File:
@@ -11,38 +11,48 @@ Purpose:
     Progressive Web App service worker.
 
 Features:
-    - App-shell caching
-    - Offline loading
-    - Runtime caching
-    - Automatic cache cleanup
-    - Navigation fallback
-    - Safe handling of missing assets
-
+    - Multi-page app-shell caching
+    - Offline navigation
+    - Runtime asset caching
+    - Automatic old-cache cleanup
+    - Network-first HTML navigation
+    - Cache-first static assets
+    - Safe handling of failed requests
+    - Immediate activation/update support
 =========================================================
 */
 
 "use strict";
 
 /* =====================================================
-   CONFIGURATION
+   CACHE CONFIGURATION
 ===================================================== */
 
-const CACHE_VERSION = "postx-v1.0.0";
+const CACHE_VERSION = "postx-v2.0.0";
 
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 /*
- * Keep these paths relative to the repository root.
- * This works correctly on GitHub Pages project sites.
+ * Core PostX application files.
+ *
+ * Keep paths relative to the repository root so the
+ * service worker works correctly on GitHub Pages.
  */
 
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./feed.html",
+  "./marketplace.html",
+  "./listing.html",
+  "./inbox.html",
+  "./settings.html",
+
   "./manifest.json",
 
   "./css/style.css",
+
   "./js/app.js",
 
   "./assets/icons/icon-192.png",
@@ -62,12 +72,13 @@ self.addEventListener("install", event => {
       .then(cache => {
 
         return Promise.all(
+
           APP_SHELL.map(file => {
 
             return cache.add(file).catch(error => {
 
               console.warn(
-                "[PostX SW] Could not cache:",
+                "[PostX SW] Cache skipped:",
                 file,
                 error
               );
@@ -75,6 +86,7 @@ self.addEventListener("install", event => {
             });
 
           })
+
         );
 
       })
@@ -82,7 +94,7 @@ self.addEventListener("install", event => {
       .then(() => {
 
         /*
-         * Activate the new worker immediately.
+         * Activate the new service worker immediately.
          */
 
         return self.skipWaiting();
@@ -108,6 +120,10 @@ self.addEventListener("activate", event => {
         return Promise.all(
 
           cacheNames.map(cacheName => {
+
+            /*
+             * Delete every old PostX cache.
+             */
 
             if (
               cacheName !== APP_CACHE &&
@@ -149,7 +165,7 @@ self.addEventListener("fetch", event => {
   const request = event.request;
 
   /*
-   * Only handle GET requests.
+   * Only GET requests can be cached.
    */
 
   if (request.method !== "GET") {
@@ -157,7 +173,7 @@ self.addEventListener("fetch", event => {
   }
 
   /*
-   * Ignore browser extensions and unsupported schemes.
+   * Ignore unsupported protocols.
    */
 
   if (
@@ -167,12 +183,16 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  /*
-   * Navigation requests:
-   *
-   * Network first
-   * Cache fallback
-   */
+  /* ===================================================
+     NAVIGATION REQUESTS
+     
+     Strategy:
+       Network first
+       Cache fallback
+     
+     This ensures users normally receive the newest
+     version of PostX while still supporting offline use.
+     =================================================== */
 
   if (request.mode === "navigate") {
 
@@ -181,10 +201,6 @@ self.addEventListener("fetch", event => {
       fetch(request)
 
         .then(response => {
-
-          /*
-           * Save a fresh copy of the page.
-           */
 
           if (
             response &&
@@ -198,10 +214,12 @@ self.addEventListener("fetch", event => {
             caches
               .open(RUNTIME_CACHE)
               .then(cache => {
+
                 cache.put(
                   request,
                   responseClone
                 );
+
               });
 
           }
@@ -212,16 +230,23 @@ self.addEventListener("fetch", event => {
 
         .catch(() => {
 
-          return caches.match(
-            request
-          ).then(cached => {
+          return caches.match(request)
 
-            return (
-              cached ||
-              caches.match("./index.html")
-            );
+            .then(cachedResponse => {
 
-          });
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+
+              /*
+               * Final offline fallback.
+               */
+
+              return caches.match(
+                "./index.html"
+              );
+
+            });
 
         })
 
@@ -230,12 +255,13 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  /*
-   * Static assets:
-   *
-   * Cache first
-   * Network fallback
-   */
+  /* ===================================================
+     STATIC / RUNTIME REQUESTS
+     
+     Strategy:
+       Cache first
+       Network fallback
+     =================================================== */
 
   event.respondWith(
 
@@ -284,9 +310,9 @@ self.addEventListener("fetch", event => {
           .catch(() => {
 
             /*
-             * If an image fails offline,
-             * return a simple empty response
-             * rather than breaking the application.
+             * Images:
+             * Return a transparent 1x1 SVG instead
+             * of causing an application failure.
              */
 
             if (
@@ -294,7 +320,16 @@ self.addEventListener("fetch", event => {
             ) {
 
               return new Response(
-                "",
+
+                `<svg xmlns="http://www.w3.org/2000/svg"
+                      width="1"
+                      height="1"
+                      viewBox="0 0 1 1">
+                   <rect width="1"
+                         height="1"
+                         fill="none"/>
+                 </svg>`,
+
                 {
                   status: 200,
                   headers: {
@@ -302,12 +337,19 @@ self.addEventListener("fetch", event => {
                       "image/svg+xml"
                   }
                 }
+
               );
 
             }
 
+            /*
+             * Generic offline response.
+             */
+
             return new Response(
+
               "PostX is currently offline.",
+
               {
                 status: 503,
                 statusText: "Offline",
@@ -316,6 +358,7 @@ self.addEventListener("fetch", event => {
                     "text/plain; charset=utf-8"
                 }
               }
+
             );
 
           });
@@ -337,8 +380,7 @@ self.addEventListener("message", event => {
   }
 
   /*
-   * Allows the application to request
-   * an immediate service-worker update.
+   * Application can request an immediate update.
    */
 
   if (
@@ -353,4 +395,4 @@ self.addEventListener("message", event => {
 
 /* =====================================================
    END OF POSTX SERVICE WORKER
-========================================================= */
+===================================================== */
