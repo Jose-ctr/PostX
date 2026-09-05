@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -20,10 +21,7 @@
 
   <title>PostX — Social Hub</title>
 
-  <link
-    rel="manifest"
-    href="manifest.json"
-  >
+  <link rel="manifest" href="manifest.json">
 
   <link
     rel="icon"
@@ -36,8 +34,9 @@
   >
 
   <style>
+
     /* =====================================================
-       ANDROID / MOBILE
+       MOBILE FOUNDATION
        ===================================================== */
 
     html {
@@ -45,13 +44,24 @@
       text-size-adjust: 100%;
     }
 
+    html,
     body {
-      touch-action: pan-y;
       overflow-x: hidden;
     }
 
+    body {
+      touch-action: pan-y;
+      padding-bottom: 88px;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: rgba(0, 229, 255, 0.12);
+    }
+
+
     /* =====================================================
-       SOCIAL HUB
+       SOCIAL HUB HEADER
        ===================================================== */
 
     .feed-header {
@@ -71,8 +81,9 @@
       line-height: 1.5;
     }
 
+
     /* =====================================================
-       FEED FILTERS
+       FILTERS
        ===================================================== */
 
     .feed-filters {
@@ -98,7 +109,6 @@
       flex: 0 0 auto;
 
       min-height: 42px;
-
       padding: 0 16px;
 
       border: 1px solid var(--border);
@@ -113,11 +123,10 @@
       cursor: pointer;
 
       transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
-
-      -webkit-tap-highlight-color: transparent;
+        background .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        transform .15s ease;
     }
 
     .feed-filter:hover,
@@ -126,6 +135,11 @@
       background: var(--cyan-soft);
       color: var(--cyan);
     }
+
+    .feed-filter:active {
+      transform: scale(.96);
+    }
+
 
     /* =====================================================
        CREATE BAR
@@ -142,11 +156,26 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
 
-      background: var(--card);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(16, 32, 49, .96),
+          rgba(8, 17, 27, .96)
+        );
 
       text-decoration: none;
 
-      -webkit-tap-highlight-color: transparent;
+      transition:
+        border-color .2s ease,
+        transform .15s ease;
+    }
+
+    .create-bar:hover {
+      border-color: rgba(0, 229, 255, .35);
+    }
+
+    .create-bar:active {
+      transform: scale(.99);
     }
 
     .create-avatar {
@@ -180,7 +209,7 @@
       border: 1px solid var(--border);
       border-radius: 999px;
 
-      background: rgba(5, 8, 13, 0.6);
+      background: rgba(5, 8, 13, .6);
 
       color: var(--muted);
 
@@ -196,7 +225,6 @@
       align-items: center;
       justify-content: center;
 
-      border: 0;
       border-radius: 999px;
 
       background: var(--cyan);
@@ -208,6 +236,7 @@
       white-space: nowrap;
     }
 
+
     /* =====================================================
        FEED
        ===================================================== */
@@ -215,8 +244,13 @@
     .social-feed {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 16px;
     }
+
+
+    /* =====================================================
+       POST CARD
+       ===================================================== */
 
     .post-card {
       overflow: hidden;
@@ -227,14 +261,27 @@
       background:
         linear-gradient(
           145deg,
-          rgba(16, 32, 49, 0.96),
-          rgba(8, 17, 27, 0.96)
+          rgba(16, 32, 49, .97),
+          rgba(8, 17, 27, .97)
         );
 
       box-shadow: var(--shadow);
 
       -webkit-tap-highlight-color: transparent;
+
+      transition:
+        border-color .2s ease,
+        transform .2s ease;
     }
+
+    .post-card:hover {
+      border-color: rgba(0, 229, 255, .2);
+    }
+
+
+    /* =====================================================
+       POST HEADER
+       ===================================================== */
 
     .post-top {
       display: flex;
@@ -255,11 +302,29 @@
 
       border-radius: 50%;
 
-      background: var(--cyan-soft);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(0,229,255,.2),
+          rgba(0,229,255,.05)
+        );
+
+      border: 1px solid rgba(0,229,255,.18);
+
       color: var(--cyan);
 
       font-size: 15px;
       font-weight: 900;
+
+      cursor: pointer;
+
+      transition:
+        transform .15s ease,
+        border-color .2s ease;
+    }
+
+    .post-avatar:active {
+      transform: scale(.92);
     }
 
     .post-author {
@@ -307,8 +372,22 @@
       font-size: 21px;
 
       cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
+
+      transition:
+        background .2s ease,
+        color .2s ease,
+        transform .15s ease;
     }
+
+    .post-more:hover {
+      background: var(--cyan-soft);
+      color: var(--cyan);
+    }
+
+    .post-more:active {
+      transform: scale(.9);
+    }
+
 
     /* =====================================================
        POST CONTENT
@@ -347,6 +426,7 @@
       line-height: 1.5;
     }
 
+
     /* =====================================================
        MEDIA
        ===================================================== */
@@ -373,6 +453,11 @@
       object-fit: cover;
     }
 
+
+    /* =====================================================
+       VIDEO
+       ===================================================== */
+
     .video-badge {
       position: absolute;
       top: 12px;
@@ -382,15 +467,16 @@
 
       border-radius: 999px;
 
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0,0,0,.7);
       color: #fff;
 
       font-size: 10px;
       font-weight: 800;
     }
 
+
     /* =====================================================
-       PRODUCT / SERVICE
+       MARKETPLACE PREVIEW
        ===================================================== */
 
     .marketplace-preview {
@@ -401,7 +487,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
 
-      background: rgba(5, 8, 13, 0.55);
+      background: rgba(5,8,13,.55);
     }
 
     .marketplace-preview-image {
@@ -413,8 +499,8 @@
       background:
         linear-gradient(
           145deg,
-          rgba(0, 229, 255, 0.12),
-          rgba(5, 8, 13, 0.8)
+          rgba(0,229,255,.12),
+          rgba(5,8,13,.8)
         );
 
       color: var(--cyan);
@@ -472,11 +558,19 @@
       font-weight: 800;
 
       cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
+
+      transition:
+        transform .15s ease,
+        background .2s ease;
     }
 
+    .seller-button:active {
+      transform: scale(.95);
+    }
+
+
     /* =====================================================
-       BOOSTED POST
+       BOOST
        ===================================================== */
 
     .sponsored-label {
@@ -498,7 +592,7 @@
 
       padding: 11px 13px;
 
-      border: 1px solid rgba(0, 229, 255, 0.18);
+      border: 1px solid rgba(0,229,255,.18);
       border-radius: var(--radius-sm);
 
       background: var(--cyan-soft);
@@ -512,6 +606,28 @@
     .boost-banner strong {
       color: var(--cyan);
     }
+
+
+    /* =====================================================
+       POST STATS
+       ===================================================== */
+
+    .post-stats {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 15px 9px;
+
+      color: var(--muted);
+
+      font-size: 11px;
+    }
+
+    .post-stats span {
+      cursor: default;
+    }
+
 
     /* =====================================================
        ACTION BAR
@@ -543,10 +659,9 @@
       cursor: pointer;
 
       transition:
-        background 0.2s ease,
-        color 0.2s ease;
-
-      -webkit-tap-highlight-color: transparent;
+        background .2s ease,
+        color .2s ease,
+        transform .15s ease;
     }
 
     .post-action:hover,
@@ -555,6 +670,179 @@
       background: var(--cyan-soft);
     }
 
+    .post-action:active {
+      transform: scale(.96);
+    }
+
+
+    /* =====================================================
+       COMMENTS
+       ===================================================== */
+
+    .comments-section {
+      display: none;
+
+      border-top: 1px solid var(--border);
+
+      background:
+        rgba(2,8,14,.42);
+
+      padding: 13px 15px 15px;
+    }
+
+    .comments-section.open {
+      display: block;
+    }
+
+    .comments-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 11px;
+
+      color: var(--text-soft);
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      margin-bottom: 12px;
+    }
+
+    .comment {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+    }
+
+    .comment-avatar {
+      width: 30px;
+      height: 30px;
+
+      display: grid;
+      place-items: center;
+
+      flex-shrink: 0;
+
+      border-radius: 50%;
+
+      background: var(--cyan-soft);
+      color: var(--cyan);
+
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .comment-body {
+      min-width: 0;
+      flex: 1;
+
+      padding: 8px 10px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: rgba(13,27,42,.72);
+    }
+
+    .comment-author {
+      display: block;
+
+      color: var(--text);
+
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .comment-text {
+      margin-top: 3px;
+
+      color: var(--text-soft);
+
+      font-size: 12px;
+      line-height: 1.45;
+
+      word-break: break-word;
+    }
+
+    .empty-comments {
+      padding: 8px 0;
+
+      color: var(--muted);
+
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .comment-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comment-input {
+      flex: 1;
+
+      min-width: 0;
+      min-height: 42px;
+
+      padding: 0 12px;
+
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      outline: none;
+
+      background: rgba(5,8,13,.75);
+      color: var(--text);
+
+      font: inherit;
+      font-size: 12px;
+
+      transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+    }
+
+    .comment-input:focus {
+      border-color: var(--cyan);
+
+      box-shadow:
+        0 0 0 3px rgba(0,229,255,.08);
+    }
+
+    .comment-submit {
+      width: 42px;
+      height: 42px;
+
+      flex-shrink: 0;
+
+      border: 0;
+      border-radius: 50%;
+
+      background: var(--cyan);
+      color: #001016;
+
+      font-size: 17px;
+      font-weight: 900;
+
+      cursor: pointer;
+
+      transition:
+        transform .15s ease;
+    }
+
+    .comment-submit:active {
+      transform: scale(.9);
+    }
+
+
     /* =====================================================
        HIDDEN
        ===================================================== */
@@ -562,6 +850,7 @@
     .hidden {
       display: none !important;
     }
+
 
     /* =====================================================
        BOTTOM NAV
@@ -576,8 +865,9 @@
       min-width: 0;
     }
 
+
     /* =====================================================
-       SMALL ANDROID PHONES
+       SMALL PHONES
        ===================================================== */
 
     @media (max-width: 360px) {
@@ -606,7 +896,9 @@
       .bottom-nav a {
         font-size: 10px;
       }
+
     }
+
 
     @media (min-width: 700px) {
 
@@ -617,13 +909,18 @@
       .post-content p {
         font-size: 16px;
       }
+
     }
+
   </style>
+
 </head>
+
 
 <body>
 
   <div class="app-shell">
+
 
     <!-- ===================================================
          HEADER
@@ -636,6 +933,7 @@
         class="brand"
         aria-label="PostX Home"
       >
+
         <img
           src="assets/icons/icon-192.png"
           alt="PostX"
@@ -644,7 +942,9 @@
         <div class="brand-text">
           Post<span>X</span>
         </div>
+
       </a>
+
 
       <div class="header-actions">
 
@@ -675,6 +975,7 @@
          =================================================== -->
 
     <main class="main-content">
+
 
       <section class="feed-header">
 
@@ -782,21 +1083,28 @@
         id="socialFeed"
       >
 
+
         <!-- =================================================
-             TEXT POST
+             POST 1
              ================================================= -->
 
         <article
           class="post-card"
+          data-post-id="joseph-1"
           data-platform="postx"
           data-type="text"
         >
 
           <div class="post-top">
 
-            <div class="post-avatar">
+            <button
+              class="post-avatar profile-trigger"
+              type="button"
+              data-profile="Joseph Mbui"
+              aria-label="View Joseph Mbui profile"
+            >
               J
-            </div>
+            </button>
 
             <div class="post-author">
 
@@ -822,6 +1130,7 @@
 
           </div>
 
+
           <div class="post-content">
 
             <p>Building something useful for creators,
@@ -834,6 +1143,13 @@ Create once. Post everywhere.</p>
             </div>
 
           </div>
+
+
+          <div class="post-stats">
+            <span class="like-count">0 likes</span>
+            <span class="comment-count">0 comments</span>
+          </div>
+
 
           <div class="post-actions">
 
@@ -863,24 +1179,62 @@ Create once. Post everywhere.</p>
 
           </div>
 
+
+          <div class="comments-section">
+
+            <div class="comments-title">
+              <span>Comments</span>
+              <span class="comment-count-title">0</span>
+            </div>
+
+            <div class="comments-list"></div>
+
+            <form class="comment-form">
+
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="300"
+                placeholder="Write a comment..."
+                autocomplete="off"
+              >
+
+              <button
+                class="comment-submit"
+                type="submit"
+                aria-label="Post comment"
+              >
+                ↑
+              </button>
+
+            </form>
+
+          </div>
+
         </article>
 
 
         <!-- =================================================
-             PHOTO POST
+             POST 2
              ================================================= -->
 
         <article
           class="post-card"
+          data-post-id="afya-1"
           data-platform="instagram"
           data-type="photo"
         >
 
           <div class="post-top">
 
-            <div class="post-avatar">
+            <button
+              class="post-avatar profile-trigger"
+              type="button"
+              data-profile="Afya Business"
+              aria-label="View Afya Business profile"
+            >
               A
-            </div>
+            </button>
 
             <div class="post-author">
 
@@ -906,6 +1260,7 @@ Create once. Post everywhere.</p>
 
           </div>
 
+
           <div class="post-content">
 
             <p>
@@ -917,6 +1272,7 @@ A new week. A new opportunity to grow.
             </div>
 
           </div>
+
 
           <div class="post-media">
 
@@ -939,6 +1295,13 @@ A new week. A new opportunity to grow.
             </div>
 
           </div>
+
+
+          <div class="post-stats">
+            <span class="like-count">0 likes</span>
+            <span class="comment-count">0 comments</span>
+          </div>
+
 
           <div class="post-actions">
 
@@ -968,24 +1331,62 @@ A new week. A new opportunity to grow.
 
           </div>
 
+
+          <div class="comments-section">
+
+            <div class="comments-title">
+              <span>Comments</span>
+              <span class="comment-count-title">0</span>
+            </div>
+
+            <div class="comments-list"></div>
+
+            <form class="comment-form">
+
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="300"
+                placeholder="Write a comment..."
+                autocomplete="off"
+              >
+
+              <button
+                class="comment-submit"
+                type="submit"
+                aria-label="Post comment"
+              >
+                ↑
+              </button>
+
+            </form>
+
+          </div>
+
         </article>
 
 
         <!-- =================================================
-             VIDEO POST
+             POST 3
              ================================================= -->
 
         <article
           class="post-card"
+          data-post-id="mombasa-1"
           data-platform="facebook"
           data-type="video"
         >
 
           <div class="post-top">
 
-            <div class="post-avatar">
+            <button
+              class="post-avatar profile-trigger"
+              type="button"
+              data-profile="Mombasa Creators"
+              aria-label="View Mombasa Creators profile"
+            >
               M
-            </div>
+            </button>
 
             <div class="post-author">
 
@@ -1011,6 +1412,7 @@ A new week. A new opportunity to grow.
 
           </div>
 
+
           <div class="post-content">
 
             <p>
@@ -1018,6 +1420,7 @@ Behind the scenes from today's project.
             </p>
 
           </div>
+
 
           <div class="post-media">
 
@@ -1045,6 +1448,13 @@ Behind the scenes from today's project.
 
           </div>
 
+
+          <div class="post-stats">
+            <span class="like-count">0 likes</span>
+            <span class="comment-count">0 comments</span>
+          </div>
+
+
           <div class="post-actions">
 
             <button
@@ -1073,24 +1483,62 @@ Behind the scenes from today's project.
 
           </div>
 
+
+          <div class="comments-section">
+
+            <div class="comments-title">
+              <span>Comments</span>
+              <span class="comment-count-title">0</span>
+            </div>
+
+            <div class="comments-list"></div>
+
+            <form class="comment-form">
+
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="300"
+                placeholder="Write a comment..."
+                autocomplete="off"
+              >
+
+              <button
+                class="comment-submit"
+                type="submit"
+                aria-label="Post comment"
+              >
+                ↑
+              </button>
+
+            </form>
+
+          </div>
+
         </article>
 
 
         <!-- =================================================
-             PRODUCT POST
+             PRODUCT
              ================================================= -->
 
         <article
           class="post-card"
+          data-post-id="kilifi-product-1"
           data-platform="postx"
           data-type="product"
         >
 
           <div class="post-top">
 
-            <div class="post-avatar">
+            <button
+              class="post-avatar profile-trigger"
+              type="button"
+              data-profile="Kilifi Tech Store"
+              aria-label="View Kilifi Tech Store profile"
+            >
               K
-            </div>
+            </button>
 
             <div class="post-author">
 
@@ -1116,6 +1564,7 @@ Behind the scenes from today's project.
 
           </div>
 
+
           <div class="post-content">
 
             <p>
@@ -1123,6 +1572,7 @@ Available now. Message us for details.
             </p>
 
           </div>
+
 
           <div class="marketplace-preview">
 
@@ -1141,7 +1591,7 @@ Available now. Message us for details.
               </h3>
 
               <p>
-                Quality products from a local seller.
+Quality products from a local seller.
               </p>
 
               <div class="marketplace-bottom">
@@ -1163,6 +1613,13 @@ Available now. Message us for details.
             </div>
 
           </div>
+
+
+          <div class="post-stats">
+            <span class="like-count">0 likes</span>
+            <span class="comment-count">0 comments</span>
+          </div>
+
 
           <div class="post-actions">
 
@@ -1192,24 +1649,62 @@ Available now. Message us for details.
 
           </div>
 
+
+          <div class="comments-section">
+
+            <div class="comments-title">
+              <span>Comments</span>
+              <span class="comment-count-title">0</span>
+            </div>
+
+            <div class="comments-list"></div>
+
+            <form class="comment-form">
+
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="300"
+                placeholder="Write a comment..."
+                autocomplete="off"
+              >
+
+              <button
+                class="comment-submit"
+                type="submit"
+                aria-label="Post comment"
+              >
+                ↑
+              </button>
+
+            </form>
+
+          </div>
+
         </article>
 
 
         <!-- =================================================
-             SERVICE POST
+             SERVICE
              ================================================= -->
 
         <article
           class="post-card"
+          data-post-id="electrical-service-1"
           data-platform="postx"
           data-type="service"
         >
 
           <div class="post-top">
 
-            <div class="post-avatar">
+            <button
+              class="post-avatar profile-trigger"
+              type="button"
+              data-profile="Electrical Services"
+              aria-label="View Electrical Services profile"
+            >
               E
-            </div>
+            </button>
 
             <div class="post-author">
 
@@ -1235,6 +1730,7 @@ Available now. Message us for details.
 
           </div>
 
+
           <div class="post-content">
 
             <p>
@@ -1247,6 +1743,7 @@ maintenance services.
             </div>
 
           </div>
+
 
           <div class="marketplace-preview">
 
@@ -1265,7 +1762,7 @@ maintenance services.
               </h3>
 
               <p>
-                Contact the provider for a quotation.
+Contact the provider for a quotation.
               </p>
 
               <div class="marketplace-bottom">
@@ -1287,6 +1784,13 @@ maintenance services.
             </div>
 
           </div>
+
+
+          <div class="post-stats">
+            <span class="like-count">0 likes</span>
+            <span class="comment-count">0 comments</span>
+          </div>
+
 
           <div class="post-actions">
 
@@ -1316,6 +1820,38 @@ maintenance services.
 
           </div>
 
+
+          <div class="comments-section">
+
+            <div class="comments-title">
+              <span>Comments</span>
+              <span class="comment-count-title">0</span>
+            </div>
+
+            <div class="comments-list"></div>
+
+            <form class="comment-form">
+
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="300"
+                placeholder="Write a comment..."
+                autocomplete="off"
+              >
+
+              <button
+                class="comment-submit"
+                type="submit"
+                aria-label="Post comment"
+              >
+                ↑
+              </button>
+
+            </form>
+
+          </div>
+
         </article>
 
 
@@ -1325,15 +1861,21 @@ maintenance services.
 
         <article
           class="post-card"
+          data-post-id="boosted-1"
           data-platform="postx"
           data-type="boost"
         >
 
           <div class="post-top">
 
-            <div class="post-avatar">
+            <button
+              class="post-avatar profile-trigger"
+              type="button"
+              data-profile="Local Business"
+              aria-label="View Local Business profile"
+            >
               B
-            </div>
+            </button>
 
             <div class="post-author">
 
@@ -1343,13 +1885,8 @@ maintenance services.
 
               <div class="post-meta">
 
-                <span>
-                  PostX
-                </span>
-
-                <span>
-                  •
-                </span>
+                <span>PostX</span>
+                <span>•</span>
 
                 <span class="sponsored-label">
                   Sponsored
@@ -1369,6 +1906,7 @@ maintenance services.
 
           </div>
 
+
           <div class="post-content">
 
             <p>
@@ -1377,6 +1915,7 @@ near you.
             </p>
 
           </div>
+
 
           <div class="boost-banner">
 
@@ -1389,6 +1928,7 @@ near you.
             — promoted to a selected audience.
 
           </div>
+
 
           <div class="post-media">
 
@@ -1412,6 +1952,13 @@ near you.
 
           </div>
 
+
+          <div class="post-stats">
+            <span class="like-count">0 likes</span>
+            <span class="comment-count">0 comments</span>
+          </div>
+
+
           <div class="post-actions">
 
             <button
@@ -1440,6 +1987,38 @@ near you.
 
           </div>
 
+
+          <div class="comments-section">
+
+            <div class="comments-title">
+              <span>Comments</span>
+              <span class="comment-count-title">0</span>
+            </div>
+
+            <div class="comments-list"></div>
+
+            <form class="comment-form">
+
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="300"
+                placeholder="Write a comment..."
+                autocomplete="off"
+              >
+
+              <button
+                class="comment-submit"
+                type="submit"
+                aria-label="Post comment"
+              >
+                ↑
+              </button>
+
+            </form>
+
+          </div>
+
         </article>
 
       </section>
@@ -1448,7 +2027,7 @@ near you.
 
 
     <!-- ===================================================
-         BOTTOM NAV — 5 FIXED TABS
+         BOTTOM NAV
          =================================================== -->
 
     <nav
@@ -1464,9 +2043,10 @@ near you.
       <a
         href="feed.html"
         class="active"
+        aria-current="page"
       >
         <span>⌂</span>
-        <span>Social</span>
+        <span>Home</span>
       </a>
 
       <a href="marketplace.html">
@@ -1502,157 +2082,817 @@ near you.
 
 
   <!-- =====================================================
-       SHARED POSTX JAVASCRIPT
+       SHARED POSTX APP CORE
        ===================================================== -->
 
   <script src="js/app.js"></script>
 
 
   <!-- =====================================================
-       SOCIAL HUB JAVASCRIPT
+       SOCIAL HUB ENGINE
+       Likes • Comments • Profile Views • Filters
        ===================================================== -->
 
   <script>
+
     (() => {
 
       "use strict";
+
+
+      /* ===================================================
+         STORAGE
+         =================================================== */
+
+      const SOCIAL_STORAGE =
+        "postx_social_feed_v1";
+
+
+      let socialData =
+        loadSocialData();
+
+
+      function loadSocialData() {
+
+        try {
+
+          const saved =
+            localStorage.getItem(
+              SOCIAL_STORAGE
+            );
+
+
+          if (!saved) {
+
+            return {
+              likes: {},
+              comments: {},
+              profileViews: {}
+            };
+
+          }
+
+
+          const parsed =
+            JSON.parse(saved);
+
+
+          return {
+
+            likes:
+              parsed.likes || {},
+
+            comments:
+              parsed.comments || {},
+
+            profileViews:
+              parsed.profileViews || {}
+
+          };
+
+        }
+
+        catch (error) {
+
+          console.warn(
+            "PostX social data could not be loaded.",
+            error
+          );
+
+
+          return {
+            likes: {},
+            comments: {},
+            profileViews: {}
+          };
+
+        }
+
+      }
+
+
+      function saveSocialData() {
+
+        try {
+
+          localStorage.setItem(
+            SOCIAL_STORAGE,
+            JSON.stringify(
+              socialData
+            )
+          );
+
+        }
+
+        catch (error) {
+
+          console.warn(
+            "PostX social data could not be saved.",
+            error
+          );
+
+        }
+
+      }
+
+
+      /* ===================================================
+         SAFE TEXT
+         =================================================== */
+
+      function escapeHTML(value) {
+
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+
+      }
+
+
+      /* ===================================================
+         POST HELPERS
+         =================================================== */
+
+      function getPostId(post) {
+
+        return post.dataset.postId;
+
+      }
+
+
+      function getComments(post) {
+
+        const id =
+          getPostId(post);
+
+        return (
+          socialData.comments[id] || []
+        );
+
+      }
+
+
+      function getLikes(post) {
+
+        const id =
+          getPostId(post);
+
+        return (
+          Number(
+            socialData.likes[id] || 0
+          )
+        );
+
+      }
+
+
+      /* ===================================================
+         RENDER POST STATE
+         =================================================== */
+
+      function renderPost(post) {
+
+        const id =
+          getPostId(post);
+
+
+        if (!id) {
+          return;
+        }
+
+
+        const liked =
+          Boolean(
+            localStorage.getItem(
+              `postx_liked_${id}`
+            )
+          );
+
+
+        const likeButton =
+          post.querySelector(
+            '[data-post-action="like"]'
+          );
+
+
+        const likeCount =
+          post.querySelector(
+            ".like-count"
+          );
+
+
+        const comments =
+          getComments(post);
+
+
+        const commentCount =
+          post.querySelector(
+            ".comment-count"
+          );
+
+
+        const commentTitle =
+          post.querySelector(
+            ".comment-count-title"
+          );
+
+
+        if (likeButton) {
+
+          likeButton.classList.toggle(
+            "active",
+            liked
+          );
+
+
+          likeButton.textContent =
+            liked
+              ? "♥ Liked"
+              : "♡ Like";
+
+        }
+
+
+        if (likeCount) {
+
+          likeCount.textContent =
+            `${getLikes(post)} ${
+              getLikes(post) === 1
+                ? "like"
+                : "likes"
+            }`;
+
+        }
+
+
+        if (commentCount) {
+
+          commentCount.textContent =
+            `${comments.length} ${
+              comments.length === 1
+                ? "comment"
+                : "comments"
+            }`;
+
+        }
+
+
+        if (commentTitle) {
+
+          commentTitle.textContent =
+            comments.length;
+
+        }
+
+
+        renderComments(post);
+
+      }
+
+
+      /* ===================================================
+         RENDER COMMENTS
+         =================================================== */
+
+      function renderComments(post) {
+
+        const list =
+          post.querySelector(
+            ".comments-list"
+          );
+
+
+        if (!list) {
+          return;
+        }
+
+
+        const comments =
+          getComments(post);
+
+
+        if (!comments.length) {
+
+          list.innerHTML =
+            `
+              <div class="empty-comments">
+                Be the first to comment.
+              </div>
+            `;
+
+          return;
+
+        }
+
+
+        list.innerHTML =
+          comments
+            .map(comment => {
+
+              return `
+                <div class="comment">
+
+                  <div class="comment-avatar">
+                    J
+                  </div>
+
+                  <div class="comment-body">
+
+                    <span class="comment-author">
+                      ${escapeHTML(
+                        comment.author
+                      )}
+                    </span>
+
+                    <div class="comment-text">
+                      ${escapeHTML(
+                        comment.text
+                      )}
+                    </div>
+
+                  </div>
+
+                </div>
+              `;
+
+            })
+            .join("");
+
+      }
+
 
       /* ===================================================
          FILTERS
          =================================================== */
 
       const filters =
-        document.querySelectorAll(".feed-filter");
+        document.querySelectorAll(
+          ".feed-filter"
+        );
+
 
       const posts =
-        document.querySelectorAll(".post-card");
+        document.querySelectorAll(
+          ".post-card"
+        );
 
 
-      filters.forEach(filter => {
+      filters.forEach(
+        filter => {
 
-        filter.addEventListener("click", () => {
+          filter.addEventListener(
+            "click",
+            () => {
 
-          filters.forEach(item => {
+              filters.forEach(
+                item => {
 
-            item.classList.remove("active");
+                  item.classList.remove(
+                    "active"
+                  );
 
-            item.setAttribute(
-              "aria-selected",
-              "false"
-            );
+                  item.setAttribute(
+                    "aria-selected",
+                    "false"
+                  );
 
-          });
-
-          filter.classList.add("active");
-
-          filter.setAttribute(
-            "aria-selected",
-            "true"
-          );
-
-          const selected =
-            filter.dataset.filter;
-
-          posts.forEach(post => {
-
-            const platform =
-              post.dataset.platform;
-
-            if (
-              selected === "all" ||
-              selected === platform
-            ) {
-
-              post.classList.remove(
-                "hidden"
+                }
               );
 
-            } else {
 
-              post.classList.add(
-                "hidden"
+              filter.classList.add(
+                "active"
+              );
+
+
+              filter.setAttribute(
+                "aria-selected",
+                "true"
+              );
+
+
+              const selected =
+                filter.dataset.filter;
+
+
+              posts.forEach(
+                post => {
+
+                  const platform =
+                    post.dataset.platform;
+
+
+                  if (
+                    selected === "all" ||
+                    selected === platform
+                  ) {
+
+                    post.classList.remove(
+                      "hidden"
+                    );
+
+                  }
+
+                  else {
+
+                    post.classList.add(
+                      "hidden"
+                    );
+
+                  }
+
+                }
               );
 
             }
+          );
 
-          });
-
-        });
-
-      });
+        }
+      );
 
 
       /* ===================================================
-         POST ACTIONS
+         LIKE
+         =================================================== */
+
+      function toggleLike(
+        post,
+        button
+      ) {
+
+        const id =
+          getPostId(post);
+
+
+        const alreadyLiked =
+          Boolean(
+            localStorage.getItem(
+              `postx_liked_${id}`
+            )
+          );
+
+
+        let count =
+          getLikes(post);
+
+
+        if (alreadyLiked) {
+
+          count =
+            Math.max(
+              0,
+              count - 1
+            );
+
+
+          localStorage.removeItem(
+            `postx_liked_${id}`
+          );
+
+        }
+
+        else {
+
+          count += 1;
+
+
+          localStorage.setItem(
+            `postx_liked_${id}`,
+            "1"
+          );
+
+        }
+
+
+        socialData.likes[id] =
+          count;
+
+
+        saveSocialData();
+
+
+        button.classList.toggle(
+          "active",
+          !alreadyLiked
+        );
+
+
+        button.textContent =
+          !alreadyLiked
+            ? "♥ Liked"
+            : "♡ Like";
+
+
+        renderPost(post);
+
+      }
+
+
+      /* ===================================================
+         COMMENTS OPEN/CLOSE
+         =================================================== */
+
+      function toggleComments(
+        post
+      ) {
+
+        const section =
+          post.querySelector(
+            ".comments-section"
+          );
+
+
+        if (!section) {
+          return;
+        }
+
+
+        const opening =
+          !section.classList.contains(
+            "open"
+          );
+
+
+        section.classList.toggle(
+          "open",
+          opening
+        );
+
+
+        if (opening) {
+
+          const input =
+            section.querySelector(
+              ".comment-input"
+            );
+
+
+          setTimeout(() => {
+
+            input?.focus();
+
+          }, 100);
+
+        }
+
+      }
+
+
+      /* ===================================================
+         ADD COMMENT
+         =================================================== */
+
+      function addComment(
+        post,
+        form
+      ) {
+
+        const input =
+          form.querySelector(
+            ".comment-input"
+          );
+
+
+        if (!input) {
+          return;
+        }
+
+
+        const text =
+          input.value.trim();
+
+
+        if (!text) {
+
+          input.focus();
+
+          return;
+
+        }
+
+
+        const id =
+          getPostId(post);
+
+
+        if (
+          !socialData.comments[id]
+        ) {
+
+          socialData.comments[id] =
+            [];
+
+        }
+
+
+        socialData.comments[id].push({
+
+          author:
+            "Joseph Mbui",
+
+          text,
+
+          createdAt:
+            Date.now()
+
+        });
+
+
+        saveSocialData();
+
+
+        input.value = "";
+
+
+        renderPost(post);
+
+
+        const section =
+          post.querySelector(
+            ".comments-section"
+          );
+
+
+        section?.classList.add(
+          "open"
+        );
+
+      }
+
+
+      /* ===================================================
+         ACTIONS
          =================================================== */
 
       document
         .querySelectorAll(
           "[data-post-action]"
         )
-        .forEach(button => {
+        .forEach(
+          button => {
 
-          button.addEventListener(
-            "click",
-            event => {
+            button.addEventListener(
+              "click",
+              event => {
 
-              event.stopPropagation();
-
-              const action =
-                button.dataset.postAction;
+                event.stopPropagation();
 
 
-              /* -------------------------------------------
-                 LIKE
-                 ------------------------------------------- */
+                const action =
+                  button.dataset.postAction;
 
-              if (action === "like") {
 
-                button.classList.toggle(
-                  "active"
+                const post =
+                  button.closest(
+                    ".post-card"
+                  );
+
+
+                if (!post) {
+                  return;
+                }
+
+
+                if (
+                  action === "like"
+                ) {
+
+                  toggleLike(
+                    post,
+                    button
+                  );
+
+                  return;
+
+                }
+
+
+                if (
+                  action === "comment"
+                ) {
+
+                  toggleComments(
+                    post
+                  );
+
+                  return;
+
+                }
+
+
+                if (
+                  action === "chat"
+                ) {
+
+                  window.location.href =
+                    "inbox.html";
+
+                  return;
+
+                }
+
+              }
+            );
+
+          }
+        );
+
+
+      /* ===================================================
+         COMMENT FORMS
+         =================================================== */
+
+      document
+        .querySelectorAll(
+          ".comment-form"
+        )
+        .forEach(
+          form => {
+
+            form.addEventListener(
+              "submit",
+              event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                const post =
+                  form.closest(
+                    ".post-card"
+                  );
+
+
+                if (!post) {
+                  return;
+                }
+
+
+                addComment(
+                  post,
+                  form
                 );
 
-                button.textContent =
-                  button.classList.contains(
-                    "active"
-                  )
-                    ? "♥ Liked"
-                    : "♡ Like";
-
-                return;
               }
+            );
+
+          }
+        );
 
 
-              /* -------------------------------------------
-                 COMMENT
-                 ------------------------------------------- */
+      /* ===================================================
+         PROFILE VIEWS
+         =================================================== */
 
-              if (action === "comment") {
+      document
+        .querySelectorAll(
+          ".profile-trigger"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              event => {
+
+                event.stopPropagation();
+
+
+                const profile =
+                  button.dataset.profile;
+
+
+                if (!profile) {
+                  return;
+                }
+
+
+                socialData.profileViews[
+                  profile
+                ] =
+                  Number(
+                    socialData.profileViews[
+                      profile
+                    ] || 0
+                  ) + 1;
+
+
+                saveSocialData();
+
 
                 window.PostX?.toast?.(
-                  "Comments will open here."
+                  `${profile} profile viewed`
                 );
 
-                return;
               }
+            );
 
-
-              /* -------------------------------------------
-                 CHAT
-                 ------------------------------------------- */
-
-              if (action === "chat") {
-
-                window.location.href =
-                  "inbox.html";
-
-                return;
-              }
-
-            }
-          );
-
-        });
+          }
+        );
 
 
       /* ===================================================
@@ -1660,25 +2900,49 @@ near you.
          =================================================== */
 
       document
-        .querySelectorAll(".post-more")
-        .forEach(button => {
+        .querySelectorAll(
+          ".post-more"
+        )
+        .forEach(
+          button => {
 
-          button.addEventListener(
-            "click",
-            event => {
+            button.addEventListener(
+              "click",
+              event => {
 
-              event.stopPropagation();
+                event.stopPropagation();
 
-              window.PostX?.toast?.(
-                "Post options coming soon."
-              );
 
-            }
-          );
+                window.PostX?.toast?.(
+                  "Post options coming soon."
+                );
 
-        });
+              }
+            );
+
+          }
+        );
+
+
+      /* ===================================================
+         INITIAL RENDER
+         =================================================== */
+
+      posts.forEach(
+        post => {
+
+          renderPost(post);
+
+        }
+      );
+
+
+      console.log(
+        "PostX Social Hub initialized."
+      );
 
     })();
+
   </script>
 
 </body>
