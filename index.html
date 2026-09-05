@@ -75,6 +75,8 @@ body{
   padding-bottom:105px;
 
   -webkit-text-size-adjust:100%;
+
+  touch-action:pan-y;
 }
 
 button,
@@ -354,6 +356,8 @@ a{
   scrollbar-width:none;
 
   -webkit-overflow-scrolling:touch;
+
+  touch-action:pan-x;
 }
 
 .filters::-webkit-scrollbar{
@@ -1056,6 +1060,7 @@ a{
 
   <button
     class="filter"
+    type="button"
     onclick="openMyProfile()"
   >
     View profile
@@ -1072,6 +1077,7 @@ a{
 
   <button
     class="filter active"
+    type="button"
     data-filter="all"
   >
     All
@@ -1079,6 +1085,7 @@ a{
 
   <button
     class="filter"
+    type="button"
     data-filter="postx"
   >
     PostX
@@ -1086,6 +1093,7 @@ a{
 
   <button
     class="filter"
+    type="button"
     data-filter="business"
   >
     Business
@@ -1093,6 +1101,7 @@ a{
 
   <button
     class="filter"
+    type="button"
     data-filter="following"
   >
     Following
@@ -1167,16 +1176,26 @@ a{
 </div>
 
 
+<!-- =====================================================
+     POSTX SOCIAL ENGINE
+     ===================================================== -->
+
 <script>
 
+"use strict";
+
+
 /* =====================================================
-   POSTX SOCIAL ENGINE
-   Frontend MVP persistence
+   STORAGE
    ===================================================== */
 
 const STORAGE_KEY =
   "postx_social_data_v1";
 
+
+/* =====================================================
+   CURRENT USER
+   ===================================================== */
 
 const CURRENT_USER = {
 
@@ -1204,60 +1223,82 @@ const DEFAULT_DATA = {
 
     {
 
-      id:"demo-1",
+      id:
+        "demo-1",
 
-      authorId:"business-1",
+      authorId:
+        "business-1",
 
-      author:"PostX Demo Store",
+      author:
+        "PostX Demo Store",
 
-      avatar:"P",
+      avatar:
+        "P",
 
-      type:"business",
+      type:
+        "business",
 
       text:
         "Welcome to PostX. Create once, publish everywhere and connect with customers.",
 
-      location:"Mariakani",
+      location:
+        "Mariakani",
 
-      tags:"#PostX #Kenya",
+      tags:
+        "#PostX #Kenya",
 
-      likes:0,
+      likes:
+        0,
 
-      liked:false,
+      liked:
+        false,
 
-      views:0,
+      views:
+        0,
 
-      comments:[]
+      comments:
+        []
 
     },
 
 
     {
 
-      id:"demo-2",
+      id:
+        "demo-2",
 
-      authorId:"user-2",
+      authorId:
+        "user-2",
 
-      author:"PostX Creator",
+      author:
+        "PostX Creator",
 
-      avatar:"C",
+      avatar:
+        "C",
 
-      type:"postx",
+      type:
+        "postx",
 
       text:
         "Your first PostX post is free. Share something with the community.",
 
-      location:"Kilifi",
+      location:
+        "Kilifi",
 
-      tags:"#PostX #Kilifi",
+      tags:
+        "#PostX #Kilifi",
 
-      likes:0,
+      likes:
+        0,
 
-      liked:false,
+      liked:
+        false,
 
-      views:0,
+      views:
+        0,
 
-      comments:[]
+      comments:
+        []
 
     }
 
@@ -1286,9 +1327,16 @@ function loadData(){
 
       return {
 
-        ...DEFAULT_DATA,
+        ...structuredClone(DEFAULT_DATA),
 
-        ...parsed
+        ...parsed,
+
+        posts:
+          Array.isArray(parsed.posts)
+            ? parsed.posts
+            : structuredClone(
+                DEFAULT_DATA.posts
+              )
 
       };
 
@@ -1316,13 +1364,24 @@ function loadData(){
 
 function saveData(){
 
-  localStorage.setItem(
+  try{
 
-    STORAGE_KEY,
+    localStorage.setItem(
 
-    JSON.stringify(data)
+      STORAGE_KEY,
 
-  );
+      JSON.stringify(data)
+
+    );
+
+  }catch(error){
+
+    console.error(
+      "PostX: Unable to save feed data.",
+      error
+    );
+
+  }
 
 }
 
@@ -1346,11 +1405,14 @@ function renderProfileViews(){
       "profileViews"
     );
 
-  if(!element)
+  if(!element){
     return;
+  }
 
   element.textContent =
-    data.profileViews || 0;
+    Number(
+      data.profileViews || 0
+    );
 
 }
 
@@ -1361,38 +1423,40 @@ function renderProfileViews(){
 
 function escapeHTML(value){
 
-  return String(value)
+  return String(
+    value ?? ""
+  )
 
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
+  .replaceAll(
+    "&",
+    "&amp;"
+  )
 
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
+  .replaceAll(
+    "<",
+    "&lt;"
+  )
 
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
+  .replaceAll(
+    ">",
+    "&gt;"
+  )
 
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
+  .replaceAll(
+    '"',
+    "&quot;"
+  )
 
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+  .replaceAll(
+    "'",
+    "&#039;"
+  );
 
 }
 
 
 /* =====================================================
-   FEED FILTER
+   FILTER
    ===================================================== */
 
 let activeFilter =
@@ -1410,21 +1474,38 @@ function renderFeed(){
       "feed"
     );
 
-  if(!feed)
+  if(!feed){
     return;
+  }
 
 
   let posts =
-    data.posts || [];
+    Array.isArray(data.posts)
+      ? data.posts
+      : [];
 
 
   if(activeFilter !== "all"){
 
     posts =
       posts.filter(
-        post =>
-          post.type ===
-          activeFilter
+        post => {
+
+          if(
+            activeFilter ===
+            "following"
+          ){
+
+            return post.following === true;
+
+          }
+
+          return (
+            post.type ===
+            activeFilter
+          );
+
+        }
       );
 
   }
@@ -1467,14 +1548,23 @@ function renderFeed(){
 function renderPost(post){
 
   const comments =
-    post.comments || [];
+    Array.isArray(post.comments)
+      ? post.comments
+      : [];
+
+
+  const safeId =
+    escapeHTML(
+      post.id
+    );
 
 
   return `
 
 <article
   class="post"
-  data-post-id="${escapeHTML(post.id)}"
+  id="post-${safeId}"
+  data-post-id="${safeId}"
 >
 
 
@@ -1483,25 +1573,38 @@ function renderPost(post){
 
     <div
       class="author"
-      onclick="viewProfile('${escapeHTML(post.authorId)}')"
+      onclick="viewProfile('${safeId.replace(/'/g, "\\'")}')"
     >
 
       <div class="author-avatar">
-        ${escapeHTML(post.avatar || "?")}
+
+        ${escapeHTML(
+          post.avatar || "?"
+        )}
+
       </div>
 
 
       <div class="author-info">
 
         <strong>
-          ${escapeHTML(post.author)}
+
+          ${escapeHTML(
+            post.author ||
+            "PostX User"
+          )}
+
         </strong>
 
+
         <small>
+
           PostX ·
           ${escapeHTML(
-            post.location || "Kenya"
+            post.location ||
+            "Kenya"
           )}
+
         </small>
 
       </div>
@@ -1522,7 +1625,21 @@ function renderPost(post){
 
 
   <div class="post-media">
-    ✦
+
+    ${
+      post.image
+      ?
+      `
+      <img
+        src="${escapeHTML(post.image)}"
+        alt="Post media"
+        loading="lazy"
+      >
+      `
+      :
+      "✦"
+    }
+
   </div>
 
 
@@ -1530,9 +1647,11 @@ function renderPost(post){
 
 
     <div class="post-text">
+
       ${escapeHTML(
         post.text || ""
       )}
+
     </div>
 
 
@@ -1541,8 +1660,12 @@ function renderPost(post){
       ?
       `
       <div class="post-location">
+
         📍
-        ${escapeHTML(post.location)}
+        ${escapeHTML(
+          post.location
+        )}
+
       </div>
       `
       :
@@ -1555,7 +1678,11 @@ function renderPost(post){
       ?
       `
       <div class="post-tags">
-        ${escapeHTML(post.tags)}
+
+        ${escapeHTML(
+          post.tags
+        )}
+
       </div>
       `
       :
@@ -1568,7 +1695,9 @@ function renderPost(post){
       ?
       `
       <div class="sponsored">
+
         🚀 Sponsored
+
       </div>
       `
       :
@@ -1582,7 +1711,7 @@ function renderPost(post){
   <div class="metrics">
 
     <span>
-      ❤️ ${post.likes || 0} likes
+      ❤️ ${Number(post.likes || 0)} likes
     </span>
 
     <span>
@@ -1590,7 +1719,7 @@ function renderPost(post){
     </span>
 
     <span>
-      👁 ${post.views || 0} views
+      👁 ${Number(post.views || 0)} views
     </span>
 
   </div>
@@ -1602,7 +1731,7 @@ function renderPost(post){
     <button
       class="action ${post.liked ? "liked" : ""}"
       type="button"
-      onclick="toggleLike('${escapeHTML(post.id)}')"
+      onclick="toggleLike('${safeId.replace(/'/g, "\\'")}')"
     >
 
       <span>
@@ -1617,7 +1746,7 @@ function renderPost(post){
     <button
       class="action"
       type="button"
-      onclick="toggleComments('${escapeHTML(post.id)}')"
+      onclick="toggleComments('${safeId.replace(/'/g, "\\'")}')"
     >
 
       <span>
@@ -1632,7 +1761,7 @@ function renderPost(post){
     <button
       class="action"
       type="button"
-      onclick="sharePost('${escapeHTML(post.id)}')"
+      onclick="sharePost('${safeId.replace(/'/g, "\\'")}')"
     >
 
       <span>
@@ -1647,7 +1776,7 @@ function renderPost(post){
     <button
       class="action"
       type="button"
-      onclick="openPost('${escapeHTML(post.id)}')"
+      onclick="openPost('${safeId.replace(/'/g, "\\'")}')"
     >
 
       <span>
@@ -1664,7 +1793,7 @@ function renderPost(post){
 
   <div
     class="comments"
-    id="comments-${escapeHTML(post.id)}"
+    id="comments-${safeId}"
   >
 
 
@@ -1680,24 +1809,34 @@ function renderPost(post){
 <div class="comment">
 
   <div class="comment-avatar">
+
     ${escapeHTML(
-      comment.avatar || "U"
+      comment.avatar ||
+      "U"
     )}
+
   </div>
 
 
   <div class="comment-content">
 
     <strong>
+
       ${escapeHTML(
-        comment.name
+        comment.name ||
+        "PostX User"
       )}
+
     </strong>
 
+
     <p>
+
       ${escapeHTML(
-        comment.text
+        comment.text ||
+        ""
       )}
+
     </p>
 
   </div>
@@ -1710,7 +1849,10 @@ function renderPost(post){
         :
         `
         <small style="color:#8499a7">
-          No comments yet. Be the first.
+
+          No comments yet.
+          Be the first.
+
         </small>
         `
       }
@@ -1720,15 +1862,16 @@ function renderPost(post){
 
     <form
       class="comment-form"
-      onsubmit="addComment(event,'${escapeHTML(post.id)}')"
+      onsubmit="addComment(event,'${safeId.replace(/'/g, "\\'")}')"
     >
 
       <input
-        id="comment-input-${escapeHTML(post.id)}"
+        id="comment-input-${safeId}"
         placeholder="Write a comment..."
         maxlength="500"
         autocomplete="off"
       >
+
 
       <button type="submit">
         Send
@@ -1756,11 +1899,13 @@ function toggleLike(postId){
   const post =
     data.posts.find(
       item =>
-        item.id === postId
+        item.id ===
+        postId
     );
 
-  if(!post)
+  if(!post){
     return;
+  }
 
 
   if(post.liked){
@@ -1768,7 +1913,7 @@ function toggleLike(postId){
     post.likes =
       Math.max(
         0,
-        (post.likes || 0) - 1
+        Number(post.likes || 0) - 1
       );
 
     post.liked =
@@ -1777,7 +1922,7 @@ function toggleLike(postId){
   }else{
 
     post.likes =
-      (post.likes || 0) + 1;
+      Number(post.likes || 0) + 1;
 
     post.liked =
       true;
@@ -1800,11 +1945,13 @@ function toggleComments(postId){
 
   const element =
     document.getElementById(
-      "comments-" + postId
+      "comments-" +
+      postId
     );
 
-  if(!element)
+  if(!element){
     return;
+  }
 
 
   element.classList.toggle(
@@ -1832,30 +1979,37 @@ function addComment(
       postId
     );
 
-  if(!input)
+  if(!input){
     return;
+  }
 
 
   const text =
     input.value.trim();
 
 
-  if(!text)
+  if(!text){
     return;
+  }
 
 
   const post =
     data.posts.find(
       item =>
-        item.id === postId
+        item.id ===
+        postId
     );
 
-
-  if(!post)
+  if(!post){
     return;
+  }
 
 
-  if(!post.comments){
+  if(
+    !Array.isArray(
+      post.comments
+    )
+  ){
 
     post.comments = [];
 
@@ -1920,15 +2074,19 @@ function openPost(postId){
   const post =
     data.posts.find(
       item =>
-        item.id === postId
+        item.id ===
+        postId
     );
 
-  if(!post)
+  if(!post){
     return;
+  }
 
 
   post.views =
-    (post.views || 0) + 1;
+    Number(
+      post.views || 0
+    ) + 1;
 
 
   saveData();
@@ -1962,7 +2120,9 @@ function viewProfile(userId){
 
 
   data.profileViews =
-    (data.profileViews || 0) + 1;
+    Number(
+      data.profileViews || 0
+    ) + 1;
 
 
   saveData();
@@ -1999,11 +2159,13 @@ async function sharePost(postId){
   const post =
     data.posts.find(
       item =>
-        item.id === postId
+        item.id ===
+        postId
     );
 
-  if(!post)
+  if(!post){
     return;
+  }
 
 
   const shareData = {
@@ -2047,7 +2209,10 @@ async function sharePost(postId){
 
   }catch(error){
 
-    /* User cancelled share */
+    /*
+     * User cancelled
+     * native share.
+     */
 
   }
 
@@ -2200,162 +2365,6 @@ function showNotice(message){
 
 
 /* =====================================================
-   WHOLE SCREEN SWIPE
-   CREATE → SOCIAL → MARKETPLACE → INBOX → SETTINGS
-   ===================================================== */
-
-const POSTX_PAGES = [
-
-  "index.html",
-
-  "feed.html",
-
-  "marketplace.html",
-
-  "inbox.html",
-
-  "settings.html"
-
-];
-
-
-let swipeStartX = 0;
-let swipeStartY = 0;
-
-
-document.addEventListener(
-  "touchstart",
-  event => {
-
-    if(
-      !event.touches.length
-    )
-      return;
-
-
-    swipeStartX =
-      event.touches[0].clientX;
-
-
-    swipeStartY =
-      event.touches[0].clientY;
-
-  },
-  {
-    passive:true
-  }
-);
-
-
-document.addEventListener(
-  "touchend",
-  event => {
-
-    if(
-      !event.changedTouches.length
-    )
-      return;
-
-
-    const endX =
-      event.changedTouches[0].clientX;
-
-
-    const endY =
-      event.changedTouches[0].clientY;
-
-
-    const dx =
-      endX -
-      swipeStartX;
-
-
-    const dy =
-      endY -
-      swipeStartY;
-
-
-    if(
-
-      Math.abs(dx) < 90 ||
-
-      Math.abs(dy) > 100
-
-    ){
-
-      return;
-
-    }
-
-
-    let file =
-      location.pathname
-        .split("/")
-        .pop()
-        .toLowerCase();
-
-
-    if(!file){
-
-      file =
-        "index.html";
-
-    }
-
-
-    let index =
-      POSTX_PAGES.indexOf(
-        file
-      );
-
-
-    if(index === -1){
-
-      index = 0;
-
-    }
-
-
-    /* Swipe left */
-
-    if(
-
-      dx < -90 &&
-
-      index <
-      POSTX_PAGES.length - 1
-
-    ){
-
-      window.location.href =
-        POSTX_PAGES[index + 1];
-
-    }
-
-
-    /* Swipe right */
-
-    if(
-
-      dx > 90 &&
-
-      index > 0
-
-    ){
-
-      window.location.href =
-        POSTX_PAGES[index - 1];
-
-    }
-
-  },
-  {
-    passive:true
-  }
-);
-
-
-/* =====================================================
    START
    ===================================================== */
 
@@ -2364,6 +2373,14 @@ renderProfileViews();
 renderFeed();
 
 </script>
+
+
+<!-- =====================================================
+     POSTX GLOBAL APP CORE
+     Theme • PWA • Navigation • Swipe • Offline
+     ===================================================== -->
+
+<script src="js/app.js"></script>
 
 </body>
 </html>
