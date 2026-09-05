@@ -116,6 +116,8 @@
         background 0.2s ease,
         color 0.2s ease,
         border-color 0.2s ease;
+
+      -webkit-tap-highlight-color: transparent;
     }
 
     .feed-filter:hover,
@@ -303,6 +305,9 @@
       color: var(--text-soft);
 
       font-size: 21px;
+
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* =====================================================
@@ -465,6 +470,9 @@
 
       font-size: 12px;
       font-weight: 800;
+
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* =====================================================
@@ -531,6 +539,8 @@
 
       font-size: 13px;
       font-weight: 700;
+
+      cursor: pointer;
 
       transition:
         background 0.2s ease,
@@ -700,6 +710,7 @@
           type="button"
           data-filter="all"
           role="tab"
+          aria-selected="true"
         >
           All
         </button>
@@ -709,6 +720,7 @@
           type="button"
           data-filter="postx"
           role="tab"
+          aria-selected="false"
         >
           PostX
         </button>
@@ -718,6 +730,7 @@
           type="button"
           data-filter="facebook"
           role="tab"
+          aria-selected="false"
         >
           Facebook
         </button>
@@ -727,6 +740,7 @@
           type="button"
           data-filter="instagram"
           role="tab"
+          aria-selected="false"
         >
           Instagram
         </button>
@@ -768,7 +782,9 @@
         id="socialFeed"
       >
 
-        <!-- TEXT POST -->
+        <!-- =================================================
+             TEXT POST
+             ================================================= -->
 
         <article
           class="post-card"
@@ -850,7 +866,9 @@ Create once. Post everywhere.</p>
         </article>
 
 
-        <!-- PHOTO POST -->
+        <!-- =================================================
+             PHOTO POST
+             ================================================= -->
 
         <article
           class="post-card"
@@ -953,7 +971,9 @@ A new week. A new opportunity to grow.
         </article>
 
 
-        <!-- VIDEO POST -->
+        <!-- =================================================
+             VIDEO POST
+             ================================================= -->
 
         <article
           class="post-card"
@@ -1056,7 +1076,9 @@ Behind the scenes from today's project.
         </article>
 
 
-        <!-- PRODUCT POST -->
+        <!-- =================================================
+             PRODUCT POST
+             ================================================= -->
 
         <article
           class="post-card"
@@ -1173,7 +1195,9 @@ Available now. Message us for details.
         </article>
 
 
-        <!-- SERVICE POST -->
+        <!-- =================================================
+             SERVICE POST
+             ================================================= -->
 
         <article
           class="post-card"
@@ -1295,7 +1319,9 @@ maintenance services.
         </article>
 
 
-        <!-- BOOSTED POST -->
+        <!-- =================================================
+             BOOSTED POST
+             ================================================= -->
 
         <article
           class="post-card"
@@ -1316,12 +1342,19 @@ maintenance services.
               </strong>
 
               <div class="post-meta">
-                <span>PostX</span>
-                <span>•</span>
+
+                <span>
+                  PostX
+                </span>
+
+                <span>
+                  •
+                </span>
 
                 <span class="sponsored-label">
                   Sponsored
                 </span>
+
               </div>
 
             </div>
@@ -1484,7 +1517,6 @@ near you.
 
       "use strict";
 
-
       /* ===================================================
          FILTERS
          =================================================== */
@@ -1501,12 +1533,22 @@ near you.
         filter.addEventListener("click", () => {
 
           filters.forEach(item => {
+
             item.classList.remove("active");
-            item.setAttribute("aria-selected", "false");
+
+            item.setAttribute(
+              "aria-selected",
+              "false"
+            );
+
           });
 
           filter.classList.add("active");
-          filter.setAttribute("aria-selected", "true");
+
+          filter.setAttribute(
+            "aria-selected",
+            "true"
+          );
 
           const selected =
             filter.dataset.filter;
@@ -1521,11 +1563,15 @@ near you.
               selected === platform
             ) {
 
-              post.classList.remove("hidden");
+              post.classList.remove(
+                "hidden"
+              );
 
             } else {
 
-              post.classList.add("hidden");
+              post.classList.add(
+                "hidden"
+              );
 
             }
 
@@ -1541,61 +1587,70 @@ near you.
          =================================================== */
 
       document
-        .querySelectorAll("[data-post-action]")
+        .querySelectorAll(
+          "[data-post-action]"
+        )
         .forEach(button => {
 
-          button.addEventListener("click", event => {
+          button.addEventListener(
+            "click",
+            event => {
 
-            event.stopPropagation();
+              event.stopPropagation();
 
-            const action =
-              button.dataset.postAction;
+              const action =
+                button.dataset.postAction;
 
 
-            /* -------------------------------
-               LIKE
-               ------------------------------- */
+              /* -------------------------------------------
+                 LIKE
+                 ------------------------------------------- */
 
-            if (action === "like") {
+              if (action === "like") {
 
-              button.classList.toggle("active");
+                button.classList.toggle(
+                  "active"
+                );
 
-              button.textContent =
-                button.classList.contains("active")
-                  ? "♥ Liked"
-                  : "♡ Like";
+                button.textContent =
+                  button.classList.contains(
+                    "active"
+                  )
+                    ? "♥ Liked"
+                    : "♡ Like";
 
-              return;
+                return;
+              }
+
+
+              /* -------------------------------------------
+                 COMMENT
+                 ------------------------------------------- */
+
+              if (action === "comment") {
+
+                window.PostX?.toast?.(
+                  "Comments will open here."
+                );
+
+                return;
+              }
+
+
+              /* -------------------------------------------
+                 CHAT
+                 ------------------------------------------- */
+
+              if (action === "chat") {
+
+                window.location.href =
+                  "inbox.html";
+
+                return;
+              }
+
             }
-
-
-            /* -------------------------------
-               COMMENT
-               ------------------------------- */
-
-            if (action === "comment") {
-
-              window.PostX?.toast?.(
-                "Comments will open here."
-              );
-
-              return;
-            }
-
-
-            /* -------------------------------
-               CHAT
-               ------------------------------- */
-
-            if (action === "chat") {
-
-              window.location.href =
-                "inbox.html";
-
-              return;
-            }
-
-          });
+          );
 
         });
 
@@ -1608,251 +1663,20 @@ near you.
         .querySelectorAll(".post-more")
         .forEach(button => {
 
-          button.addEventListener("click", event => {
+          button.addEventListener(
+            "click",
+            event => {
 
-            event.stopPropagation();
+              event.stopPropagation();
 
-            window.PostX?.toast?.(
-              "Post options coming soon."
-            );
+              window.PostX?.toast?.(
+                "Post options coming soon."
+              );
 
-          });
+            }
+          );
 
         });
-
-
-      /* ===================================================
-         UNIVERSAL SWIPE
-         =================================================== */
-
-      const PAGES = [
-        "index.html",
-        "feed.html",
-        "marketplace.html",
-        "inbox.html",
-        "settings.html"
-      ];
-
-      let startX = 0;
-      let startY = 0;
-
-      let trackingSwipe = false;
-      let swipeLocked = false;
-
-      document.addEventListener(
-        "touchstart",
-        event => {
-
-          /*
-           * Only use the first finger.
-           * Multi-touch gestures are ignored.
-           */
-
-          if (event.touches.length !== 1) {
-            trackingSwipe = false;
-            return;
-          }
-
-          const target =
-            event.target.closest(
-              "button, a, input, textarea, select, video, .feed-filters"
-            );
-
-          /*
-           * Do not hijack normal interaction.
-           */
-
-          if (target) {
-            trackingSwipe = false;
-            return;
-          }
-
-          const touch =
-            event.touches[0];
-
-          startX =
-            touch.clientX;
-
-          startY =
-            touch.clientY;
-
-          trackingSwipe = true;
-          swipeLocked = false;
-
-        },
-        {
-          passive: true
-        }
-      );
-
-
-      document.addEventListener(
-        "touchmove",
-        event => {
-
-          if (!trackingSwipe) {
-            return;
-          }
-
-          if (event.touches.length !== 1) {
-            trackingSwipe = false;
-            return;
-          }
-
-          const touch =
-            event.touches[0];
-
-          const dx =
-            touch.clientX - startX;
-
-          const dy =
-            touch.clientY - startY;
-
-
-          /*
-           * If movement is mainly vertical,
-           * this is normal page scrolling.
-           */
-
-          if (
-            Math.abs(dy) >
-            Math.abs(dx)
-          ) {
-
-            trackingSwipe = false;
-            return;
-          }
-
-
-          /*
-           * Lock once horizontal movement
-           * clearly becomes a swipe.
-           */
-
-          if (
-            Math.abs(dx) > 20 &&
-            Math.abs(dx) > Math.abs(dy) * 1.25
-          ) {
-
-            swipeLocked = true;
-
-          }
-
-        },
-        {
-          passive: true
-        }
-      );
-
-
-      document.addEventListener(
-        "touchend",
-        event => {
-
-          if (!trackingSwipe) {
-            return;
-          }
-
-          trackingSwipe = false;
-
-          const touch =
-            event.changedTouches[0];
-
-          const dx =
-            touch.clientX - startX;
-
-          const dy =
-            touch.clientY - startY;
-
-
-          /*
-           * Must be a strong horizontal gesture.
-           */
-
-          if (
-            Math.abs(dx) < 90 ||
-            Math.abs(dy) > 100 ||
-            Math.abs(dx) <= Math.abs(dy)
-          ) {
-
-            return;
-
-          }
-
-
-          if (!swipeLocked) {
-            return;
-          }
-
-
-          let current =
-            location.pathname
-              .split("/")
-              .pop();
-
-
-          /*
-           * GitHub Pages can sometimes
-           * resolve the root as an empty path.
-           */
-
-          if (
-            !current ||
-            !PAGES.includes(current)
-          ) {
-
-            current =
-              "index.html";
-
-          }
-
-
-          const currentIndex =
-            PAGES.indexOf(current);
-
-
-          /*
-           * Swipe LEFT
-           * → NEXT TAB
-           */
-
-          if (dx < 0) {
-
-            if (
-              currentIndex <
-              PAGES.length - 1
-            ) {
-
-              window.location.href =
-                PAGES[currentIndex + 1];
-
-            }
-
-            return;
-          }
-
-
-          /*
-           * Swipe RIGHT
-           * → PREVIOUS TAB
-           */
-
-          if (dx > 0) {
-
-            if (currentIndex > 0) {
-
-              window.location.href =
-                PAGES[currentIndex - 1];
-
-            }
-
-          }
-
-        },
-        {
-          passive: true
-        }
-      );
 
     })();
   </script>
