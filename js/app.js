@@ -5,15 +5,20 @@
    ========================================================= */
 
 (() => {
+
   "use strict";
+
 
   /* =======================================================
      POSTX GLOBAL STATE
      ======================================================= */
 
-  const STORAGE_KEY = "postx_state_v1";
+  const STORAGE_KEY =
+    "postx_state_v1";
+
 
   const defaultState = {
+
     theme: "dark",
 
     user: {
@@ -30,9 +35,12 @@
       notifications: true,
       sound: true
     }
+
   };
 
-  let state = loadState();
+
+  let state =
+    loadState();
 
 
   /* =======================================================
@@ -40,40 +48,69 @@
      ======================================================= */
 
   function loadState() {
+
     try {
+
       const saved =
-        localStorage.getItem(STORAGE_KEY);
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
 
       if (!saved) {
-        return structuredClone(defaultState);
+
+        return structuredClone(
+          defaultState
+        );
+
       }
 
-      const parsed = JSON.parse(saved);
+
+      const parsed =
+        JSON.parse(saved);
+
 
       return {
-        ...structuredClone(defaultState),
+
+        ...structuredClone(
+          defaultState
+        ),
+
         ...parsed,
 
         user: {
+
           ...defaultState.user,
+
           ...(parsed.user || {})
+
         },
 
         settings: {
+
           ...defaultState.settings,
+
           ...(parsed.settings || {})
+
         }
+
       };
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.warn(
         "PostX: Could not load saved state.",
         error
       );
 
-      return structuredClone(defaultState);
+      return structuredClone(
+        defaultState
+      );
+
     }
+
   }
 
 
@@ -86,48 +123,66 @@
         JSON.stringify(state)
       );
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.warn(
-        "PostX: Could not save state.",
+        "PostX: Could not save saved state.",
         error
       );
+
     }
+
   }
 
 
   /* =======================================================
-     PUBLIC STATE ACCESS
+     POSTX PUBLIC API
      ======================================================= */
 
   window.PostX = {
 
     getState() {
+
       return state;
+
     },
 
+
     saveState,
+
 
     updateState(updates = {}) {
 
       state = {
+
         ...state,
+
         ...updates
+
       };
+
 
       saveState();
 
+
       document.dispatchEvent(
+
         new CustomEvent(
           "postx:statechange",
           {
             detail: state
           }
         )
+
       );
 
+
       return state;
+
     }
+
   };
 
 
@@ -142,32 +197,53 @@
   ) {
 
     let toast =
-      document.getElementById("toast");
+      document.getElementById(
+        "toast"
+      );
+
 
     if (!toast) {
 
       toast =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      toast.id = "toast";
-      toast.className = "toast";
+      toast.id =
+        "toast";
 
-      document.body.appendChild(toast);
+      toast.className =
+        "toast";
+
+      document.body.appendChild(
+        toast
+      );
+
     }
 
-    toast.textContent = message;
+
+    toast.textContent =
+      message;
+
 
     toast.className =
       `toast ${type} show`;
 
-    clearTimeout(toast._timer);
+
+    clearTimeout(
+      toast._timer
+    );
+
 
     toast._timer =
       setTimeout(() => {
 
-        toast.classList.remove("show");
+        toast.classList.remove(
+          "show"
+        );
 
       }, duration);
+
   }
 
 
@@ -185,18 +261,25 @@
       theme !== "dark" &&
       theme !== "light"
     ) {
+
       theme = "dark";
+
     }
+
 
     document.documentElement.dataset.theme =
       theme;
 
+
     state.theme =
       theme;
 
+
     saveState();
 
+
     document.dispatchEvent(
+
       new CustomEvent(
         "postx:themechange",
         {
@@ -205,16 +288,18 @@
           }
         }
       )
+
     );
+
   }
 
 
   function initTheme() {
 
-    const savedTheme =
-      state.theme || "dark";
+    applyTheme(
+      state.theme || "dark"
+    );
 
-    applyTheme(savedTheme);
   }
 
 
@@ -230,7 +315,11 @@
           ? "light"
           : "dark";
 
-      applyTheme(nextTheme);
+
+      applyTheme(
+        nextTheme
+      );
+
 
       showToast(
         `${
@@ -240,202 +329,273 @@
         } mode enabled`,
         "success"
       );
+
     };
 
 
   /* =======================================================
-     POSTX MAIN PAGE ORDER
+     MAIN POSTX PAGE ORDER
+     
+     CREATE → HOME → MARKET → INBOX → SETTINGS
      
      LEFT SWIPE  = NEXT
      RIGHT SWIPE = PREVIOUS
-
-     Create → Social → Market → Inbox → Settings
      ======================================================= */
 
   const POSTX_PAGES = [
+
     "index.html",
     "feed.html",
     "marketplace.html",
     "inbox.html",
     "settings.html"
+
   ];
 
 
+  /* =======================================================
+     CURRENT PAGE
+     ======================================================= */
+
   function getCurrentPage() {
 
-    let page =
+    let path =
       window.location.pathname
         .split("/")
         .pop()
         .toLowerCase();
 
-    if (!page) {
-      page = "index.html";
-    }
 
     /*
-      GitHub Pages root can sometimes appear
-      without an explicit filename.
-    */
+     * GitHub Pages root:
+     *
+     * /PostX/
+     *
+     * has no filename.
+     *
+     * Treat root as index.html.
+     */
+
+    if (
+      !path ||
+      path === "postx"
+    ) {
+
+      path =
+        "index.html";
+
+    }
+
+
+    if (
+      POSTX_PAGES.includes(path)
+    ) {
+
+      return path;
+
+    }
+
+
+    return null;
+
+  }
+
+
+  /* =======================================================
+     NAVIGATE
+     ======================================================= */
+
+  function navigateToPage(
+    page
+  ) {
 
     if (
       !POSTX_PAGES.includes(page)
     ) {
 
-      /*
-        If this is another PostX page,
-        don't force navigation.
-      */
+      return;
 
-      return null;
     }
 
-    return page;
+
+    if (
+      getCurrentPage() === page
+    ) {
+
+      return;
+
+    }
+
+
+    window.location.href =
+      page;
+
   }
 
 
-  function navigateBySwipe(direction) {
+  /* =======================================================
+     SWIPE NAVIGATION
+     ======================================================= */
+
+  function navigateBySwipe(
+    direction
+  ) {
 
     const currentPage =
       getCurrentPage();
 
+
     if (!currentPage) {
+
       return;
+
     }
+
 
     const currentIndex =
       POSTX_PAGES.indexOf(
         currentPage
       );
 
+
     if (currentIndex === -1) {
+
       return;
+
     }
 
-    let nextIndex =
+
+    const nextIndex =
       currentIndex + direction;
 
+
     /*
-      No wrapping.
-
-      First page:
-      right swipe stays on Create.
-
-      Last page:
-      left swipe stays on Settings.
-    */
+     * No wrapping.
+     */
 
     if (
       nextIndex < 0 ||
-      nextIndex >= POSTX_PAGES.length
+      nextIndex >=
+        POSTX_PAGES.length
     ) {
+
       return;
+
     }
+
 
     const target =
       POSTX_PAGES[nextIndex];
 
-    if (!target) {
-      return;
-    }
 
-    window.location.href =
-      target;
+    navigateToPage(
+      target
+    );
+
   }
 
 
   /* =======================================================
-     WHOLE-SCREEN SWIPE NAVIGATION
+     RELIABLE ANDROID SWIPE ENGINE
      
-     Designed for mobile:
-     - Vertical scrolling remains normal
-     - Horizontal swipe changes PostX page
-     - Buttons/links/forms are ignored
-     - Marketplace filter tabs are ignored
+     IMPORTANT:
+     - Vertical scrolling remains normal.
+     - Horizontal swipes change pages.
+     - Buttons and links remain clickable.
+     - No duplicate swipe handler.
      ======================================================= */
 
   function initSwipeNavigation() {
 
-    /*
-      Prevent duplicate initialization if this
-      file is accidentally loaded twice.
-    */
-
     if (
-      window.PostX &&
       window.PostX._swipeInitialized
     ) {
+
       return;
+
     }
 
-    if (window.PostX) {
-      window.PostX._swipeInitialized =
-        true;
-    }
+
+    window.PostX._swipeInitialized =
+      true;
 
 
     let startX = 0;
     let startY = 0;
 
+    let currentX = 0;
+    let currentY = 0;
+
     let tracking = false;
+    let horizontalGesture = false;
 
-    let swipeLocked = false;
+
+    const SWIPE_DISTANCE = 70;
 
 
-    const SWIPE_THRESHOLD = 90;
-
+    /* =====================================================
+       TOUCH START
+       ===================================================== */
 
     document.addEventListener(
-      "touchstart",
-      event => {
 
-        /*
-          Only track a single finger.
-        */
+      "touchstart",
+
+      event => {
 
         if (
           event.touches.length !== 1
         ) {
+
           tracking = false;
+
           return;
+
         }
 
-
-        const touch =
-          event.touches[0];
 
         const target =
           event.target;
 
 
         /*
-          Never hijack normal interaction
-          with controls.
-        */
+         * Interactive controls should
+         * behave normally.
+         */
 
         if (
           target.closest(
             "button, a, input, textarea, select, video, [contenteditable='true']"
           )
         ) {
+
           tracking = false;
+
           return;
+
         }
 
 
         /*
-          Marketplace category tabs are
-          horizontally scrollable.
-        */
+         * Don't hijack horizontal
+         * scrolling filter bars.
+         */
 
         if (
           target.closest(
-            ".type-tabs, .feed-filters, .marketplace-filters"
+            ".feed-filters, .type-tabs, .marketplace-filters, .filter-tabs"
           )
         ) {
+
           tracking = false;
+
           return;
+
         }
+
+
+        const touch =
+          event.touches[0];
 
 
         startX =
@@ -444,118 +604,187 @@
         startY =
           touch.clientY;
 
-        tracking = true;
 
-        swipeLocked = false;
+        currentX =
+          startX;
+
+        currentY =
+          startY;
+
+
+        tracking =
+          true;
+
+
+        horizontalGesture =
+          false;
 
       },
+
       {
         passive: true
       }
+
     );
 
 
+    /* =====================================================
+       TOUCH MOVE
+       ===================================================== */
+
     document.addEventListener(
+
       "touchmove",
+
       event => {
 
         if (!tracking) {
+
           return;
+
         }
+
 
         if (
           event.touches.length !== 1
         ) {
+
           tracking = false;
+
           return;
+
         }
 
 
         const touch =
           event.touches[0];
 
+
+        currentX =
+          touch.clientX;
+
+        currentY =
+          touch.clientY;
+
+
         const dx =
-          touch.clientX - startX;
+          currentX - startX;
+
 
         const dy =
-          touch.clientY - startY;
+          currentY - startY;
 
 
         /*
-          If movement is primarily vertical,
-          allow normal page scrolling.
-        */
+         * Once the gesture clearly becomes
+         * vertical, give it back to scrolling.
+         */
 
         if (
           Math.abs(dy) >
-          Math.abs(dx)
+          Math.abs(dx) + 10
         ) {
+
           tracking = false;
+
           return;
+
         }
 
 
         /*
-          Horizontal movement detected.
-        */
+         * Horizontal gesture detected.
+         */
 
         if (
-          Math.abs(dx) >=
-          SWIPE_THRESHOLD
+          Math.abs(dx) >= 25 &&
+          Math.abs(dx) >
+            Math.abs(dy)
         ) {
-          swipeLocked = true;
+
+          horizontalGesture =
+            true;
+
         }
 
       },
+
       {
         passive: true
       }
+
     );
 
 
+    /* =====================================================
+       TOUCH END
+       ===================================================== */
+
     document.addEventListener(
+
       "touchend",
+
       event => {
 
         if (!tracking) {
+
           return;
+
         }
+
 
         tracking = false;
 
 
         if (
-          swipeLocked !== true
+          event.changedTouches.length !== 1
         ) {
+
           return;
+
         }
 
 
         const touch =
           event.changedTouches[0];
 
-        if (!touch) {
-          return;
-        }
+
+        currentX =
+          touch.clientX;
+
+        currentY =
+          touch.clientY;
 
 
         const dx =
-          touch.clientX - startX;
+          currentX - startX;
+
 
         const dy =
-          touch.clientY - startY;
+          currentY - startY;
 
 
         /*
-          Confirm this is genuinely
-          a horizontal gesture.
-        */
+         * Must be a genuine horizontal
+         * gesture.
+         */
+
+        if (
+          !horizontalGesture
+        ) {
+
+          return;
+
+        }
+
 
         if (
           Math.abs(dx) <
-          SWIPE_THRESHOLD
+          SWIPE_DISTANCE
         ) {
+
           return;
+
         }
 
 
@@ -563,36 +792,60 @@
           Math.abs(dx) <=
           Math.abs(dy)
         ) {
+
           return;
+
         }
 
 
         /*
-          LEFT → NEXT PAGE
-
-          RIGHT → PREVIOUS PAGE
-        */
+         * LEFT = NEXT
+         */
 
         if (dx < 0) {
 
-          navigateBySwipe(1);
+          navigateBySwipe(
+            1
+          );
 
-        } else {
+        }
 
-          navigateBySwipe(-1);
+
+        /*
+         * RIGHT = PREVIOUS
+         */
+
+        else {
+
+          navigateBySwipe(
+            -1
+          );
 
         }
 
       },
+
       {
         passive: true
       }
+
     );
+
+
+    console.log(
+      "PostX swipe navigation enabled."
+    );
+
   }
 
 
   /* =======================================================
-     ACTIVE NAVIGATION
+     ACTIVE BOTTOM NAV
+     
+     Supports:
+     - buttons
+     - anchors
+     - data-page
      ======================================================= */
 
   function setActiveNavigation() {
@@ -600,15 +853,82 @@
     const currentPage =
       getCurrentPage();
 
+
     if (!currentPage) {
+
       return;
+
     }
 
 
     /*
-      Supports all PostX navigation
-      classes, including Marketplace.
-    */
+     * BUTTON NAVIGATION
+     */
+
+    document
+      .querySelectorAll(
+        ".postx-nav-item, .bottom-nav button, .marketplace-bottom-nav button"
+      )
+      .forEach(button => {
+
+        const onclick =
+          button.getAttribute(
+            "onclick"
+          ) || "";
+
+
+        let target =
+          "";
+
+
+        const match =
+          onclick.match(
+            /['"]([^'"]+\.html)['"]/
+          );
+
+
+        if (match) {
+
+          target =
+            match[1]
+              .split("/")
+              .pop()
+              .split("?")[0]
+              .toLowerCase();
+
+        }
+
+
+        button.classList.toggle(
+          "active",
+          target === currentPage
+        );
+
+
+        if (
+          target === currentPage
+        ) {
+
+          button.setAttribute(
+            "aria-current",
+            "page"
+          );
+
+        }
+        else {
+
+          button.removeAttribute(
+            "aria-current"
+          );
+
+        }
+
+      });
+
+
+    /*
+     * ANCHOR NAVIGATION
+     */
 
     document
       .querySelectorAll(
@@ -617,8 +937,10 @@
       .forEach(link => {
 
         const href =
-          link.getAttribute("href") ||
-          "";
+          link.getAttribute(
+            "href"
+          ) || "";
+
 
         const target =
           href
@@ -633,7 +955,27 @@
           target === currentPage
         );
 
+
+        if (
+          target === currentPage
+        ) {
+
+          link.setAttribute(
+            "aria-current",
+            "page"
+          );
+
+        }
+        else {
+
+          link.removeAttribute(
+            "aria-current"
+          );
+
+        }
+
       });
+
   }
 
 
@@ -644,17 +986,19 @@
   function initNavigation() {
 
     document
-      .querySelectorAll("a[href]")
+      .querySelectorAll(
+        "a[href]"
+      )
       .forEach(link => {
 
         link.addEventListener(
           "click",
-          event => {
+          () => {
 
             const href =
               link.getAttribute(
                 "href"
-              );
+              ) || "";
 
 
             if (
@@ -666,7 +1010,9 @@
               href.startsWith("tel:") ||
               href.startsWith("javascript:")
             ) {
+
               return;
+
             }
 
 
@@ -685,12 +1031,14 @@
 
           }
         );
+
       });
+
   }
 
 
   /* =======================================================
-     COUNTERS
+     DASHBOARD COUNTERS
      ======================================================= */
 
   function updateDashboardCounters() {
@@ -700,10 +1048,12 @@
         "draftCount"
       );
 
+
     const scheduledCount =
       document.getElementById(
         "scheduledCount"
       );
+
 
     const boostCount =
       document.getElementById(
@@ -737,41 +1087,26 @@
         ).length;
 
     }
+
   }
 
 
   /* =======================================================
-     NOTIFICATION BUTTON
+     NOTIFICATIONS
      ======================================================= */
 
   function initNotifications() {
 
-    const button =
-      document.querySelector(
-        "[data-action='notifications']"
-      );
+    /*
+     * Global delegated handler below
+     * already handles notifications.
+     */
 
-    if (!button) {
-      return;
-    }
-
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        showToast(
-          "Notifications will appear here.",
-          "success"
-        );
-
-      }
-    );
   }
 
 
   /* =======================================================
-     GLOBAL BUTTON ACTIONS
+     GLOBAL ACTIONS
      ======================================================= */
 
   function initGlobalActions() {
@@ -785,8 +1120,11 @@
             "[data-action]"
           );
 
+
         if (!button) {
+
           return;
+
         }
 
 
@@ -795,6 +1133,7 @@
 
 
         switch (action) {
+
 
           case "notifications":
 
@@ -830,11 +1169,14 @@
 
 
           default:
+
             break;
+
         }
 
       }
     );
+
   }
 
 
@@ -847,7 +1189,9 @@
     if (
       !("serviceWorker" in navigator)
     ) {
+
       return;
+
     }
 
 
@@ -868,7 +1212,9 @@
             registration.scope
           );
 
-        } catch (error) {
+        }
+
+        catch (error) {
 
           console.warn(
             "PostX Service Worker registration failed:",
@@ -879,33 +1225,41 @@
 
       }
     );
+
   }
 
 
   /* =======================================================
-     ONLINE / OFFLINE STATUS
+     CONNECTION STATUS
      ======================================================= */
 
   function updateConnectionStatus() {
 
-    if (navigator.onLine) {
+    if (
+      navigator.onLine
+    ) {
 
       document.body.classList.remove(
         "offline"
       );
 
-    } else {
+    }
+
+    else {
 
       document.body.classList.add(
         "offline"
       );
+
 
       showToast(
         "You're offline. Saved data remains available.",
         "warning",
         4000
       );
+
     }
+
   }
 
 
@@ -918,6 +1272,7 @@
         document.body.classList.remove(
           "offline"
         );
+
 
         showToast(
           "Back online.",
@@ -936,6 +1291,7 @@
           "offline"
         );
 
+
         showToast(
           "You're offline.",
           "warning",
@@ -947,11 +1303,12 @@
 
 
     updateConnectionStatus();
+
   }
 
 
   /* =======================================================
-     GLOBAL ERROR HANDLING
+     ERROR HANDLING
      ======================================================= */
 
   window.addEventListener(
@@ -1023,7 +1380,9 @@
       init
     );
 
-  } else {
+  }
+
+  else {
 
     init();
 
