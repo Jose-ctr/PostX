@@ -5,7 +5,7 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
   <meta
@@ -37,6 +37,20 @@
 
   <style>
     /* =====================================================
+       ANDROID / MOBILE
+       ===================================================== */
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    body {
+      touch-action: pan-y;
+      overflow-x: hidden;
+    }
+
+    /* =====================================================
        SOCIAL HUB
        ===================================================== */
 
@@ -45,15 +59,16 @@
     }
 
     .feed-header h1 {
-      font-size: clamp(28px, 7vw, 40px);
+      font-size: clamp(30px, 8vw, 42px);
       line-height: 1.1;
       letter-spacing: -1.5px;
     }
 
     .feed-header p {
-      margin-top: 7px;
+      margin-top: 8px;
       color: var(--text-soft);
-      font-size: 13px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     /* =====================================================
@@ -67,9 +82,12 @@
       margin-bottom: 18px;
 
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding-bottom: 5px;
 
       scrollbar-width: none;
+
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
     }
 
     .feed-filters::-webkit-scrollbar {
@@ -79,9 +97,9 @@
     .feed-filter {
       flex: 0 0 auto;
 
-      min-height: 40px;
+      min-height: 42px;
 
-      padding: 0 15px;
+      padding: 0 16px;
 
       border: 1px solid var(--border);
       border-radius: 999px;
@@ -89,12 +107,15 @@
       background: var(--card);
       color: var(--text-soft);
 
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
 
       cursor: pointer;
 
-      transition: 0.2s ease;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
     }
 
     .feed-filter:hover,
@@ -120,11 +141,15 @@
       border-radius: var(--radius);
 
       background: var(--card);
+
+      text-decoration: none;
+
+      -webkit-tap-highlight-color: transparent;
     }
 
     .create-avatar {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
 
       display: grid;
       place-items: center;
@@ -136,13 +161,14 @@
       background: var(--cyan-soft);
       color: var(--cyan);
 
-      font-weight: 800;
+      font-size: 15px;
+      font-weight: 900;
     }
 
     .create-input {
       flex: 1;
 
-      min-height: 42px;
+      min-height: 44px;
 
       display: flex;
       align-items: center;
@@ -156,13 +182,17 @@
 
       color: var(--muted);
 
-      font-size: 13px;
+      font-size: 14px;
     }
 
     .create-button {
       min-height: 42px;
 
-      padding: 0 14px;
+      padding: 0 15px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
 
       border: 0;
       border-radius: 999px;
@@ -170,18 +200,20 @@
       background: var(--cyan);
       color: #001016;
 
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 900;
+
+      white-space: nowrap;
     }
 
     /* =====================================================
-       FEED CARD
+       FEED
        ===================================================== */
 
     .social-feed {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 15px;
     }
 
     .post-card {
@@ -198,19 +230,21 @@
         );
 
       box-shadow: var(--shadow);
+
+      -webkit-tap-highlight-color: transparent;
     }
 
     .post-top {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 11px;
 
-      padding: 15px 15px 10px;
+      padding: 16px 15px 11px;
     }
 
     .post-avatar {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
 
       display: grid;
       place-items: center;
@@ -222,6 +256,7 @@
       background: var(--cyan-soft);
       color: var(--cyan);
 
+      font-size: 15px;
       font-weight: 900;
     }
 
@@ -237,7 +272,8 @@
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      font-size: 14px;
+      font-size: 15px;
+      line-height: 1.3;
     }
 
     .post-meta {
@@ -245,18 +281,20 @@
       align-items: center;
       gap: 5px;
 
-      margin-top: 2px;
+      margin-top: 3px;
 
       color: var(--muted);
-      font-size: 10px;
+      font-size: 11px;
     }
 
     .post-more {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
 
       display: grid;
       place-items: center;
+
+      flex-shrink: 0;
 
       border: 0;
       border-radius: 50%;
@@ -264,7 +302,7 @@
       background: transparent;
       color: var(--text-soft);
 
-      font-size: 18px;
+      font-size: 21px;
     }
 
     /* =====================================================
@@ -272,12 +310,14 @@
        ===================================================== */
 
     .post-content {
-      padding: 3px 15px 14px;
+      padding: 3px 15px 15px;
     }
 
     .post-content p {
       color: var(--text);
-      font-size: 14px;
+      font-size: 16px;
+      line-height: 1.55;
+
       white-space: pre-wrap;
     }
 
@@ -286,19 +326,20 @@
       align-items: center;
       gap: 5px;
 
-      margin-top: 9px;
+      margin-top: 10px;
 
       color: var(--text-soft);
-      font-size: 11px;
+      font-size: 12px;
     }
 
     .hashtags {
-      margin-top: 8px;
+      margin-top: 9px;
 
       color: var(--cyan);
 
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
+      line-height: 1.5;
     }
 
     /* =====================================================
@@ -313,12 +354,16 @@
       overflow: hidden;
 
       background: #03060a;
+
+      touch-action: pan-y;
     }
 
     .post-media img,
     .post-media video {
       width: 100%;
       max-height: 520px;
+
+      display: block;
 
       object-fit: cover;
     }
@@ -328,7 +373,7 @@
       top: 12px;
       right: 12px;
 
-      padding: 5px 8px;
+      padding: 6px 9px;
 
       border-radius: 999px;
 
@@ -344,7 +389,7 @@
        ===================================================== */
 
     .marketplace-preview {
-      margin: 0 15px 14px;
+      margin: 0 15px 15px;
 
       overflow: hidden;
 
@@ -355,7 +400,7 @@
     }
 
     .marketplace-preview-image {
-      min-height: 150px;
+      min-height: 155px;
 
       display: grid;
       place-items: center;
@@ -369,42 +414,48 @@
 
       color: var(--cyan);
 
-      font-size: 42px;
+      font-size: 44px;
     }
 
     .marketplace-preview-body {
-      padding: 13px;
+      padding: 14px;
     }
 
     .marketplace-preview-body h3 {
-      font-size: 15px;
+      margin-top: 7px;
+
+      font-size: 16px;
+      line-height: 1.3;
     }
 
     .marketplace-preview-body p {
-      margin-top: 3px;
+      margin-top: 4px;
 
       color: var(--text-soft);
-      font-size: 12px;
+      font-size: 13px;
+      line-height: 1.45;
     }
 
     .marketplace-bottom {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
 
-      margin-top: 10px;
+      margin-top: 11px;
     }
 
     .marketplace-price {
       color: var(--cyan);
-      font-size: 17px;
+
+      font-size: 18px;
       font-weight: 900;
     }
 
     .seller-button {
-      min-height: 38px;
+      min-height: 40px;
 
-      padding: 0 13px;
+      padding: 0 14px;
 
       border: 1px solid var(--cyan);
       border-radius: 999px;
@@ -412,7 +463,7 @@
       background: var(--cyan-soft);
       color: var(--cyan);
 
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
     }
 
@@ -435,8 +486,9 @@
     }
 
     .boost-banner {
-      margin: 0 15px 14px;
-      padding: 10px 12px;
+      margin: 0 15px 15px;
+
+      padding: 11px 13px;
 
       border: 1px solid rgba(0, 229, 255, 0.18);
       border-radius: var(--radius-sm);
@@ -445,7 +497,8 @@
 
       color: var(--text-soft);
 
-      font-size: 11px;
+      font-size: 12px;
+      line-height: 1.45;
     }
 
     .boost-banner strong {
@@ -458,14 +511,13 @@
 
     .post-actions {
       display: grid;
-      grid-template-columns:
-        repeat(3, 1fr);
+      grid-template-columns: repeat(3, 1fr);
 
       border-top: 1px solid var(--border);
     }
 
     .post-action {
-      min-height: 48px;
+      min-height: 50px;
 
       display: flex;
       align-items: center;
@@ -477,10 +529,14 @@
       background: transparent;
       color: var(--text-soft);
 
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
 
-      transition: 0.2s ease;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease;
+
+      -webkit-tap-highlight-color: transparent;
     }
 
     .post-action:hover,
@@ -490,25 +546,66 @@
     }
 
     /* =====================================================
-       LOADING / EMPTY
+       HIDDEN
        ===================================================== */
-
-    .feed-loading {
-      padding: 35px;
-
-      text-align: center;
-
-      color: var(--muted);
-      font-size: 13px;
-    }
 
     .hidden {
       display: none !important;
     }
 
+    /* =====================================================
+       BOTTOM NAV
+       ===================================================== */
+
+    .bottom-nav {
+      display: grid !important;
+      grid-template-columns: repeat(5, 1fr) !important;
+    }
+
+    .bottom-nav a {
+      min-width: 0;
+    }
+
+    /* =====================================================
+       SMALL ANDROID PHONES
+       ===================================================== */
+
+    @media (max-width: 360px) {
+
+      .feed-header h1 {
+        font-size: 28px;
+      }
+
+      .feed-header p {
+        font-size: 13px;
+      }
+
+      .post-content p {
+        font-size: 15px;
+      }
+
+      .post-action {
+        font-size: 11px;
+      }
+
+      .create-button {
+        padding: 0 11px;
+        font-size: 11px;
+      }
+
+      .bottom-nav a {
+        font-size: 10px;
+      }
+    }
+
     @media (min-width: 700px) {
+
       .post-card {
         border-radius: 20px;
+      }
+
+      .post-content p {
+        font-size: 16px;
       }
     }
   </style>
@@ -550,12 +647,13 @@
           🔔
         </button>
 
-        <div
+        <a
+          href="settings.html"
           class="avatar"
-          aria-label="Profile"
+          aria-label="Profile and Settings"
         >
           J
-        </div>
+        </a>
 
       </div>
 
@@ -575,7 +673,7 @@
         </div>
 
         <h1>
-          Discover.
+          Discover.<br>
           Connect.
         </h1>
 
@@ -643,6 +741,7 @@
       <a
         href="index.html"
         class="create-bar"
+        aria-label="Create a new PostX post"
       >
 
         <div class="create-avatar">
@@ -653,12 +752,9 @@
           What do you want to post?
         </div>
 
-        <button
-          class="create-button"
-          type="button"
-        >
+        <span class="create-button">
           Create
-        </button>
+        </span>
 
       </a>
 
@@ -672,10 +768,7 @@
         id="socialFeed"
       >
 
-
-        <!-- ===============================================
-             TEXT POST
-             =============================================== -->
+        <!-- TEXT POST -->
 
         <article
           class="post-card"
@@ -715,12 +808,10 @@
 
           <div class="post-content">
 
-            <p>
-Building something useful for creators,
+            <p>Building something useful for creators,
 businesses and communities.
 
-Create once. Post everywhere.
-            </p>
+Create once. Post everywhere.</p>
 
             <div class="hashtags">
               #PostX #BuildInPublic
@@ -759,9 +850,7 @@ Create once. Post everywhere.
         </article>
 
 
-        <!-- ===============================================
-             PHOTO POST
-             =============================================== -->
+        <!-- PHOTO POST -->
 
         <article
           class="post-card"
@@ -792,6 +881,7 @@ Create once. Post everywhere.
             <button
               class="post-more"
               type="button"
+              aria-label="More options"
             >
               ⋯
             </button>
@@ -863,9 +953,7 @@ A new week. A new opportunity to grow.
         </article>
 
 
-        <!-- ===============================================
-             VIDEO POST
-             =============================================== -->
+        <!-- VIDEO POST -->
 
         <article
           class="post-card"
@@ -896,6 +984,7 @@ A new week. A new opportunity to grow.
             <button
               class="post-more"
               type="button"
+              aria-label="More options"
             >
               ⋯
             </button>
@@ -967,9 +1056,7 @@ Behind the scenes from today's project.
         </article>
 
 
-        <!-- ===============================================
-             PRODUCT POST
-             =============================================== -->
+        <!-- PRODUCT POST -->
 
         <article
           class="post-card"
@@ -1000,6 +1087,7 @@ Behind the scenes from today's project.
             <button
               class="post-more"
               type="button"
+              aria-label="More options"
             >
               ⋯
             </button>
@@ -1085,9 +1173,7 @@ Available now. Message us for details.
         </article>
 
 
-        <!-- ===============================================
-             SERVICE POST
-             =============================================== -->
+        <!-- SERVICE POST -->
 
         <article
           class="post-card"
@@ -1118,6 +1204,7 @@ Available now. Message us for details.
             <button
               class="post-more"
               type="button"
+              aria-label="More options"
             >
               ⋯
             </button>
@@ -1208,9 +1295,7 @@ maintenance services.
         </article>
 
 
-        <!-- ===============================================
-             BOOSTED POST
-             =============================================== -->
+        <!-- BOOSTED POST -->
 
         <article
           class="post-card"
@@ -1233,6 +1318,7 @@ maintenance services.
               <div class="post-meta">
                 <span>PostX</span>
                 <span>•</span>
+
                 <span class="sponsored-label">
                   Sponsored
                 </span>
@@ -1243,6 +1329,7 @@ maintenance services.
             <button
               class="post-more"
               type="button"
+              aria-label="More options"
             >
               ⋯
             </button>
@@ -1261,6 +1348,7 @@ near you.
           <div class="boost-banner">
 
             🚀
+
             <strong>
               Boosted post
             </strong>
@@ -1321,14 +1409,13 @@ near you.
 
         </article>
 
-
       </section>
 
     </main>
 
 
     <!-- ===================================================
-         BOTTOM NAV
+         BOTTOM NAV — 5 FIXED TABS
          =================================================== -->
 
     <nav
@@ -1347,6 +1434,11 @@ near you.
       >
         <span>⌂</span>
         <span>Social</span>
+      </a>
+
+      <a href="marketplace.html">
+        <span>🛍</span>
+        <span>Market</span>
       </a>
 
       <a href="inbox.html">
@@ -1377,133 +1469,390 @@ near you.
 
 
   <!-- =====================================================
-       SOCIAL HUB JAVASCRIPT
+       SHARED POSTX JAVASCRIPT
        ===================================================== -->
 
   <script src="js/app.js"></script>
 
+
+  <!-- =====================================================
+       SOCIAL HUB JAVASCRIPT
+       ===================================================== -->
+
   <script>
     (() => {
+
       "use strict";
 
+
+      /* ===================================================
+         FILTERS
+         =================================================== */
+
       const filters =
-        document.querySelectorAll(
-          ".feed-filter"
-        );
+        document.querySelectorAll(".feed-filter");
 
       const posts =
-        document.querySelectorAll(
-          ".post-card"
-        );
+        document.querySelectorAll(".post-card");
 
-      /* ================================================
-         FILTERS
-         ================================================ */
 
       filters.forEach(filter => {
 
-        filter.addEventListener(
-          "click",
-          () => {
+        filter.addEventListener("click", () => {
 
-            filters.forEach(item =>
-              item.classList.remove(
-                "active"
-              )
-            );
+          filters.forEach(item => {
+            item.classList.remove("active");
+            item.setAttribute("aria-selected", "false");
+          });
 
-            filter.classList.add(
-              "active"
-            );
+          filter.classList.add("active");
+          filter.setAttribute("aria-selected", "true");
 
-            const selected =
-              filter.dataset.filter;
+          const selected =
+            filter.dataset.filter;
 
-            posts.forEach(post => {
+          posts.forEach(post => {
 
-              const platform =
-                post.dataset.platform;
+            const platform =
+              post.dataset.platform;
 
-              if (
-                selected === "all" ||
-                selected === platform
-              ) {
-                post.classList.remove(
-                  "hidden"
-                );
-              } else {
-                post.classList.add(
-                  "hidden"
-                );
-              }
+            if (
+              selected === "all" ||
+              selected === platform
+            ) {
 
-            });
+              post.classList.remove("hidden");
 
-          }
-        );
+            } else {
+
+              post.classList.add("hidden");
+
+            }
+
+          });
+
+        });
 
       });
 
 
-      /* ================================================
+      /* ===================================================
          POST ACTIONS
-         ================================================ */
+         =================================================== */
 
       document
-        .querySelectorAll(
-          "[data-post-action]"
-        )
+        .querySelectorAll("[data-post-action]")
         .forEach(button => {
 
-          button.addEventListener(
-            "click",
-            () => {
+          button.addEventListener("click", event => {
 
-              const action =
-                button.dataset.postAction;
+            event.stopPropagation();
 
-              if (
-                action === "like"
-              ) {
+            const action =
+              button.dataset.postAction;
 
-                button.classList.toggle(
-                  "active"
-                );
 
-                button.textContent =
-                  button.classList.contains(
-                    "active"
-                  )
-                    ? "♥ Liked"
-                    : "♡ Like";
+            /* -------------------------------
+               LIKE
+               ------------------------------- */
 
-                return;
-              }
+            if (action === "like") {
 
-              if (
-                action === "comment"
-              ) {
+              button.classList.toggle("active");
 
-                window.PostX?.toast(
-                  "Comments will open here."
-                );
+              button.textContent =
+                button.classList.contains("active")
+                  ? "♥ Liked"
+                  : "♡ Like";
 
-                return;
-              }
-
-              if (
-                action === "chat"
-              ) {
-
-                window.location.href =
-                  "inbox.html";
-
-              }
-
+              return;
             }
-          );
+
+
+            /* -------------------------------
+               COMMENT
+               ------------------------------- */
+
+            if (action === "comment") {
+
+              window.PostX?.toast?.(
+                "Comments will open here."
+              );
+
+              return;
+            }
+
+
+            /* -------------------------------
+               CHAT
+               ------------------------------- */
+
+            if (action === "chat") {
+
+              window.location.href =
+                "inbox.html";
+
+              return;
+            }
+
+          });
 
         });
+
+
+      /* ===================================================
+         MORE BUTTONS
+         =================================================== */
+
+      document
+        .querySelectorAll(".post-more")
+        .forEach(button => {
+
+          button.addEventListener("click", event => {
+
+            event.stopPropagation();
+
+            window.PostX?.toast?.(
+              "Post options coming soon."
+            );
+
+          });
+
+        });
+
+
+      /* ===================================================
+         UNIVERSAL SWIPE
+         =================================================== */
+
+      const PAGES = [
+        "index.html",
+        "feed.html",
+        "marketplace.html",
+        "inbox.html",
+        "settings.html"
+      ];
+
+      let startX = 0;
+      let startY = 0;
+
+      let trackingSwipe = false;
+      let swipeLocked = false;
+
+      document.addEventListener(
+        "touchstart",
+        event => {
+
+          /*
+           * Only use the first finger.
+           * Multi-touch gestures are ignored.
+           */
+
+          if (event.touches.length !== 1) {
+            trackingSwipe = false;
+            return;
+          }
+
+          const target =
+            event.target.closest(
+              "button, a, input, textarea, select, video, .feed-filters"
+            );
+
+          /*
+           * Do not hijack normal interaction.
+           */
+
+          if (target) {
+            trackingSwipe = false;
+            return;
+          }
+
+          const touch =
+            event.touches[0];
+
+          startX =
+            touch.clientX;
+
+          startY =
+            touch.clientY;
+
+          trackingSwipe = true;
+          swipeLocked = false;
+
+        },
+        {
+          passive: true
+        }
+      );
+
+
+      document.addEventListener(
+        "touchmove",
+        event => {
+
+          if (!trackingSwipe) {
+            return;
+          }
+
+          if (event.touches.length !== 1) {
+            trackingSwipe = false;
+            return;
+          }
+
+          const touch =
+            event.touches[0];
+
+          const dx =
+            touch.clientX - startX;
+
+          const dy =
+            touch.clientY - startY;
+
+
+          /*
+           * If movement is mainly vertical,
+           * this is normal page scrolling.
+           */
+
+          if (
+            Math.abs(dy) >
+            Math.abs(dx)
+          ) {
+
+            trackingSwipe = false;
+            return;
+          }
+
+
+          /*
+           * Lock once horizontal movement
+           * clearly becomes a swipe.
+           */
+
+          if (
+            Math.abs(dx) > 20 &&
+            Math.abs(dx) > Math.abs(dy) * 1.25
+          ) {
+
+            swipeLocked = true;
+
+          }
+
+        },
+        {
+          passive: true
+        }
+      );
+
+
+      document.addEventListener(
+        "touchend",
+        event => {
+
+          if (!trackingSwipe) {
+            return;
+          }
+
+          trackingSwipe = false;
+
+          const touch =
+            event.changedTouches[0];
+
+          const dx =
+            touch.clientX - startX;
+
+          const dy =
+            touch.clientY - startY;
+
+
+          /*
+           * Must be a strong horizontal gesture.
+           */
+
+          if (
+            Math.abs(dx) < 90 ||
+            Math.abs(dy) > 100 ||
+            Math.abs(dx) <= Math.abs(dy)
+          ) {
+
+            return;
+
+          }
+
+
+          if (!swipeLocked) {
+            return;
+          }
+
+
+          let current =
+            location.pathname
+              .split("/")
+              .pop();
+
+
+          /*
+           * GitHub Pages can sometimes
+           * resolve the root as an empty path.
+           */
+
+          if (
+            !current ||
+            !PAGES.includes(current)
+          ) {
+
+            current =
+              "index.html";
+
+          }
+
+
+          const currentIndex =
+            PAGES.indexOf(current);
+
+
+          /*
+           * Swipe LEFT
+           * → NEXT TAB
+           */
+
+          if (dx < 0) {
+
+            if (
+              currentIndex <
+              PAGES.length - 1
+            ) {
+
+              window.location.href =
+                PAGES[currentIndex + 1];
+
+            }
+
+            return;
+          }
+
+
+          /*
+           * Swipe RIGHT
+           * → PREVIOUS TAB
+           */
+
+          if (dx > 0) {
+
+            if (currentIndex > 0) {
+
+              window.location.href =
+                PAGES[currentIndex - 1];
+
+            }
+
+          }
+
+        },
+        {
+          passive: true
+        }
+      );
 
     })();
   </script>
