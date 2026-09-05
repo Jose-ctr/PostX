@@ -1,1140 +1,1105 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
+«»
 
-    <title>Create Post — PostX</title>
+<meta
+name="description"
+content="PostX — Write once. Post everywhere. Connect. Sell. Grow."
 
-    <meta
-        name="description"
-        content="PostX — Write once. Post everywhere. Connect. Sell. Grow."
-    >
+«»
 
-    <meta name="theme-color" content="#07111f">
-
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-
-    <!-- ORIGINAL POSTX ICON -->
-    <link
-        rel="icon"
-        type="image/png"
-        href="assets/icons/icon-192.png"
-    >
-
-    <link
-        rel="apple-touch-icon"
-        href="assets/icons/icon-192.png"
-    >
-
-    <!-- STYLES -->
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
-</head>
-
-<body>
-
-<!-- =====================================================
+  <meta name="theme-color" content="#07111f">  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PostX">  <title>PostX — Create &amp; Publish</title>  <!-- PWA -->  <link rel="manifest" href="manifest.json">  <!-- ORIGINAL POSTX ICON -->  <link
+    rel="icon"
+    type="image/png"
+    href="assets/icons/icon-192.png"
+  >  <link
+    rel="apple-touch-icon"
+    href="assets/icons/icon-192.png"
+  >  <!-- POSTX STYLES -->  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
+</head><body>  <div class="app"><!-- =================================================
      HEADER
-===================================================== -->
-<header class="app-header">
+================================================== -->
 
-    <div class="brand">
+<header class="topbar">
 
-        <!-- ORIGINAL POSTX APP ICON -->
-        <img
-            src="assets/icons/icon-192.png"
-            alt="PostX"
-            class="brand-icon"
-        >
+  <div class="brand">
 
-        <div class="brand-text">
-            <strong>PostX</strong>
-            <span>Create. Publish. Grow.</span>
-        </div>
+    <img
+      src="assets/icons/icon-192.png"
+      alt="PostX"
+      class="brand-icon"
+    >
 
+    <div class="brand-text">
+      <strong>PostX</strong>
+      <span>Create. Publish. Grow.</span>
     </div>
 
+  </div>
 
-    <div class="header-actions">
 
-        <button
-            type="button"
-            class="icon-button"
-            id="notificationBtn"
-            aria-label="Notifications"
-        >
-            🔔
-        </button>
+  <div class="header-actions">
 
-        <button
-            type="button"
-            class="avatar-button"
-            id="profileBtn"
-            aria-label="Open profile"
-        >
-            J
-        </button>
+    <button
+      type="button"
+      class="icon-btn"
+      id="notificationsBtn"
+      aria-label="Notifications"
+    >
+      🔔
+      <span class="notification-dot"></span>
+    </button>
 
-    </div>
+    <button
+      type="button"
+      class="avatar-btn"
+      id="profileBtn"
+      aria-label="Profile"
+    >
+      J
+    </button>
+
+  </div>
 
 </header>
 
 
-<!-- =====================================================
-     MAIN CONTENT
-===================================================== -->
-<main class="page-container">
+<!-- =================================================
+     MAIN
+================================================== -->
 
-    <!-- =================================================
-         WELCOME
-    ================================================== -->
-    <section class="welcome-section">
+<main class="main-content">
 
-        <div class="eyebrow">
-            POST EVERYWHERE
+  <!-- =================================================
+       WELCOME
+  ================================================== -->
+
+  <section class="welcome-section">
+
+    <div>
+
+      <p class="eyebrow">
+        POST EVERYWHERE
+      </p>
+
+      <h1>
+        Create your post
+      </h1>
+
+      <p class="welcome-text">
+        Write once. We post to PostX, Facebook &amp; Instagram for you.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- =================================================
+       COMPOSER
+  ================================================== -->
+
+  <section class="composer-card">
+
+    <form id="postForm">
+
+
+      <!-- =================================================
+           PHOTO / VIDEO
+      ================================================= -->
+
+      <div class="composer-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-icon">
+              📸
+            </span>
+
+            <div>
+
+              <h2>
+                Photo / Video
+              </h2>
+
+              <p>
+                Your product photo — customers buy what they see.
+              </p>
+
+            </div>
+
+          </div>
+
         </div>
 
-        <h1>
-            Create your post
-        </h1>
 
-        <p>
-            Write once. We post to PostX, Facebook &amp; Instagram for you.
+        <label
+          for="mediaInput"
+          class="media-upload"
+          id="mediaUpload"
+        >
+
+          <div class="upload-icon">
+            ＋
+          </div>
+
+          <strong>
+            Add Photo or Video
+          </strong>
+
+          <span>
+            JPG, PNG, WEBP, MP4 and supported formats
+          </span>
+
+          <input
+            type="file"
+            id="mediaInput"
+            name="media"
+            accept="image/*,video/*"
+            hidden
+          >
+
+        </label>
+
+
+        <div
+          id="mediaPreview"
+          class="media-preview hidden"
+        ></div>
+
+      </div>
+
+
+      <!-- =================================================
+           CAPTION
+      ================================================== -->
+
+      <div class="composer-section">
+
+        <label
+          for="caption"
+          class="field-label"
+        >
+          ✍️ Caption
+        </label>
+
+        <textarea
+          id="caption"
+          name="caption"
+          rows="4"
+          maxlength="2200"
+          placeholder="What are you selling today? e.g. &quot;Fresh Avocados Ksh 200&quot;"
+        ></textarea>
+
+        <div class="character-count">
+
+          <span id="captionCount">
+            0
+          </span>/2200
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           STORY / DETAILS
+      ================================================== -->
+
+      <div class="composer-section">
+
+        <label
+          for="postText"
+          class="field-label"
+        >
+          📝 Story / Details
+          <span class="optional">
+            Optional
+          </span>
+        </label>
+
+        <textarea
+          id="postText"
+          name="postText"
+          rows="3"
+          maxlength="5000"
+          placeholder="Price, Delivery, WhatsApp number"
+        ></textarea>
+
+      </div>
+
+
+      <!-- =================================================
+           LOCATION
+      ================================================== -->
+
+      <div class="composer-section">
+
+        <label
+          for="location"
+          class="field-label"
+        >
+          📍 Location
+          <span class="optional">
+            Optional
+          </span>
+        </label>
+
+        <div class="input-with-icon">
+
+          <span>
+            📍
+          </span>
+
+          <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="Add Location to reach nearby buyers (Mariakani, Mombasa)"
+            autocomplete="off"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           HASHTAGS
+      ================================================== -->
+
+      <div class="composer-section">
+
+        <label
+          for="hashtags"
+          class="field-label"
+        >
+          #️⃣ Hashtags
+          <span class="optional">
+            Optional
+          </span>
+        </label>
+
+        <input
+          type="text"
+          id="hashtags"
+          name="hashtags"
+          placeholder="#Mombasa #BusinessKenya"
+          autocomplete="off"
+        >
+
+        <p class="field-help">
+          Hashtags help people find you.
         </p>
 
-    </section>
+      </div>
 
 
-    <!-- =================================================
-         COMPOSER FORM
-    ================================================== -->
-    <form
-        id="postForm"
-        class="composer-form"
-    >
+      <!-- =================================================
+           PUBLISH TO — FIXED
+      ================================================== -->
+
+      <div class="composer-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-icon">
+              🌐
+            </span>
+
+            <div>
+
+              <h2>
+                Publish to
+              </h2>
+
+              <p>
+                Choose where your post will appear.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
 
 
-        <!-- =============================================
-             PHOTO / VIDEO
-        ============================================== -->
-        <div class="composer-section">
+        <div
+          class="platform-list"
+          style="
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            width:100%;
+          "
+        >
 
-            <div class="section-heading">
 
-                <div>
+          <!-- POSTX -->
 
-                    <span class="section-icon">
-                        📸
-                    </span>
+          <label
+            class="platform-option active"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              display:flex;
+              align-items:center;
+              gap:10px;
+            "
+          >
 
-                    <div>
+            <input
+              type="checkbox"
+              name="platform"
+              value="postx"
+              checked
+            >
 
-                        <h2>
-                            Photo / Video
-                        </h2>
+            <span class="platform-logo postx-logo">
+              PX
+            </span>
 
-                        <p>
-                            Your product photo — customers buy what they see.
-                        </p>
+            <span class="platform-info">
 
-                    </div>
+              <strong>
+                PostX
+              </strong>
 
-                </div>
+              <small>
+                Your PostX Social Hub
+              </small>
+
+            </span>
+
+            <span class="checkmark">
+              ✓
+            </span>
+
+          </label>
+
+
+          <!-- FACEBOOK -->
+
+          <label
+            class="platform-option"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              display:flex;
+              align-items:center;
+              gap:10px;
+            "
+          >
+
+            <input
+              type="checkbox"
+              name="platform"
+              value="facebook"
+            >
+
+            <span class="platform-logo facebook-logo">
+              f
+            </span>
+
+            <span class="platform-info">
+
+              <strong>
+                Facebook
+              </strong>
+
+              <small>
+                Your Facebook Page
+              </small>
+
+            </span>
+
+            <span class="checkmark">
+              ✓
+            </span>
+
+          </label>
+
+
+          <!-- INSTAGRAM -->
+
+          <label
+            class="platform-option"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              display:flex;
+              align-items:center;
+              gap:10px;
+            "
+          >
+
+            <input
+              type="checkbox"
+              name="platform"
+              value="instagram"
+            >
+
+            <span class="platform-logo instagram-logo">
+              ◎
+            </span>
+
+            <span class="platform-info">
+
+              <strong>
+                Instagram
+              </strong>
+
+              <small>
+                Your Instagram
+              </small>
+
+            </span>
+
+            <span class="checkmark">
+              ✓
+            </span>
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           PUBLISHING — FIXED
+      ================================================== -->
+
+      <div class="composer-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-icon">
+              🗓️
+            </span>
+
+            <div>
+
+              <h2>
+                Publishing
+              </h2>
+
+              <p>
+                Choose when your post goes live.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="publish-mode"
+          style="
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            width:100%;
+          "
+        >
+
+
+          <!-- POST NOW -->
+
+          <label
+            class="mode-option active"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              display:flex;
+              align-items:center;
+              gap:12px;
+              padding:12px;
+              cursor:pointer;
+            "
+          >
+
+            <input
+              type="radio"
+              name="publishMode"
+              value="now"
+              checked
+              style="
+                width:22px;
+                height:22px;
+                flex:0 0 22px;
+                margin:0;
+              "
+            >
+
+            <span class="mode-radio"></span>
+
+            <span>
+
+              <strong>
+                Post now
+              </strong>
+
+              <small>
+                Go live now
+              </small>
+
+            </span>
+
+          </label>
+
+
+          <!-- SCHEDULE -->
+
+          <label
+            class="mode-option"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              display:flex;
+              align-items:center;
+              gap:12px;
+              padding:12px;
+              cursor:pointer;
+            "
+          >
+
+            <input
+              type="radio"
+              name="publishMode"
+              value="schedule"
+              style="
+                width:22px;
+                height:22px;
+                flex:0 0 22px;
+                margin:0;
+              "
+            >
+
+            <span class="mode-radio"></span>
+
+            <span>
+
+              <strong>
+                Schedule
+              </strong>
+
+              <small>
+                Choose a date and time
+              </small>
+
+            </span>
+
+          </label>
+
+        </div>
+
+
+        <!-- SCHEDULE CONTROLS -->
+
+        <div
+          id="scheduleControls"
+          class="schedule-controls hidden"
+        >
+
+          <div class="schedule-grid">
+
+            <div>
+
+              <label for="scheduleDate">
+                Date
+              </label>
+
+              <input
+                type="date"
+                id="scheduleDate"
+                name="scheduleDate"
+              >
 
             </div>
 
 
-            <label
-                for="mediaInput"
-                class="media-upload"
+            <div>
+
+              <label for="scheduleTime">
+                Time
+              </label>
+
+              <input
+                type="time"
+                id="scheduleTime"
+                name="scheduleTime"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="premium-notice">
+
+            <span>
+              ⭐
+            </span>
+
+            <div>
+
+              <strong>
+                PostX Pro
+              </strong>
+
+              <p>
+                Scheduled autoposting will be available with Pro.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           BOOST — FIXED
+      ================================================== -->
+
+      <div
+        class="composer-section boost-section"
+        style="
+          overflow:hidden;
+        "
+      >
+
+        <div
+          class="boost-header"
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            width:100%;
+          "
+        >
+
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              gap:10px;
+              min-width:0;
+              flex:1;
+            "
+          >
+
+            <span class="boost-icon">
+              ⚡
+            </span>
+
+            <div>
+
+              <h2>
+                Boost this post
+              </h2>
+
+              <p>
+                Pay for extra visibility in your selected area.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- BOOST TOGGLE -->
+
+          <label
+            class="switch"
+            style="
+              flex:0 0 auto;
+              display:flex;
+              align-items:center;
+            "
+          >
+
+            <input
+              type="checkbox"
+              id="boostToggle"
+              name="boost"
             >
 
-                <input
-                    type="file"
-                    id="mediaInput"
-                    name="media"
-                    accept="image/*,video/*"
-                    hidden
-                >
+            <span class="slider"></span>
 
-                <div class="upload-icon">
-                    ＋
-                </div>
+          </label>
+
+        </div>
+
+
+        <!-- BOOST CONTROLS -->
+
+        <div
+          id="boostControls"
+          class="boost-controls hidden"
+        >
+
+
+          <!-- BOOST LOCATION -->
+
+          <div class="boost-group">
+
+            <span class="small-label">
+              Select area
+            </span>
+
+
+            <div class="boost-options">
+
+
+              <!-- KILIFI -->
+
+              <button
+                type="button"
+                class="boost-location active"
+                data-price="30"
+                data-location="Kilifi"
+              >
 
                 <strong>
-                    Add Photo or Video
+                  Kilifi
                 </strong>
 
                 <span>
-                    JPG, PNG, WEBP or MP4
+                  KSh 30
                 </span>
 
-            </label>
+              </button>
 
 
-            <div
-                id="mediaPreview"
-                class="media-preview"
-            ></div>
+              <!-- MOMBASA -->
 
-        </div>
-
-
-        <!-- =============================================
-             CAPTION
-        ============================================== -->
-        <div class="composer-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        ✍️
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Caption
-                        </h2>
-
-                        <p>
-                            Tell people what you are sharing.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="field">
-
-                <textarea
-                    id="caption"
-                    name="caption"
-                    maxlength="2200"
-                    rows="5"
-                    placeholder="What are you selling today? e.g. &quot;Fresh Avocados Ksh 200&quot;"
-                ></textarea>
-
-
-                <div class="field-footer">
-
-                    <span>
-                        Make it clear and easy to understand.
-                    </span>
-
-                    <span id="captionCount">
-                        0 / 2200
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             STORY / DETAILS
-        ============================================== -->
-        <div class="composer-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        📝
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Story / Details
-                            <small>Optional</small>
-                        </h2>
-
-                        <p>
-                            Add useful information for your customers.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="field">
-
-                <textarea
-                    id="postText"
-                    name="postText"
-                    maxlength="5000"
-                    rows="4"
-                    placeholder="Price, Delivery, WhatsApp number"
-                ></textarea>
-
-
-                <div class="field-footer">
-
-                    <span>
-                        Add price, delivery details or contact information.
-                    </span>
-
-                    <span id="postTextCount">
-                        0 / 5000
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             LOCATION
-        ============================================== -->
-        <div class="composer-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        📍
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Location
-                            <small>Optional</small>
-                        </h2>
-
-                        <p>
-                            Help nearby people discover your post.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="field">
-
-                <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    placeholder="Add Location to reach nearby buyers (Mariakani, Mombasa)"
-                    autocomplete="off"
-                >
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             HASHTAGS
-        ============================================== -->
-        <div class="composer-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        #
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Hashtags
-                            <small>Optional</small>
-                        </h2>
-
-                        <p>
-                            Help people discover your post.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="field">
-
-                <input
-                    type="text"
-                    id="hashtags"
-                    name="hashtags"
-                    placeholder="#Mombasa #BusinessKenya"
-                    autocomplete="off"
-                >
-
-
-                <div class="field-footer">
-
-                    <span>
-                        Hashtags help people find you.
-                    </span>
-
-                    <span>
-                        #Mombasa #BusinessKenya
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             PUBLISH TO
-        ============================================== -->
-        <div class="composer-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        🌐
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Publish to
-                        </h2>
-
-                        <p>
-                            Choose where you want your post to appear.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="platform-list">
-
-
-                <!-- =====================================
-                     POSTX
-                ====================================== -->
-                <label class="platform-option active">
-
-                    <input
-                        type="checkbox"
-                        name="platform"
-                        value="postx"
-                        checked
-                    >
-
-
-                    <span class="platform-logo postx-logo">
-                        PX
-                    </span>
-
-
-                    <span class="platform-info">
-
-                        <strong>
-                            PostX
-                        </strong>
-
-                        <small>
-                            Your PostX Social Hub
-                        </small>
-
-                    </span>
-
-
-                    <span class="checkmark">
-                        ✓
-                    </span>
-
-                </label>
-
-
-                <!-- =====================================
-                     FACEBOOK
-                ====================================== -->
-                <label class="platform-option">
-
-                    <input
-                        type="checkbox"
-                        name="platform"
-                        value="facebook"
-                    >
-
-
-                    <span class="platform-logo facebook-logo">
-                        f
-                    </span>
-
-
-                    <span class="platform-info">
-
-                        <strong>
-                            Facebook
-                        </strong>
-
-                        <small>
-                            Your Facebook Page
-                        </small>
-
-                    </span>
-
-
-                    <span class="checkmark">
-                        ✓
-                    </span>
-
-                </label>
-
-
-                <!-- =====================================
-                     INSTAGRAM
-                ====================================== -->
-                <label class="platform-option">
-
-                    <input
-                        type="checkbox"
-                        name="platform"
-                        value="instagram"
-                    >
-
-
-                    <span class="platform-logo instagram-logo">
-                        ◎
-                    </span>
-
-
-                    <span class="platform-info">
-
-                        <strong>
-                            Instagram
-                        </strong>
-
-                        <small>
-                            Your Instagram
-                        </small>
-
-                    </span>
-
-
-                    <span class="checkmark">
-                        ✓
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             PUBLISHING
-        ============================================== -->
-        <div class="composer-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        🚀
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Publishing
-                        </h2>
-
-                        <p>
-                            Choose when your post goes live.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="publish-options">
-
-
-                <!-- POST NOW -->
-                <label class="publish-option active">
-
-                    <input
-                        type="radio"
-                        name="publishType"
-                        value="now"
-                        checked
-                    >
-
-                    <span class="publish-radio"></span>
-
-
-                    <span class="publish-info">
-
-                        <strong>
-                            Post now
-                        </strong>
-
-                        <small>
-                            Go live now
-                        </small>
-
-                    </span>
-
-                </label>
-
-
-                <!-- SCHEDULE -->
-                <label class="publish-option">
-
-                    <input
-                        type="radio"
-                        name="publishType"
-                        value="schedule"
-                    >
-
-                    <span class="publish-radio"></span>
-
-
-                    <span class="publish-info">
-
-                        <strong>
-                            Schedule
-                        </strong>
-
-                        <small>
-                            Automatically publish later
-                        </small>
-
-                    </span>
-
-                </label>
-
-            </div>
-
-
-            <!-- SCHEDULE CONTROLS -->
-            <div
-                id="scheduleControls"
-                class="schedule-controls"
-                hidden
-            >
-
-                <div class="field">
-
-                    <label for="scheduleDate">
-                        Date
-                    </label>
-
-                    <input
-                        type="date"
-                        id="scheduleDate"
-                        name="scheduleDate"
-                    >
-
-                </div>
-
-
-                <div class="field">
-
-                    <label for="scheduleTime">
-                        Time
-                    </label>
-
-                    <input
-                        type="time"
-                        id="scheduleTime"
-                        name="scheduleTime"
-                    >
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             BOOST
-        ============================================== -->
-        <div class="composer-section boost-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-icon">
-                        ⚡
-                    </span>
-
-                    <div>
-
-                        <h2>
-                            Boost this post
-                        </h2>
-
-                        <p>
-                            Pay for extra visibility in your selected area.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- BOOST SWITCH -->
-                <label class="switch">
-
-                    <input
-                        type="checkbox"
-                        id="boostToggle"
-                        name="boost"
-                    >
-
-                    <span class="slider"></span>
-
-                </label>
-
-            </div>
-
-
-            <!-- BOOST CONTROLS -->
-            <div
-                id="boostControls"
-                class="boost-controls"
-                hidden
-            >
-
-
-                <!-- BOOST LOCATION -->
-                <div class="boost-group">
-
-                    <label>
-                        Select area
-                    </label>
-
-
-                    <div class="boost-options">
-
-
-                        <!-- KILIFI -->
-                        <label class="boost-option active">
-
-                            <input
-                                type="radio"
-                                name="boostLocation"
-                                value="kilifi"
-                                data-price="30"
-                                checked
-                            >
-
-                            <span>
-
-                                <strong>
-                                    Kilifi
-                                </strong>
-
-                                <small>
-                                    KSh 30
-                                </small>
-
-                            </span>
-
-                        </label>
-
-
-                        <!-- MOMBASA -->
-                        <label class="boost-option">
-
-                            <input
-                                type="radio"
-                                name="boostLocation"
-                                value="mombasa"
-                                data-price="80"
-                            >
-
-                            <span>
-
-                                <strong>
-                                    Mombasa
-                                </strong>
-
-                                <small>
-                                    KSh 80
-                                </small>
-
-                            </span>
-
-                        </label>
-
-
-                        <!-- KWALE -->
-                        <label class="boost-option">
-
-                            <input
-                                type="radio"
-                                name="boostLocation"
-                                value="kwale"
-                                data-price="80"
-                            >
-
-                            <span>
-
-                                <strong>
-                                    Kwale
-                                </strong>
-
-                                <small>
-                                    KSh 80
-                                </small>
-
-                            </span>
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                <!-- BOOST DURATION -->
-                <div class="boost-group">
-
-                    <label>
-                        Duration
-                    </label>
-
-
-                    <div class="boost-options">
-
-
-                        <!-- 24 HOURS -->
-                        <label class="boost-option active">
-
-                            <input
-                                type="radio"
-                                name="boostDuration"
-                                value="24h"
-                                checked
-                            >
-
-                            <span>
-
-                                <strong>
-                                    24 Hours
-                                </strong>
-
-                                <small>
-                                    Standard
-                                </small>
-
-                            </span>
-
-                        </label>
-
-
-                        <!-- 3 DAYS -->
-                        <label class="boost-option">
-
-                            <input
-                                type="radio"
-                                name="boostDuration"
-                                value="3d"
-                            >
-
-                            <span>
-
-                                <strong>
-                                    3 Days
-                                </strong>
-
-                                <small>
-                                    More reach
-                                </small>
-
-                            </span>
-
-                        </label>
-
-
-                        <!-- 7 DAYS -->
-                        <label class="boost-option">
-
-                            <input
-                                type="radio"
-                                name="boostDuration"
-                                value="7d"
-                            >
-
-                            <span>
-
-                                <strong>
-                                    7 Days
-                                </strong>
-
-                                <small>
-                                    Maximum duration
-                                </small>
-
-                            </span>
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                <!-- BOOST SUMMARY -->
-                <div class="boost-summary">
-
-                    <span>
-                        Boost total
-                    </span>
-
-                    <strong id="boostPrice">
-                        KSh 0
-                    </strong>
-
-                </div>
-
-
-                <p class="sponsored-note">
-                    Boosted content will be displayed as Sponsored / Ad where required.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- =============================================
-             ACTION BUTTONS
-        ============================================== -->
-        <div class="composer-actions">
-
-
-            <button
+              <button
                 type="button"
-                class="secondary-button"
-                id="saveDraftBtn"
-            >
-                Save Draft
-            </button>
+                class="boost-location"
+                data-price="80"
+                data-location="Mombasa"
+              >
 
-
-            <button
-                type="submit"
-                class="primary-button"
-                id="publishBtn"
-            >
+                <strong>
+                  Mombasa
+                </strong>
 
                 <span>
-                    🚀
+                  KSh 80
                 </span>
 
-                Post Everywhere
+              </button>
 
-            </button>
+
+              <!-- KWALE -->
+
+              <button
+                type="button"
+                class="boost-location"
+                data-price="80"
+                data-location="Kwale"
+              >
+
+                <strong>
+                  Kwale
+                </strong>
+
+                <span>
+                  KSh 80
+                </span>
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- DURATION -->
+
+          <div class="duration-options">
+
+            <span class="small-label">
+              Duration
+            </span>
+
+
+            <div class="duration-list">
+
+
+              <button
+                type="button"
+                class="duration active"
+                data-duration="24"
+              >
+                24 hours
+              </button>
+
+
+              <button
+                type="button"
+                class="duration"
+                data-duration="72"
+              >
+                3 days
+              </button>
+
+
+              <button
+                type="button"
+                class="duration"
+                data-duration="168"
+              >
+                7 days
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- BOOST SUMMARY -->
+
+          <div class="boost-summary">
+
+            <span>
+              Boost budget
+            </span>
+
+            <strong id="boostPrice">
+              KSh 0
+            </strong>
+
+          </div>
+
+
+          <div class="sponsored-note">
+
+            ⚡ Boosted content will be displayed as
+            <strong>Sponsored / Ad</strong>
+            where required.
+
+          </div>
 
         </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ACTIONS
+      ================================================== -->
+
+      <div class="composer-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          id="saveDraftBtn"
+        >
+          💾 Save Draft
+        </button>
+
+
+        <button
+          type="submit"
+          class="primary-btn"
+          id="publishBtn"
+        >
+
+          <span>
+            🚀
+          </span>
+
+          <span id="publishButtonText">
+            Post Everywhere
+          </span>
+
+        </button>
+
+      </div>
+
 
     </form>
 
-
-    <!-- =================================================
-         QUICK STATS
-    ================================================== -->
-    <section class="quick-stats">
+  </section>
 
 
-        <!-- DRAFTS -->
-        <div class="stat-card">
+  <!-- =================================================
+       QUICK STATS
+  ================================================== -->
 
-            <span class="stat-icon">
-                📝
-            </span>
-
-            <div>
-
-                <strong id="draftCount">
-                    0
-                </strong>
-
-                <small>
-                    Drafts
-                </small>
-
-            </div>
-
-        </div>
+  <section class="quick-stats">
 
 
-        <!-- SCHEDULED -->
-        <div class="stat-card">
+    <div class="stat-card">
 
-            <span class="stat-icon">
-                🗓️
-            </span>
+      <span>
+        📝
+      </span>
 
-            <div>
+      <div>
 
-                <strong id="scheduledCount">
-                    0
-                </strong>
+        <strong id="draftCount">
+          0
+        </strong>
 
-                <small>
-                    Scheduled
-                </small>
+        <small>
+          Drafts
+        </small>
 
-            </div>
+      </div>
 
-        </div>
+    </div>
 
 
-        <!-- ACTIVE BOOSTS -->
-        <div class="stat-card">
+    <div class="stat-card">
 
-            <span class="stat-icon">
-                ⚡
-            </span>
+      <span>
+        🗓️
+      </span>
 
-            <div>
+      <div>
 
-                <strong id="activeBoostCount">
-                    0
-                </strong>
+        <strong id="scheduledCount">
+          0
+        </strong>
 
-                <small>
-                    Active Boosts
-                </small>
+        <small>
+          Scheduled
+        </small>
 
-            </div>
+      </div>
 
-        </div>
+    </div>
 
-    </section>
+
+    <div class="stat-card">
+
+      <span>
+        ⚡
+      </span>
+
+      <div>
+
+        <strong id="boostCount">
+          0
+        </strong>
+
+        <small>
+          Active Boosts
+        </small>
+
+      </div>
+
+    </div>
+
+  </section>
 
 </main>
 
 
-<!-- =====================================================
+<!-- =================================================
      BOTTOM NAVIGATION
-===================================================== -->
+================================================== -->
+
 <nav class="bottom-nav">
 
+  <a
+    href="index.html"
+    class="nav-item active"
+    aria-label="Create"
+  >
+    <span>
+      ＋
+    </span>
 
-    <!-- CREATE -->
-    <a
-        href="index.html"
-        class="nav-item active"
-    >
+    <small>
+      Create
+    </small>
 
-        <span class="nav-icon">
-            ＋
-        </span>
-
-        <span>
-            Create
-        </span>
-
-    </a>
+  </a>
 
 
-    <!-- SOCIAL -->
-    <a
-        href="feed.html"
-        class="nav-item"
-    >
+  <a
+    href="feed.html"
+    class="nav-item"
+    aria-label="Social Hub"
+  >
+    <span>
+      ◉
+    </span>
 
-        <span class="nav-icon">
-            ◉
-        </span>
+    <small>
+      Social
+    </small>
 
-        <span>
-            Social
-        </span>
-
-    </a>
-
-
-    <!-- INBOX -->
-    <a
-        href="inbox.html"
-        class="nav-item"
-    >
-
-        <span class="nav-icon">
-            💬
-        </span>
-
-        <span>
-            Inbox
-        </span>
-
-    </a>
+  </a>
 
 
-    <!-- SETTINGS -->
-    <a
-        href="settings.html"
-        class="nav-item"
-    >
+  <a
+    href="inbox.html"
+    class="nav-item"
+    aria-label="Inbox"
+  >
+    <span>
+      💬
+    </span>
 
-        <span class="nav-icon">
-            ⚙
-        </span>
+    <small>
+      Inbox
+    </small>
 
-        <span>
-            Settings
-        </span>
+  </a>
 
-    </a>
+
+  <a
+    href="settings.html"
+    class="nav-item"
+    aria-label="Settings"
+  >
+    <span>
+      ⚙
+    </span>
+
+    <small>
+      Settings
+    </small>
+
+  </a>
 
 </nav>
 
-
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
-<script src="js/app.js"></script>
-<script src="js/composer.js"></script>
-
-</body>
+  </div>  <!-- =================================================
+       TOAST
+  ================================================== -->  <div
+    id="toast"
+    class="toast"
+    role="status"
+    aria-live="polite"
+  ></div>  <!-- =================================================
+       JAVASCRIPT
+  ================================================== -->  <script src="js/app.js"></script>  <script src="js/composer.js"></script></body>
 </html>
