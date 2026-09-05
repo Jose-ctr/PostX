@@ -5,74 +5,217 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta
-    name="theme-color"
-    content="#05080D"
-  >
+  <meta name="theme-color" content="#000000">
 
   <meta
     name="description"
-    content="PostX Unified Inbox — manage conversations in one place."
+    content="PostX Unified Inbox — DMs, comments, marketplace chats and social conversations."
   >
 
-  <title>PostX — Unified Inbox</title>
+  <title>Inbox — PostX</title>
 
-  <link
-    rel="manifest"
-    href="manifest.json"
-  >
+  <link rel="manifest" href="manifest.json">
 
   <link
     rel="icon"
+    type="image/png"
     href="assets/icons/icon-192.png"
   >
 
   <link
     rel="stylesheet"
-    href="css/style.css"
+    href="css/style.css?v=10"
   >
 
   <style>
+    :root {
+      --px-bg: #000000;
+      --px-card: #212528;
+      --px-surface: #4B4F52;
+      --px-input: #111416;
+      --px-border: #555B5E;
+      --px-text: #ffffff;
+      --px-muted: #D0D5D8;
+      --px-lime: #A6FF7F;
+      --px-danger: #ff6675;
+      --px-radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--px-bg);
+      color: var(--px-text);
+      color-scheme: dark;
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      font-size: 15px;
+      line-height: 1.45;
+      padding-bottom: 82px;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+    }
+
     /* =====================================================
-       INBOX
+       APP
        ===================================================== */
 
-    .inbox-page {
-      width: min(100%, 1000px);
+    .app {
+      width: 100%;
+      max-width: 1100px;
       margin: 0 auto;
-    }
-
-    .inbox-heading {
-      margin-bottom: 18px;
-    }
-
-    .inbox-heading h1 {
-      font-size: clamp(28px, 7vw, 40px);
-      line-height: 1.1;
-      letter-spacing: -1.5px;
-    }
-
-    .inbox-heading p {
-      margin-top: 7px;
-      color: var(--text-soft);
-      font-size: 13px;
+      padding: 12px 12px 20px;
     }
 
     /* =====================================================
-       CHANNEL FILTER
+       HEADER
+       ===================================================== */
+
+    .topbar {
+      min-height: 54px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+
+      text-decoration: none;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+
+      border-radius: 12px;
+
+      object-fit: cover;
+
+      border: 1px solid var(--px-border);
+      background: var(--px-card);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing: -0.7px;
+    }
+
+    .brand-name span {
+      color: var(--px-lime);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .icon-button {
+      width: 43px;
+      height: 43px;
+
+      display: grid;
+      place-items: center;
+
+      border: 1px solid var(--px-border);
+      border-radius: 13px;
+
+      background: var(--px-card);
+      color: var(--px-text);
+
+      font-size: 18px;
+    }
+
+    .icon-button:active {
+      transform: scale(.96);
+    }
+
+    /* =====================================================
+       PAGE HEADER
+       ===================================================== */
+
+    .page-heading {
+      margin-bottom: 14px;
+    }
+
+    .eyebrow {
+      color: var(--px-lime);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+
+      font-size: clamp(27px, 7vw, 38px);
+      line-height: 1.05;
+
+      letter-spacing: -1.2px;
+      font-weight: 950;
+    }
+
+    .page-heading p {
+      margin: 7px 0 0;
+
+      color: var(--px-muted);
+      font-size: 14px;
+    }
+
+    /* =====================================================
+       CHANNEL TABS
        ===================================================== */
 
     .channel-tabs {
       display: flex;
-      gap: 8px;
-
-      margin-bottom: 16px;
+      gap: 7px;
 
       overflow-x: auto;
       scrollbar-width: none;
+
+      padding-bottom: 4px;
+      margin-bottom: 12px;
     }
 
     .channel-tabs::-webkit-scrollbar {
@@ -82,119 +225,172 @@
     .channel-tab {
       flex: 0 0 auto;
 
-      min-height: 40px;
+      min-height: 42px;
 
-      padding: 0 14px;
+      padding: 0 15px;
 
-      border: 1px solid var(--border);
+      border: 1px solid var(--px-border);
       border-radius: 999px;
 
-      background: var(--card);
-      color: var(--text-soft);
+      background: var(--px-card);
+      color: var(--px-muted);
 
-      font-size: 11px;
-      font-weight: 800;
+      font-size: 12px;
+      font-weight: 850;
     }
 
     .channel-tab.active {
-      border-color: var(--cyan);
-      background: var(--cyan-soft);
-      color: var(--cyan);
+      border-color: var(--px-lime);
+      color: var(--px-lime);
+      background: #111416;
     }
 
     /* =====================================================
-       INBOX LAYOUT
+       INBOX
        ===================================================== */
 
-    .inbox-layout {
+    .inbox {
       display: grid;
       grid-template-columns: 1fr;
 
+      min-height: 650px;
+
       overflow: hidden;
 
-      min-height: 560px;
+      border: 1px solid var(--px-border);
+      border-radius: var(--px-radius);
 
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      background: var(--px-card);
 
-      background: var(--card);
-      box-shadow: var(--shadow);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.35);
     }
 
     /* =====================================================
-       CONVERSATION LIST
+       LIST PANEL
        ===================================================== */
 
-    .conversation-list {
-      border-bottom: 1px solid var(--border);
+    .list-panel {
+      min-width: 0;
+      border-bottom: 1px solid var(--px-border);
     }
 
-    .conversation-header {
+    .list-header {
+      min-height: 58px;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      padding: 15px;
+      padding: 10px 13px;
 
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--px-border);
     }
 
-    .conversation-header strong {
+    .list-title {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .unread-count {
+      min-width: 25px;
+      height: 23px;
+
+      padding: 0 7px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 999px;
+
+      background: var(--px-lime);
+      color: #071006;
+
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .search {
+      padding: 10px 12px;
+    }
+
+    .search input {
+      width: 100%;
+      min-height: 44px;
+
+      padding: 0 15px;
+
+      border: 1px solid var(--px-border);
+      border-radius: 999px;
+
+      outline: none;
+
+      background: var(--px-input);
+      color: var(--px-text);
+
       font-size: 14px;
     }
 
-    .search-box {
-      margin: 12px;
+    .search input::placeholder {
+      color: #AEB5B9;
     }
 
-    .search-box input {
-      min-height: 42px;
-      border-radius: 999px;
+    .search input:focus {
+      border-color: var(--px-lime);
     }
 
-    .conversations {
-      max-height: 390px;
+    .conversation-list {
+      max-height: 450px;
       overflow-y: auto;
     }
+
+    /* =====================================================
+       CONVERSATION
+       ===================================================== */
 
     .conversation {
       width: 100%;
 
       display: flex;
       align-items: center;
+
       gap: 10px;
 
-      padding: 13px 14px;
+      padding: 12px;
 
       border: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,.06);
 
       background: transparent;
-      color: var(--text);
+      color: var(--px-text);
 
       text-align: left;
     }
 
     .conversation:hover,
     .conversation.active {
-      background: var(--cyan-soft);
+      background: #171a1b;
     }
 
     .conversation-avatar {
-      width: 44px;
-      height: 44px;
+      width: 45px;
+      height: 45px;
+
+      flex: 0 0 45px;
 
       display: grid;
       place-items: center;
 
-      flex-shrink: 0;
-
       border-radius: 50%;
 
-      background: var(--cyan-soft);
-      color: var(--cyan);
+      background: var(--px-surface);
+      color: var(--px-lime);
 
-      font-weight: 900;
+      border: 1px solid var(--px-border);
+
+      font-size: 15px;
+      font-weight: 950;
     }
 
     .conversation-info {
@@ -202,63 +398,98 @@
       flex: 1;
     }
 
-    .conversation-name {
+    .conversation-top {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      gap: 8px;
+
+      gap: 7px;
     }
 
-    .conversation-name strong {
+    .conversation-name {
       overflow: hidden;
+
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 900;
     }
 
     .conversation-time {
       flex-shrink: 0;
-      color: var(--muted);
-      font-size: 9px;
+
+      color: var(--px-muted);
+      font-size: 10px;
     }
 
     .conversation-preview {
       margin-top: 3px;
 
       overflow: hidden;
+
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      color: var(--text-soft);
-      font-size: 11px;
+      color: var(--px-muted);
+      font-size: 12px;
+    }
+
+    .conversation-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 8px;
+
+      margin-top: 5px;
     }
 
     .channel-badge {
       display: inline-flex;
 
-      margin-top: 5px;
-      padding: 2px 6px;
+      padding: 3px 7px;
 
       border-radius: 999px;
 
-      background: rgba(255,255,255,0.05);
-      color: var(--muted);
+      background: #111416;
+      color: var(--px-muted);
 
-      font-size: 8px;
-      font-weight: 800;
+      font-size: 9px;
+      font-weight: 900;
       text-transform: uppercase;
     }
 
-    .unread-dot {
-      width: 8px;
-      height: 8px;
+    .unread-badge {
+      min-width: 19px;
+      height: 19px;
 
-      flex-shrink: 0;
+      padding: 0 5px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
 
       border-radius: 50%;
 
-      background: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan-glow);
+      background: var(--px-lime);
+      color: #071006;
+
+      font-size: 9px;
+      font-weight: 950;
+    }
+
+    /* =====================================================
+       EMPTY LIST
+       ===================================================== */
+
+    .empty-list {
+      padding: 35px 20px;
+
+      text-align: center;
+
+      color: var(--px-muted);
+      font-size: 13px;
     }
 
     /* =====================================================
@@ -266,22 +497,59 @@
        ===================================================== */
 
     .chat-panel {
+      min-width: 0;
+
       display: flex;
       flex-direction: column;
 
-      min-width: 0;
+      min-height: 560px;
     }
 
     .chat-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
       min-height: 66px;
 
-      padding: 11px 15px;
+      display: flex;
+      align-items: center;
 
-      border-bottom: 1px solid var(--border);
+      gap: 10px;
+
+      padding: 10px 13px;
+
+      border-bottom: 1px solid var(--px-border);
+    }
+
+    .back-button {
+      display: none;
+
+      width: 38px;
+      height: 38px;
+
+      place-items: center;
+
+      border: 1px solid var(--px-border);
+      border-radius: 12px;
+
+      background: var(--px-input);
+      color: var(--px-text);
+    }
+
+    .chat-avatar {
+      width: 43px;
+      height: 43px;
+
+      flex: 0 0 43px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+
+      background: var(--px-surface);
+      color: var(--px-lime);
+
+      border: 1px solid var(--px-border);
+
+      font-weight: 950;
     }
 
     .chat-user {
@@ -293,56 +561,45 @@
       display: block;
 
       overflow: hidden;
+
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 900;
     }
 
-    .online-status {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-
+    .chat-channel {
       margin-top: 2px;
 
-      color: var(--success);
-      font-size: 10px;
-    }
-
-    .online-status::before {
-      content: "";
-
-      width: 6px;
-      height: 6px;
-
-      border-radius: 50%;
-
-      background: var(--success);
+      color: var(--px-muted);
+      font-size: 11px;
     }
 
     .chat-actions {
       display: flex;
-      gap: 5px;
+      gap: 4px;
     }
 
-    .chat-icon {
-      width: 36px;
-      height: 36px;
+    .chat-action {
+      width: 38px;
+      height: 38px;
 
       display: grid;
       place-items: center;
 
       border: 0;
-      border-radius: 50%;
+      border-radius: 12px;
 
       background: transparent;
-      color: var(--text-soft);
+      color: var(--px-muted);
+
+      font-size: 17px;
     }
 
-    .chat-icon:hover {
-      background: var(--cyan-soft);
-      color: var(--cyan);
+    .chat-action:hover {
+      background: #111416;
+      color: var(--px-lime);
     }
 
     /* =====================================================
@@ -352,41 +609,40 @@
     .messages {
       flex: 1;
 
+      min-height: 410px;
+
       display: flex;
       flex-direction: column;
-      gap: 10px;
 
-      min-height: 360px;
+      gap: 9px;
 
-      padding: 18px;
+      padding: 16px;
 
       overflow-y: auto;
 
-      background:
-        radial-gradient(
-          circle at center,
-          rgba(0,229,255,0.025),
-          transparent 50%
-        );
+      background: #050607;
     }
 
     .message-date {
       align-self: center;
 
-      margin: 4px 0 8px;
-      padding: 4px 9px;
+      margin: 3px 0 8px;
+
+      padding: 4px 10px;
 
       border-radius: 999px;
 
-      background: rgba(255,255,255,0.04);
+      background: #212528;
 
-      color: var(--muted);
+      color: var(--px-muted);
+
       font-size: 9px;
+      font-weight: 750;
     }
 
     .message-row {
-      display: flex;
       width: 100%;
+      display: flex;
     }
 
     .message-row.received {
@@ -398,27 +654,29 @@
     }
 
     .message {
-      max-width: 78%;
+      max-width: min(78%, 520px);
 
       padding: 10px 12px;
 
       border-radius: 16px;
 
-      font-size: 12px;
+      font-size: 13px;
+
+      word-break: break-word;
     }
 
-    .received .message {
+    .message.received {
       border-bottom-left-radius: 4px;
 
-      background: var(--card-light);
-      color: var(--text);
+      background: var(--px-card);
+      color: var(--px-text);
     }
 
-    .sent .message {
+    .message.sent {
       border-bottom-right-radius: 4px;
 
-      background: var(--cyan);
-      color: #001016;
+      background: var(--px-lime);
+      color: #071006;
     }
 
     .message-time {
@@ -426,100 +684,355 @@
 
       margin-top: 4px;
 
-      opacity: 0.55;
+      opacity: .58;
 
-      font-size: 8px;
+      font-size: 9px;
       text-align: right;
     }
 
-    /* =====================================================
-       CHAT COMPOSER
-       ===================================================== */
+    .message-system {
+      align-self: center;
 
-    .message-composer {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
+      max-width: 85%;
 
-      padding: 10px;
+      padding: 8px 11px;
 
-      border-top: 1px solid var(--border);
+      border: 1px solid var(--px-border);
+      border-radius: 12px;
+
+      background: #111416;
+
+      color: var(--px-muted);
+
+      font-size: 10px;
+      text-align: center;
     }
 
-    .message-composer textarea {
+    /* =====================================================
+       COMPOSER
+       ===================================================== */
+
+    .composer {
+      display: flex;
+      align-items: flex-end;
+
+      gap: 7px;
+
+      padding: 9px;
+
+      border-top: 1px solid var(--px-border);
+
+      background: var(--px-card);
+    }
+
+    .attach-button {
+      width: 44px;
+      height: 44px;
+
+      flex: 0 0 44px;
+
+      display: grid;
+      place-items: center;
+
+      border: 1px solid var(--px-border);
+      border-radius: 13px;
+
+      background: var(--px-input);
+      color: var(--px-muted);
+
+      font-size: 18px;
+    }
+
+    .message-input {
+      min-width: 0;
+      flex: 1;
+
       min-height: 44px;
-      max-height: 110px;
+      max-height: 120px;
 
       resize: none;
 
+      padding: 11px 13px;
+
+      border: 1px solid var(--px-border);
       border-radius: 14px;
 
-      padding: 11px 13px;
+      outline: none;
+
+      background: var(--px-input);
+      color: var(--px-text);
+
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .message-input::placeholder {
+      color: #AEB5B9;
+    }
+
+    .message-input:focus {
+      border-color: var(--px-lime);
     }
 
     .send-button {
       width: 44px;
       height: 44px;
 
+      flex: 0 0 44px;
+
       display: grid;
       place-items: center;
 
-      flex-shrink: 0;
-
       border: 0;
-      border-radius: 50%;
+      border-radius: 13px;
 
-      background: var(--cyan);
-      color: #001016;
+      background: var(--px-lime);
+      color: #071006;
 
       font-size: 17px;
-      font-weight: 900;
+      font-weight: 950;
+    }
+
+    .send-button:active {
+      transform: scale(.95);
     }
 
     /* =====================================================
-       EMPTY / FUTURE CHANNEL
+       NO CHAT
        ===================================================== */
 
-    .integration-note {
-      margin: 12px;
-      padding: 11px;
+    .no-chat {
+      flex: 1;
 
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      min-height: 560px;
 
-      background: rgba(0,229,255,0.04);
+      display: flex;
+      flex-direction: column;
 
-      color: var(--text-soft);
-      font-size: 10px;
-      line-height: 1.5;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px;
+
+      text-align: center;
+
+      background: #050607;
     }
 
-    .integration-note strong {
-      color: var(--cyan);
+    .no-chat-icon {
+      font-size: 45px;
+      margin-bottom: 12px;
+    }
+
+    .no-chat strong {
+      font-size: 17px;
+    }
+
+    .no-chat p {
+      max-width: 330px;
+
+      margin: 7px 0 0;
+
+      color: var(--px-muted);
+      font-size: 13px;
+    }
+
+    /* =====================================================
+       TOAST
+       ===================================================== */
+
+    .toast {
+      position: fixed;
+
+      left: 50%;
+      bottom: 92px;
+
+      z-index: 300;
+
+      transform: translate(-50%, 20px);
+
+      max-width: calc(100% - 30px);
+
+      padding: 11px 15px;
+
+      border: 1px solid var(--px-border);
+      border-radius: 13px;
+
+      background: #212528;
+      color: var(--px-text);
+
+      font-size: 12px;
+      font-weight: 800;
+
+      opacity: 0;
+      pointer-events: none;
+
+      transition: .2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* =====================================================
+       BOTTOM NAV
+       ===================================================== */
+
+    .bottom-nav {
+      position: fixed;
+
+      z-index: 200;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      min-height: 76px;
+
+      padding:
+        7px
+        max(8px, env(safe-area-inset-right))
+        max(8px, env(safe-area-inset-bottom))
+        max(8px, env(safe-area-inset-left));
+
+      display: flex;
+      justify-content: center;
+
+      border-top: 1px solid var(--px-border);
+
+      background: rgba(0,0,0,.97);
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 760px;
+
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+
+      gap: 4px;
+    }
+
+    .nav-item {
+      min-height: 56px;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      gap: 2px;
+
+      border-radius: 14px;
+
+      color: var(--px-muted);
+      text-decoration: none;
+
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .nav-item span:first-child {
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .nav-item.active {
+      background: #111416;
+      color: var(--px-lime);
     }
 
     /* =====================================================
        DESKTOP
        ===================================================== */
 
-    @media (min-width: 760px) {
+    @media (min-width: 780px) {
 
-      .inbox-layout {
-        grid-template-columns: 320px 1fr;
-        min-height: 650px;
+      .app {
+        padding: 18px 18px 30px;
       }
 
-      .conversation-list {
-        border-right: 1px solid var(--border);
+      .inbox {
+        grid-template-columns: 340px 1fr;
+        min-height: 690px;
+      }
+
+      .list-panel {
+        border-right: 1px solid var(--px-border);
         border-bottom: 0;
       }
 
-      .conversations {
-        max-height: 510px;
+      .conversation-list {
+        max-height: 560px;
+      }
+
+      .chat-panel {
+        min-height: 690px;
       }
 
       .messages {
-        min-height: 480px;
+        min-height: 500px;
+      }
+
+      .no-chat {
+        min-height: 690px;
+      }
+    }
+
+    /* =====================================================
+       MOBILE CHAT MODE
+       ===================================================== */
+
+    @media (max-width: 779px) {
+
+      body.chat-open .list-panel {
+        display: none;
+      }
+
+      body.chat-open .chat-panel {
+        display: flex;
+      }
+
+      body:not(.chat-open) .chat-panel {
+        display: none;
+      }
+
+      body.chat-open .back-button {
+        display: grid;
+      }
+
+      body.chat-open .inbox {
+        min-height: calc(100vh - 190px);
+      }
+
+      body.chat-open .messages {
+        min-height: 0;
+      }
+
+      body.chat-open .chat-panel {
+        min-height: calc(100vh - 190px);
+      }
+
+      body.chat-open .bottom-nav {
+        display: none;
+      }
+
+      body.chat-open {
+        padding-bottom: 0;
+      }
+
+    }
+
+    /* =====================================================
+       REDUCED MOTION
+       ===================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
       }
     }
   </style>
@@ -527,25 +1040,28 @@
 
 <body>
 
-  <div class="app-shell">
+  <main class="app">
 
     <!-- ===================================================
          HEADER
          =================================================== -->
 
-    <header class="app-header">
+    <header class="topbar">
 
       <a
-        href="index.html"
+        href="feed.html"
         class="brand"
+        aria-label="PostX Home"
       >
 
         <img
+          class="brand-logo"
           src="assets/icons/icon-192.png"
           alt="PostX"
+          onerror="this.style.display='none'"
         >
 
-        <div class="brand-text">
+        <div class="brand-name">
           Post<span>X</span>
         </div>
 
@@ -555,16 +1071,20 @@
 
         <button
           class="icon-button"
+          id="notificationButton"
           type="button"
-          data-action="notifications"
           aria-label="Notifications"
         >
           🔔
         </button>
 
-        <div class="avatar">
-          J
-        </div>
+        <a
+          href="settings.html"
+          class="icon-button"
+          aria-label="Settings"
+        >
+          ⚙️
+        </a>
 
       </div>
 
@@ -572,817 +1092,524 @@
 
 
     <!-- ===================================================
-         MAIN
+         PAGE HEADING
          =================================================== -->
 
-    <main class="main-content">
+    <section class="page-heading">
 
-      <div class="inbox-page">
+      <div class="eyebrow">
+        POSTX UNIFIED INBOX
+      </div>
 
-        <section class="inbox-heading">
+      <h1>
+        Messages.
+      </h1>
 
-          <div class="eyebrow">
-            UNIFIED INBOX
-          </div>
+      <p>
+        DMs, comments, marketplace chats and social conversations in one place.
+      </p>
 
-          <h1>
-            Your conversations.
-          </h1>
-
-          <p>
-            Chat with customers, creators and your community
-            from one place.
-          </p>
-
-        </section>
+    </section>
 
 
-        <!-- ===============================================
-             CHANNELS
-             =============================================== -->
+    <!-- ===================================================
+         CHANNEL TABS
+         =================================================== -->
 
-        <div class="channel-tabs">
+    <div
+      class="channel-tabs"
+      id="channelTabs"
+      role="tablist"
+      aria-label="Message channels"
+    >
 
-          <button
-            class="channel-tab active"
-            type="button"
-            data-channel="all"
+      <button
+        class="channel-tab active"
+        type="button"
+        data-channel="all"
+      >
+        All
+      </button>
+
+      <button
+        class="channel-tab"
+        type="button"
+        data-channel="postx"
+      >
+        PostX
+      </button>
+
+      <button
+        class="channel-tab"
+        type="button"
+        data-channel="facebook"
+      >
+        Facebook
+      </button>
+
+      <button
+        class="channel-tab"
+        type="button"
+        data-channel="instagram"
+      >
+        Instagram
+      </button>
+
+      <button
+        class="channel-tab"
+        type="button"
+        data-channel="whatsapp"
+      >
+        WhatsApp
+      </button>
+
+      <button
+        class="channel-tab"
+        type="button"
+        data-channel="x"
+      >
+        X
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         INBOX
+         =================================================== -->
+
+    <section class="inbox">
+
+
+      <!-- =================================================
+           CONVERSATION LIST
+           ================================================= -->
+
+      <aside class="list-panel">
+
+        <div class="list-header">
+
+          <span class="list-title">
+            Conversations
+          </span>
+
+          <span
+            class="unread-count"
+            id="totalUnread"
           >
-            All
-          </button>
-
-          <button
-            class="channel-tab"
-            type="button"
-            data-channel="postx"
-          >
-            PostX
-          </button>
-
-          <button
-            class="channel-tab"
-            type="button"
-            data-channel="facebook"
-          >
-            Facebook
-          </button>
-
-          <button
-            class="channel-tab"
-            type="button"
-            data-channel="instagram"
-          >
-            Instagram
-          </button>
-
-          <button
-            class="channel-tab"
-            type="button"
-            data-channel="whatsapp"
-          >
-            WhatsApp
-          </button>
-
-          <button
-            class="channel-tab"
-            type="button"
-            data-channel="x"
-          >
-            X
-          </button>
+            2
+          </span>
 
         </div>
 
 
-        <!-- ===============================================
-             INBOX
-             =============================================== -->
+        <div class="search">
 
-        <section class="inbox-layout">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search conversations..."
+            autocomplete="off"
+            aria-label="Search conversations"
+          >
 
+        </div>
 
-          <!-- =============================================
-               CONVERSATION LIST
-               ============================================= -->
 
-          <aside class="conversation-list">
+        <div
+          class="conversation-list"
+          id="conversationList"
+        ></div>
 
-            <div class="conversation-header">
+      </aside>
 
-              <strong>
-                Messages
-              </strong>
 
-              <span class="badge">
-                Unified
-              </span>
+      <!-- =================================================
+           CHAT
+           ================================================= -->
 
-            </div>
-
-
-            <div class="search-box">
-
-              <input
-                type="search"
-                id="conversationSearch"
-                placeholder="Search conversations..."
-                autocomplete="off"
-              >
-
-            </div>
-
-
-            <div
-              class="conversations"
-              id="conversationList"
-            >
-
-
-              <!-- CUSTOMER -->
-
-              <button
-                class="conversation active"
-                type="button"
-                data-channel="postx"
-                data-name="Demo Customer"
-              >
-
-                <div class="conversation-avatar">
-                  D
-                </div>
-
-                <div class="conversation-info">
-
-                  <div class="conversation-name">
-
-                    <strong>
-                      Demo Customer
-                    </strong>
-
-                    <span class="conversation-time">
-                      2m
-                    </span>
-
-                  </div>
-
-                  <div class="conversation-preview">
-                    Is this product still available?
-                  </div>
-
-                  <span class="channel-badge">
-                    PostX
-                  </span>
-
-                </div>
-
-                <span class="unread-dot"></span>
-
-              </button>
-
-
-              <!-- BUSINESS -->
-
-              <button
-                class="conversation"
-                type="button"
-                data-channel="instagram"
-                data-name="Afya Business"
-              >
-
-                <div class="conversation-avatar">
-                  A
-                </div>
-
-                <div class="conversation-info">
-
-                  <div class="conversation-name">
-
-                    <strong>
-                      Afya Business
-                    </strong>
-
-                    <span class="conversation-time">
-                      18m
-                    </span>
-
-                  </div>
-
-                  <div class="conversation-preview">
-                    Thanks for reaching out.
-                  </div>
-
-                  <span class="channel-badge">
-                    Instagram
-                  </span>
-
-                </div>
-
-              </button>
-
-
-              <!-- FACEBOOK -->
-
-              <button
-                class="conversation"
-                type="button"
-                data-channel="facebook"
-                data-name="Mombasa Creators"
-              >
-
-                <div class="conversation-avatar">
-                  M
-                </div>
-
-                <div class="conversation-info">
-
-                  <div class="conversation-name">
-
-                    <strong>
-                      Mombasa Creators
-                    </strong>
-
-                    <span class="conversation-time">
-                      1h
-                    </span>
-
-                  </div>
-
-                  <div class="conversation-preview">
-                    Let's discuss the project.
-                  </div>
-
-                  <span class="channel-badge">
-                    Facebook
-                  </span>
-
-                </div>
-
-              </button>
-
-
-              <!-- WHATSAPP FUTURE -->
-
-              <button
-                class="conversation"
-                type="button"
-                data-channel="whatsapp"
-                data-name="Customer Support"
-              >
-
-                <div class="conversation-avatar">
-                  W
-                </div>
-
-                <div class="conversation-info">
-
-                  <div class="conversation-name">
-
-                    <strong>
-                      Customer Support
-                    </strong>
-
-                    <span class="conversation-time">
-                      3h
-                    </span>
-
-                  </div>
-
-                  <div class="conversation-preview">
-                    WhatsApp integration ready for backend.
-                  </div>
-
-                  <span class="channel-badge">
-                    WhatsApp
-                  </span>
-
-                </div>
-
-              </button>
-
-
-              <!-- X FUTURE -->
-
-              <button
-                class="conversation"
-                type="button"
-                data-channel="x"
-                data-name="PostX Community"
-              >
-
-                <div class="conversation-avatar">
-                  X
-                </div>
-
-                <div class="conversation-info">
-
-                  <div class="conversation-name">
-
-                    <strong>
-                      PostX Community
-                    </strong>
-
-                    <span class="conversation-time">
-                      5h
-                    </span>
-
-                  </div>
-
-                  <div class="conversation-preview">
-                    Mentioned you in a conversation.
-                  </div>
-
-                  <span class="channel-badge">
-                    X
-                  </span>
-
-                </div>
-
-              </button>
-
-
-            </div>
-
-
-            <div class="integration-note">
-
-              <strong>PostX Unified Inbox</strong>
-
-              <br>
-
-              PostX Chat is the native messaging layer.
-              External channels will connect through
-              official APIs and authenticated integrations.
-
-            </div>
-
-          </aside>
-
-
-          <!-- =============================================
-               CHAT
-               ============================================= -->
-
-          <section class="chat-panel">
-
-
-            <header class="chat-header">
-
-              <div class="conversation-avatar">
-                D
-              </div>
-
-              <div class="chat-user">
-
-                <strong id="chatUserName">
-                  Demo Customer
-                </strong>
-
-                <div class="online-status">
-                  Online
-                </div>
-
-              </div>
-
-              <div class="chat-actions">
-
-                <button
-                  class="chat-icon"
-                  type="button"
-                  aria-label="Search chat"
-                >
-                  🔍
-                </button>
-
-                <button
-                  class="chat-icon"
-                  type="button"
-                  aria-label="More options"
-                >
-                  ⋯
-                </button>
-
-              </div>
-
-            </header>
-
-
-            <!-- =========================================
-                 MESSAGES
-                 ========================================= -->
-
-            <div
-              class="messages"
-              id="messages"
-            >
-
-              <div class="message-date">
-                Today
-              </div>
-
-
-              <div class="message-row received">
-
-                <div class="message">
-
-                  Hi! I saw your product on PostX.
-
-                  <span class="message-time">
-                    8:42 PM
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="message-row sent">
-
-                <div class="message">
-
-                  Hello! Thanks for reaching out.
-                  How can I help?
-
-                  <span class="message-time">
-                    8:43 PM
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="message-row received">
-
-                <div class="message">
-
-                  Is this product still available?
-
-                  <span class="message-time">
-                    8:44 PM
-                  </span>
-
-                </div>
-
-              </div>
-
-
-            </div>
-
-
-            <!-- =========================================
-                 MESSAGE COMPOSER
-                 ========================================= -->
-
-            <form
-              class="message-composer"
-              id="messageForm"
-            >
-
-              <textarea
-                id="messageInput"
-                rows="1"
-                placeholder="Write a message..."
-                aria-label="Message"
-              ></textarea>
-
-              <button
-                class="send-button"
-                type="submit"
-                aria-label="Send message"
-              >
-                ➤
-              </button>
-
-            </form>
-
-
-          </section>
-
-        </section>
-
-      </div>
-
-    </main>
-
-
-    <!-- ===================================================
-         BOTTOM NAV
-         =================================================== -->
-
-    <nav
-      class="bottom-nav"
-      aria-label="Main navigation"
-    >
-
-      <a href="index.html">
-        <span>✚</span>
-        <span>Create</span>
-      </a>
-
-      <a href="feed.html">
-        <span>⌂</span>
-        <span>Social</span>
-      </a>
-
-      <a
-        href="inbox.html"
-        class="active"
+      <section
+        class="chat-panel"
+        id="chatPanel"
       >
-        <span>✉</span>
-        <span>Inbox</span>
-      </a>
 
-      <a href="settings.html">
-        <span>⚙</span>
-        <span>Settings</span>
-      </a>
+        <div class="no-chat">
 
-    </nav>
+          <div class="no-chat-icon">
+            💬
+          </div>
 
+          <strong>
+            Select a conversation
+          </strong>
 
-    <div
-      id="toast"
-      class="toast"
-      role="status"
-      aria-live="polite"
-    ></div>
+          <p>
+            Choose a conversation to view messages and continue chatting.
+          </p>
 
-  </div>
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
 
 
   <!-- =====================================================
-       APP CORE
+       BOTTOM NAV
        ===================================================== -->
+
+  <nav
+    class="bottom-nav"
+    aria-label="Main navigation"
+  >
+
+    <div class="nav-inner">
+
+      <a
+        class="nav-item"
+        href="index.html"
+      >
+        <span>＋</span>
+        <span>Create</span>
+      </a>
+
+      <a
+        class="nav-item"
+        href="feed.html"
+      >
+        <span>⌂</span>
+        <span>Home</span>
+      </a>
+
+      <a
+        class="nav-item"
+        href="catalog.html"
+      >
+        <span>🛍</span>
+        <span>Market</span>
+      </a>
+
+      <a
+        class="nav-item active"
+        href="inbox.html"
+      >
+        <span>💬</span>
+        <span>Inbox</span>
+      </a>
+
+      <a
+        class="nav-item"
+        href="settings.html"
+      >
+        <span>◉</span>
+        <span>Profile</span>
+      </a>
+
+    </div>
+
+  </nav>
+
+
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
 
   <script src="js/app.js"></script>
 
 
-  <!-- =====================================================
-       INBOX ENGINE
-       ===================================================== -->
-
   <script>
     (() => {
+
       "use strict";
+
+
+      /* ==================================================
+         STORAGE
+         ================================================== */
+
+      const STORAGE_KEY =
+        "postx_inbox_v2";
+
+
+      /* ==================================================
+         DEFAULT CONVERSATIONS
+         ================================================== */
+
+      const defaultConversations = [
+
+        {
+          id: "customer",
+          name: "Demo Customer",
+          avatar: "D",
+          channel: "postx",
+          time: "2m",
+          unread: 2,
+
+          messages: [
+
+            {
+              id: "m1",
+              sender: "received",
+              text:
+                "Hi! I saw your product on PostX.",
+              time: "8:42 PM"
+            },
+
+            {
+              id: "m2",
+              sender: "sent",
+              text:
+                "Hello! Thanks for reaching out. How can I help?",
+              time: "8:43 PM"
+            },
+
+            {
+              id: "m3",
+              sender: "received",
+              text:
+                "Is this product still available?",
+              time: "8:44 PM"
+            }
+
+          ]
+
+        },
+
+
+        {
+          id: "afya",
+          name: "Afya Business",
+          avatar: "A",
+          channel: "instagram",
+          time: "18m",
+          unread: 0,
+
+          messages: [
+
+            {
+              id: "a1",
+              sender: "received",
+              text:
+                "Thanks for reaching out.",
+              time: "8:26 PM"
+            },
+
+            {
+              id: "a2",
+              sender: "sent",
+              text:
+                "You're welcome. Let's keep in touch.",
+              time: "8:28 PM"
+            }
+
+          ]
+
+        },
+
+
+        {
+          id: "creators",
+          name: "Mombasa Creators",
+          avatar: "M",
+          channel: "facebook",
+          time: "1h",
+          unread: 0,
+
+          messages: [
+
+            {
+              id: "c1",
+              sender: "received",
+              text:
+                "Let's discuss the project.",
+              time: "7:40 PM"
+            },
+
+            {
+              id: "c2",
+              sender: "sent",
+              text:
+                "Sure. Send me the details.",
+              time: "7:44 PM"
+            }
+
+          ]
+
+        },
+
+
+        {
+          id: "whatsapp",
+          name: "Customer Support",
+          avatar: "W",
+          channel: "whatsapp",
+          time: "3h",
+          unread: 0,
+
+          messages: [
+
+            {
+              id: "w1",
+              sender: "system",
+              text:
+                "WhatsApp Cloud API connection will be handled by the PostX backend.",
+              time: ""
+            }
+
+          ]
+
+        },
+
+
+        {
+          id: "xcommunity",
+          name: "PostX Community",
+          avatar: "X",
+          channel: "x",
+          time: "5h",
+          unread: 0,
+
+          messages: [
+
+            {
+              id: "x1",
+              sender: "received",
+              text:
+                "Mentioned you in a conversation.",
+              time: "4:12 PM"
+            }
+
+          ]
+
+        }
+
+      ];
+
+
+      /* ==================================================
+         STATE
+         ================================================== */
+
+      let conversations =
+        loadConversations();
+
+      let activeConversationId =
+        null;
+
+      let activeChannel =
+        "all";
+
+      let searchQuery =
+        "";
+
+
+      /* ==================================================
+         DOM
+         ================================================== */
+
+      const conversationList =
+        document.getElementById(
+          "conversationList"
+        );
+
+      const chatPanel =
+        document.getElementById(
+          "chatPanel"
+        );
+
+      const searchInput =
+        document.getElementById(
+          "searchInput"
+        );
+
+      const totalUnread =
+        document.getElementById(
+          "totalUnread"
+        );
+
+      const toast =
+        document.getElementById(
+          "toast"
+        );
 
       const channelTabs =
         document.querySelectorAll(
           ".channel-tab"
         );
 
-      const conversations =
-        document.querySelectorAll(
-          ".conversation"
-        );
 
-      const searchInput =
-        document.getElementById(
-          "conversationSearch"
-        );
+      /* ==================================================
+         LOAD
+         ================================================== */
 
-      const chatUserName =
-        document.getElementById(
-          "chatUserName"
-        );
+      function loadConversations() {
 
-      const messageForm =
-        document.getElementById(
-          "messageForm"
-        );
+        try {
 
-      const messageInput =
-        document.getElementById(
-          "messageInput"
-        );
-
-      const messages =
-        document.getElementById(
-          "messages"
-        );
-
-
-      /* ================================================
-         CHANNEL FILTER
-         ================================================ */
-
-      channelTabs.forEach(tab => {
-
-        tab.addEventListener(
-          "click",
-          () => {
-
-            channelTabs.forEach(item =>
-              item.classList.remove(
-                "active"
-              )
+          const saved =
+            localStorage.getItem(
+              STORAGE_KEY
             );
 
-            tab.classList.add(
-              "active"
-            );
+          if (saved) {
 
-            const channel =
-              tab.dataset.channel;
+            const parsed =
+              JSON.parse(saved);
 
-            conversations.forEach(item => {
-
-              if (
-                channel === "all" ||
-                item.dataset.channel ===
-                  channel
-              ) {
-                item.style.display =
-                  "flex";
-              } else {
-                item.style.display =
-                  "none";
-              }
-
-            });
+            if (Array.isArray(parsed)) {
+              return parsed;
+            }
 
           }
-        );
 
-      });
+        } catch (error) {
+          console.warn(
+            "PostX inbox storage error:",
+            error
+          );
+        }
+
+        return defaultConversations;
+
+      }
 
 
-      /* ================================================
-         CONVERSATION SELECTION
-         ================================================ */
+      /* ==================================================
+         SAVE
+         ================================================== */
 
-      conversations.forEach(
-        conversation => {
+      function saveConversations() {
 
-          conversation.addEventListener(
-            "click",
-            () => {
+        try {
 
-              conversations.forEach(
-                item =>
-                  item.classList.remove(
-                    "active"
-                  )
-              );
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+              conversations
+            )
+          );
 
-              conversation.classList.add(
-                "active"
-              );
+        } catch (error) {
 
-              const name =
-                conversation.dataset.name;
-
-              if (chatUserName) {
-                chatUserName.textContent =
-                  name;
-              }
-
-              const unread =
-                conversation.querySelector(
-                  ".unread-dot"
-                );
-
-              if (unread) {
-                unread.remove();
-              }
-
-            }
+          console.warn(
+            "PostX inbox could not save:",
+            error
           );
 
         }
-      );
+
+      }
 
 
-      /* ================================================
-         SEARCH
-         ================================================ */
-
-      searchInput?.addEventListener(
-        "input",
-        () => {
-
-          const query =
-            searchInput.value
-              .trim()
-              .toLowerCase();
-
-          conversations.forEach(
-            conversation => {
-
-              const name =
-                conversation.dataset.name
-                  .toLowerCase();
-
-              const preview =
-                conversation
-                  .querySelector(
-                    ".conversation-preview"
-                  )
-                  ?.textContent
-                  .toLowerCase() || "";
-
-              const matches =
-                name.includes(query) ||
-                preview.includes(query);
-
-              conversation.style.display =
-                matches
-                  ? "flex"
-                  : "none";
-
-            }
-          );
-
-        }
-      );
-
-
-      /* ================================================
-         SEND MESSAGE
-         ================================================ */
-
-      messageForm?.addEventListener(
-        "submit",
-        event => {
-
-          event.preventDefault();
-
-          const text =
-            messageInput.value.trim();
-
-          if (!text) {
-            return;
-          }
-
-          const row =
-            document.createElement(
-              "div"
-            );
-
-          row.className =
-            "message-row sent";
-
-          const message =
-            document.createElement(
-              "div"
-            );
-
-          message.className =
-            "message";
-
-          const time =
-            new Date()
-              .toLocaleTimeString(
-                [],
-                {
-                  hour: "numeric",
-                  minute: "2-digit"
-                }
-              );
-
-          message.innerHTML = `
-            ${escapeHTML(text)}
-            <span class="message-time">
-              ${time}
-            </span>
-          `;
-
-          row.appendChild(message);
-
-          messages.appendChild(row);
-
-          messages.scrollTop =
-            messages.scrollHeight;
-
-          messageInput.value = "";
-
-        }
-      );
-
-
-      /* ================================================
-         TEXTAREA AUTO HEIGHT
-         ================================================ */
-
-      messageInput?.addEventListener(
-        "input",
-        () => {
-
-          messageInput.style.height =
-            "auto";
-
-          messageInput.style.height =
-            Math.min(
-              messageInput.scrollHeight,
-              110
-            ) + "px";
-
-        }
-      );
-
-
-      /* ================================================
-         HTML SAFETY
-         ================================================ */
+      /* ==================================================
+         ESCAPE HTML
+         ================================================== */
 
       function escapeHTML(value) {
 
@@ -1391,11 +1618,857 @@
             "div"
           );
 
-        div.textContent = value;
+        div.textContent =
+          String(value ?? "");
 
         return div.innerHTML;
 
       }
+
+
+      /* ==================================================
+         CHANNEL NAME
+         ================================================== */
+
+      function channelName(channel) {
+
+        const names = {
+
+          postx: "PostX",
+          facebook: "Facebook",
+          instagram: "Instagram",
+          whatsapp: "WhatsApp",
+          x: "X"
+
+        };
+
+        return (
+          names[channel] ||
+          "PostX"
+        );
+
+      }
+
+
+      /* ==================================================
+         RENDER CONVERSATIONS
+         ================================================== */
+
+      function renderConversations() {
+
+        const filtered =
+          conversations.filter(
+            conversation => {
+
+              const matchesChannel =
+                activeChannel === "all" ||
+                conversation.channel ===
+                  activeChannel;
+
+              const searchText =
+                (
+                  conversation.name +
+                  " " +
+                  (
+                    conversation.messages[
+                      conversation.messages.length - 1
+                    ]?.text || ""
+                  )
+                ).toLowerCase();
+
+              const matchesSearch =
+                !searchQuery ||
+                searchText.includes(
+                  searchQuery
+                );
+
+              return (
+                matchesChannel &&
+                matchesSearch
+              );
+
+            }
+          );
+
+
+        conversationList.innerHTML = "";
+
+
+        if (!filtered.length) {
+
+          conversationList.innerHTML = `
+            <div class="empty-list">
+              No conversations found.
+            </div>
+          `;
+
+          return;
+
+        }
+
+
+        filtered.forEach(
+          conversation => {
+
+            const lastMessage =
+              conversation.messages[
+                conversation.messages.length - 1
+              ];
+
+            const button =
+              document.createElement(
+                "button"
+              );
+
+            button.type =
+              "button";
+
+            button.className =
+              "conversation" +
+              (
+                conversation.id ===
+                activeConversationId
+                  ? " active"
+                  : ""
+              );
+
+            button.dataset.id =
+              conversation.id;
+
+
+            button.innerHTML = `
+
+              <div class="conversation-avatar">
+                ${escapeHTML(
+                  conversation.avatar
+                )}
+              </div>
+
+              <div class="conversation-info">
+
+                <div class="conversation-top">
+
+                  <strong class="conversation-name">
+                    ${escapeHTML(
+                      conversation.name
+                    )}
+                  </strong>
+
+                  <span class="conversation-time">
+                    ${escapeHTML(
+                      conversation.time || ""
+                    )}
+                  </span>
+
+                </div>
+
+                <div class="conversation-preview">
+                  ${escapeHTML(
+                    lastMessage?.text ||
+                    "No messages yet."
+                  )}
+                </div>
+
+                <div class="conversation-bottom">
+
+                  <span class="channel-badge">
+                    ${escapeHTML(
+                      channelName(
+                        conversation.channel
+                      )
+                    )}
+                  </span>
+
+                  ${
+                    conversation.unread > 0
+                      ? `
+                        <span class="unread-badge">
+                          ${conversation.unread}
+                        </span>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              </div>
+            `;
+
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                openConversation(
+                  conversation.id
+                );
+
+              }
+            );
+
+
+            conversationList.appendChild(
+              button
+            );
+
+          }
+        );
+
+      }
+
+
+      /* ==================================================
+         OPEN CONVERSATION
+         ================================================== */
+
+      function openConversation(id) {
+
+        const conversation =
+          conversations.find(
+            item =>
+              item.id === id
+          );
+
+        if (!conversation) {
+          return;
+        }
+
+
+        activeConversationId =
+          id;
+
+
+        /* Mark read */
+
+        conversation.unread =
+          0;
+
+
+        saveConversations();
+
+        renderConversations();
+
+        renderChat(conversation);
+
+
+        /* Mobile chat mode */
+
+        document.body.classList.add(
+          "chat-open"
+        );
+
+      }
+
+
+      /* ==================================================
+         RENDER CHAT
+         ================================================== */
+
+      function renderChat(
+        conversation
+      ) {
+
+        chatPanel.innerHTML = `
+
+          <header class="chat-header">
+
+            <button
+              class="back-button"
+              id="backButton"
+              type="button"
+              aria-label="Back to conversations"
+            >
+              ←
+            </button>
+
+            <div class="chat-avatar">
+              ${escapeHTML(
+                conversation.avatar
+              )}
+            </div>
+
+            <div class="chat-user">
+
+              <strong>
+                ${escapeHTML(
+                  conversation.name
+                )}
+              </strong>
+
+              <div class="chat-channel">
+                ${escapeHTML(
+                  channelName(
+                    conversation.channel
+                  )
+                )}
+              </div>
+
+            </div>
+
+            <div class="chat-actions">
+
+              <button
+                class="chat-action"
+                type="button"
+                data-chat-action="search"
+                aria-label="Search chat"
+              >
+                🔍
+              </button>
+
+              <button
+                class="chat-action"
+                type="button"
+                data-chat-action="more"
+                aria-label="More options"
+              >
+                ⋯
+              </button>
+
+            </div>
+
+          </header>
+
+
+          <div
+            class="messages"
+            id="messages"
+          >
+
+            <div class="message-date">
+              Today
+            </div>
+
+            ${conversation.messages
+              .map(renderMessage)
+              .join("")}
+
+          </div>
+
+
+          <form
+            class="composer"
+            id="messageForm"
+          >
+
+            <button
+              class="attach-button"
+              type="button"
+              id="attachButton"
+              aria-label="Attach"
+            >
+              ＋
+            </button>
+
+            <textarea
+              class="message-input"
+              id="messageInput"
+              rows="1"
+              maxlength="2000"
+              placeholder="Write a message..."
+              aria-label="Message"
+            ></textarea>
+
+            <button
+              class="send-button"
+              type="submit"
+              aria-label="Send message"
+            >
+              ➤
+            </button>
+
+          </form>
+
+        `;
+
+
+        const messages =
+          document.getElementById(
+            "messages"
+          );
+
+        if (messages) {
+
+          messages.scrollTop =
+            messages.scrollHeight;
+
+        }
+
+
+        document
+          .getElementById(
+            "backButton"
+          )
+          ?.addEventListener(
+            "click",
+            closeMobileChat
+          );
+
+
+        document
+          .getElementById(
+            "messageForm"
+          )
+          ?.addEventListener(
+            "submit",
+            sendMessage
+          );
+
+
+        const input =
+          document.getElementById(
+            "messageInput"
+          );
+
+
+        input?.addEventListener(
+          "input",
+          autoResize
+        );
+
+
+        document
+          .getElementById(
+            "attachButton"
+          )
+          ?.addEventListener(
+            "click",
+            () => {
+
+              showToast(
+                "Attachments will be connected to the PostX backend."
+              );
+
+            }
+          );
+
+
+        chatPanel
+          .querySelectorAll(
+            "[data-chat-action]"
+          )
+          .forEach(button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                const action =
+                  button.dataset
+                    .chatAction;
+
+                if (
+                  action === "search"
+                ) {
+
+                  showToast(
+                    "Chat search is ready for backend integration."
+                  );
+
+                } else {
+
+                  showToast(
+                    "More chat options coming soon."
+                  );
+
+                }
+
+              }
+            );
+
+          });
+
+      }
+
+
+      /* ==================================================
+         RENDER MESSAGE
+         ================================================== */
+
+      function renderMessage(
+        message
+      ) {
+
+        if (
+          message.sender ===
+          "system"
+        ) {
+
+          return `
+            <div class="message-system">
+              ${escapeHTML(
+                message.text
+              )}
+            </div>
+          `;
+
+        }
+
+
+        const className =
+          message.sender ===
+          "sent"
+            ? "sent"
+            : "received";
+
+
+        return `
+
+          <div
+            class="message-row ${className}"
+          >
+
+            <div
+              class="message ${className}"
+            >
+
+              ${escapeHTML(
+                message.text
+              )}
+
+              ${
+                message.time
+                  ? `
+                    <span class="message-time">
+                      ${escapeHTML(
+                        message.time
+                      )}
+                    </span>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+
+
+      /* ==================================================
+         SEND MESSAGE
+         ================================================== */
+
+      function sendMessage(event) {
+
+        event.preventDefault();
+
+
+        const input =
+          document.getElementById(
+            "messageInput"
+          );
+
+
+        if (!input) {
+          return;
+        }
+
+
+        const text =
+          input.value.trim();
+
+
+        if (!text) {
+          return;
+        }
+
+
+        const conversation =
+          conversations.find(
+            item =>
+              item.id ===
+              activeConversationId
+          );
+
+
+        if (!conversation) {
+          return;
+        }
+
+
+        const now =
+          new Date();
+
+
+        const time =
+          now.toLocaleTimeString(
+            [],
+            {
+              hour: "numeric",
+              minute: "2-digit"
+            }
+          );
+
+
+        conversation.messages.push({
+
+          id:
+            "msg_" +
+            Date.now() +
+            "_" +
+            Math.random()
+              .toString(36)
+              .slice(2, 8),
+
+          sender: "sent",
+
+          text,
+
+          time
+
+        });
+
+
+        conversation.time =
+          "now";
+
+
+        conversation.unread =
+          0;
+
+
+        saveConversations();
+
+        renderConversations();
+
+        renderChat(conversation);
+
+
+        showToast(
+          "Message sent"
+        );
+
+      }
+
+
+      /* ==================================================
+         AUTO RESIZE
+         ================================================== */
+
+      function autoResize(event) {
+
+        const input =
+          event.target;
+
+        input.style.height =
+          "auto";
+
+        input.style.height =
+          Math.min(
+            input.scrollHeight,
+            120
+          ) + "px";
+
+      }
+
+
+      /* ==================================================
+         CLOSE MOBILE CHAT
+         ================================================== */
+
+      function closeMobileChat() {
+
+        document.body.classList.remove(
+          "chat-open"
+        );
+
+        renderConversations();
+
+      }
+
+
+      /* ==================================================
+         FILTER CHANNEL
+         ================================================== */
+
+      channelTabs.forEach(
+        tab => {
+
+          tab.addEventListener(
+            "click",
+            () => {
+
+              channelTabs.forEach(
+                item =>
+                  item.classList.remove(
+                    "active"
+                  )
+              );
+
+
+              tab.classList.add(
+                "active"
+              );
+
+
+              activeChannel =
+                tab.dataset.channel;
+
+
+              renderConversations();
+
+            }
+          );
+
+        }
+      );
+
+
+      /* ==================================================
+         SEARCH
+         ================================================== */
+
+      searchInput.addEventListener(
+        "input",
+        () => {
+
+          searchQuery =
+            searchInput.value
+              .trim()
+              .toLowerCase();
+
+
+          renderConversations();
+
+        }
+      );
+
+
+      /* ==================================================
+         UNREAD TOTAL
+         ================================================== */
+
+      function updateUnreadCount() {
+
+        const count =
+          conversations.reduce(
+            (total, conversation) =>
+              total +
+              Number(
+                conversation.unread || 0
+              ),
+            0
+          );
+
+
+        totalUnread.textContent =
+          count > 99
+            ? "99+"
+            : String(count);
+
+      }
+
+
+      /* ==================================================
+         TOAST
+         ================================================== */
+
+      let toastTimer;
+
+
+      function showToast(
+        message
+      ) {
+
+        toast.textContent =
+          message;
+
+        toast.classList.add(
+          "show"
+        );
+
+
+        clearTimeout(
+          toastTimer
+        );
+
+
+        toastTimer =
+          setTimeout(
+            () => {
+
+              toast.classList.remove(
+                "show"
+              );
+
+            },
+            2200
+          );
+
+      }
+
+
+      /* ==================================================
+         NOTIFICATIONS
+         ================================================== */
+
+      document
+        .getElementById(
+          "notificationButton"
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+
+            showToast(
+              "No new notifications."
+            );
+
+          }
+        );
+
+
+      /* ==================================================
+         INIT
+         ================================================== */
+
+      updateUnreadCount();
+
+      renderConversations();
+
+
+      /*
+       * Keep unread count updated after
+       * conversation state changes.
+       */
+
+      const originalOpen =
+        openConversation;
+
+
+      /* Select first conversation on desktop */
+
+      if (
+        window.innerWidth >= 780 &&
+        conversations.length
+      ) {
+
+        openConversation(
+          conversations[0].id
+        );
+
+      }
+
+
+      window.addEventListener(
+        "resize",
+        () => {
+
+          if (
+            window.innerWidth >= 780
+          ) {
+
+            document.body.classList.remove(
+              "chat-open"
+            );
+
+          }
+
+        }
+      );
 
     })();
   </script>
