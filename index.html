@@ -5,53 +5,76 @@
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
->
-
-<meta
-  name="description"
-  content="PostX — Create once. Publish everywhere. Connect. Sell. Grow."
+  content="width=device-width, initial-scale=1, viewport-fit=cover"
 >
 
 <meta name="theme-color" content="#07111f">
 
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="assets/icons/icon-192.png">
-<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-
-<title>PostX — Create Post</title>
+<title>PostX — Social Hub</title>
 
 <style>
+
+/* =====================================================
+   POSTX SOCIAL HUB — ANDROID OPTIMIZED
+   ===================================================== */
+
+:root{
+  --bg:#050b13;
+  --surface:#0b1624;
+  --surface2:#0f1e2f;
+  --border:#1b3448;
+
+  --cyan:#00d9ff;
+  --text:#f4f8fb;
+  --muted:#9bb0bf;
+
+  --danger:#ff5577;
+  --green:#3ee58a;
+}
+
+
+/* =====================================================
+   RESET
+   ===================================================== */
 
 *{
   box-sizing:border-box;
   margin:0;
   padding:0;
+
   font-family:
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
+    Roboto,
+    Arial,
     sans-serif;
 }
 
 html{
-  background:#050a0f;
-  overflow-x:hidden;
+  background:var(--bg);
+  scroll-behavior:smooth;
 }
 
 body{
   background:
     radial-gradient(
-      circle at top,
-      #10212c 0%,
-      #070c11 42%,
-      #05090d 100%
-    );
-  color:#fff;
+      circle at 50% -10%,
+      #12334a 0%,
+      transparent 38%
+    ),
+    var(--bg);
+
+  color:var(--text);
+
   min-height:100vh;
+
   overflow-x:hidden;
-  padding-bottom:125px;
+
+  padding-bottom:105px;
+
+  -webkit-text-size-adjust:100%;
 }
 
 button,
@@ -60,31 +83,52 @@ textarea{
   font:inherit;
 }
 
-button,
-label{
+button{
+  cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
 
-button{
-  cursor:pointer;
+a{
+  -webkit-tap-highlight-color:transparent;
 }
 
-.container{
+
+/* =====================================================
+   APP
+   ===================================================== */
+
+.app{
   width:100%;
-  max-width:620px;
+  max-width:720px;
   margin:auto;
-  padding:14px 14px 30px;
 }
 
-/* =========================================
-   HEADER
-========================================= */
 
-.header{
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  padding:8px 2px 18px;
+  align-items:center;
+
+  padding:
+    calc(10px + env(safe-area-inset-top))
+    16px
+    12px;
+
+  background:rgba(5,11,19,.92);
+
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+
+  border-bottom:
+    1px solid rgba(0,217,255,.08);
 }
 
 .brand{
@@ -94,1648 +138,2230 @@ button{
 }
 
 .brand img{
-  width:42px;
-  height:42px;
+  width:43px;
+  height:43px;
+
   border-radius:12px;
+
   object-fit:cover;
 }
 
-.brand-text strong{
+.brand strong{
   display:block;
-  font-size:20px;
-  font-weight:900;
+
+  font-size:19px;
+  font-weight:800;
+
+  letter-spacing:.1px;
 }
 
-.brand-text span{
+.brand small{
   display:block;
-  font-size:11px;
-  color:#8da5ad;
+
+  color:var(--muted);
+
+  font-size:12px;
+
   margin-top:2px;
 }
 
-.profile{
-  width:40px;
-  height:40px;
+.header-actions{
+  display:flex;
+  gap:8px;
+}
+
+.icon-btn,
+.avatar-btn{
+  width:42px;
+  height:42px;
+
   border-radius:50%;
-  border:1px solid #21414c;
-  background:#10212b;
-  color:#00e5ff;
+
+  border:1px solid var(--border);
+
+  background:var(--surface);
+
+  color:white;
+
+  display:grid;
+  place-items:center;
+}
+
+.icon-btn{
+  font-size:18px;
+}
+
+.avatar-btn{
+  background:
+    linear-gradient(
+      135deg,
+      #00d9ff,
+      #1687ff
+    );
+
+  color:#001018;
+
+  font-size:15px;
   font-weight:900;
 }
 
-/* =========================================
-   PAGE TITLE
-========================================= */
 
-.page-title{
-  margin-bottom:16px;
+/* =====================================================
+   CONTENT
+   ===================================================== */
+
+.content{
+  padding:17px 16px 24px;
+}
+
+
+/* =====================================================
+   HERO
+   ===================================================== */
+
+.hero{
+  padding:8px 2px 18px;
 }
 
 .eyebrow{
-  color:#00e5ff;
-  font-size:10px;
+  color:var(--cyan);
+
+  font-size:11px;
   font-weight:900;
-  letter-spacing:1.5px;
-  margin-bottom:5px;
+
+  letter-spacing:1.8px;
 }
 
-.page-title h1{
-  font-size:28px;
-  line-height:1.1;
-  font-weight:900;
+.hero h1{
+  font-size:29px;
+  line-height:1.15;
+
+  margin-top:5px;
+
+  font-weight:800;
 }
 
-.page-title p{
-  color:#91a5ac;
-  font-size:13px;
+.hero p{
+  color:var(--muted);
+
+  font-size:14px;
+  line-height:1.5;
+
   margin-top:6px;
 }
 
-/* =========================================
-   MAIN CARD
-========================================= */
 
-.card{
+/* =====================================================
+   PROFILE VIEWS
+   ===================================================== */
+
+.profile-card{
   background:
     linear-gradient(
       145deg,
-      rgba(17,31,39,.98),
-      rgba(10,19,24,.98)
+      rgba(15,30,47,.98),
+      rgba(8,19,31,.98)
     );
 
-  border:1px solid #1c3942;
-  border-radius:18px;
+  border:1px solid var(--border);
+
+  border-radius:17px;
+
   padding:15px;
-  margin-bottom:12px;
-  box-shadow:0 12px 35px rgba(0,0,0,.18);
-}
 
-/* =========================================
-   SECTION
-========================================= */
+  margin-bottom:17px;
 
-.section{
-  margin-bottom:18px;
-}
-
-.section:last-child{
-  margin-bottom:0;
-}
-
-.section-title{
   display:flex;
   align-items:center;
-  gap:8px;
-  margin-bottom:9px;
+  justify-content:space-between;
+
+  gap:12px;
 }
 
-.section-title strong{
-  font-size:16px;
-  font-weight:900;
-}
-
-.section-help{
-  color:#81969d;
-  font-size:11px;
-  margin-top:-4px;
-  margin-bottom:10px;
-}
-
-/* =========================================
-   MEDIA
-========================================= */
-
-.media-upload{
-  display:block;
-  text-align:center;
-  padding:25px 12px;
-  border:1.5px dashed #45616a;
-  border-radius:16px;
-  background:#0b151a;
-  transition:.2s;
-}
-
-.media-upload:active{
-  border-color:#00e5ff;
-  background:#0d2026;
-}
-
-.media-icon{
-  width:55px;
-  height:55px;
-  margin:0 auto 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:16px;
-  background:#102a32;
-  color:#00e5ff;
-  font-size:28px;
-}
-
-.media-upload strong{
-  display:block;
-  color:#00e5ff;
-  font-size:15px;
-}
-
-.media-upload small{
-  display:block;
-  color:#84979d;
-  font-size:11px;
-  margin-top:5px;
-}
-
-/* =========================================
-   INPUTS
-========================================= */
-
-textarea,
-input[type="text"],
-input[type="date"],
-input[type="time"]{
-  width:100%;
-  border:1px solid #263e46;
-  background:#0c151a;
-  color:#fff;
-  border-radius:12px;
-  padding:13px;
-  outline:none;
-  font-size:14px;
-}
-
-textarea{
-  resize:vertical;
-  min-height:100px;
-}
-
-textarea:focus,
-input:focus{
-  border-color:#00cfe9;
-  box-shadow:0 0 0 3px rgba(0,229,255,.08);
-}
-
-textarea::placeholder,
-input::placeholder{
-  color:#71858c;
-}
-
-.caption-wrap{
-  position:relative;
-}
-
-.counter{
-  text-align:right;
-  color:#657980;
-  font-size:10px;
-  margin-top:4px;
-}
-
-/* =========================================
-   PUBLISH TO
-========================================= */
-
-.platform-list{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
-
-.platform-card{
-  width:100%;
+.profile-left{
   display:flex;
   align-items:center;
   gap:11px;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid #203a42;
-  background:#101b20;
-  cursor:pointer;
-  transition:.2s;
-}
 
-.platform-card:has(input:checked){
-  border-color:#00dff5;
-  background:#0b242b;
-  box-shadow:0 0 0 1px rgba(0,229,255,.12);
-}
-
-.platform-card input{
-  width:21px;
-  height:21px;
-  flex:0 0 auto;
-  accent-color:#00e5ff;
-}
-
-.platform-icon{
-  width:39px;
-  height:39px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-  font-size:18px;
-  flex:0 0 auto;
-}
-
-.postx-icon{
-  background:#122e38;
-  color:#00e5ff;
-}
-
-.facebook-icon{
-  background:#1456a0;
-  color:#fff;
-}
-
-.instagram-icon{
-  background:linear-gradient(
-    135deg,
-    #7b2cff,
-    #f1267a,
-    #ffb000
-  );
-  color:#fff;
-}
-
-.platform-info{
   min-width:0;
-  flex:1;
 }
 
-.platform-info strong{
-  display:block;
-  font-size:14px;
-}
-
-.platform-info small{
-  display:block;
-  color:#8ca0a7;
-  font-size:11px;
-  margin-top:2px;
-}
-
-.check{
-  color:#00e5ff;
+.profile-number{
   font-size:20px;
+  line-height:1;
+
   font-weight:900;
 }
 
-/* =========================================
-   PUBLISHING
-========================================= */
+.profile-label{
+  color:var(--muted);
 
-.publish-modes{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
+  font-size:12px;
+
+  margin-top:4px;
 }
 
-.pub-card{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  width:100%;
-  padding:14px;
-  border:1px solid #263a41;
-  border-radius:14px;
-  background:#10191e;
-  cursor:pointer;
-}
+.profile-card .filter{
+  padding:9px 13px;
 
-.pub-card:has(input:checked){
-  border-color:#168cff;
-  background:#0d202d;
-}
+  font-size:12px;
 
-.pub-card input{
-  width:23px;
-  height:23px;
-  flex:0 0 auto;
-  accent-color:#168cff;
-}
-
-.pub-info{
-  flex:1;
-  min-width:0;
-}
-
-.pub-info strong{
-  display:block;
-  font-size:14px;
-}
-
-.pub-info small{
-  display:block;
-  color:#899ca3;
-  font-size:11px;
-  margin-top:3px;
-}
-
-.now-badge{
-  border:1px solid #00dfff;
-  color:#00e5ff;
-  border-radius:8px;
-  padding:4px 7px;
-  font-size:9px;
-  font-weight:900;
-}
-
-/* =========================================
-   SCHEDULE
-========================================= */
-
-.schedule-controls{
-  margin-top:10px;
-  padding:12px;
-  background:#0b151a;
-  border:1px solid #20363d;
-  border-radius:13px;
-}
-
-.schedule-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-}
-
-.schedule-grid label{
-  display:block;
-  color:#91a4aa;
-  font-size:11px;
-  margin-bottom:5px;
-}
-
-/* =========================================
-   BOOST
-========================================= */
-
-.boost-card{
-  border:1px solid #16cfc1;
-  background:
-    linear-gradient(
-      145deg,
-      #0b2426,
-      #09181c
-    );
-  border-radius:16px;
-  padding:14px;
-}
-
-.boost-main{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.boost-info{
-  flex:1;
-}
-
-.boost-info strong{
-  display:block;
-  font-size:15px;
-}
-
-.boost-info small{
-  display:block;
-  color:#8fa6aa;
-  font-size:11px;
-  margin-top:3px;
-}
-
-.toggle{
-  position:relative;
-  width:50px;
-  height:28px;
-  flex:0 0 auto;
-}
-
-.toggle input{
-  opacity:0;
-  width:0;
-  height:0;
-}
-
-.slider{
-  position:absolute;
-  inset:0;
-  border-radius:30px;
-  background:#263c42;
-  border:1px solid #42616a;
-}
-
-.slider:before{
-  content:"";
-  position:absolute;
-  width:22px;
-  height:22px;
-  left:2px;
-  top:2px;
-  background:#91a2a7;
-  border-radius:50%;
-  transition:.2s;
-}
-
-.toggle input:checked + .slider{
-  background:#00aebf;
-  border-color:#00e5ff;
-}
-
-.toggle input:checked + .slider:before{
-  transform:translateX(22px);
-  background:#fff;
-}
-
-.boost-options{
-  display:none;
-  margin-top:13px;
-  padding-top:13px;
-  border-top:1px solid rgba(255,255,255,.08);
-}
-
-.boost-options.show{
-  display:block;
-}
-
-.boost-label{
-  color:#9fb0b5;
-  font-size:11px;
-  display:block;
-  margin-bottom:8px;
-}
-
-.boost-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.boost-plan{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #27383d;
-  background:#0d171b;
-  cursor:pointer;
-}
-
-.boost-plan:has(input:checked){
-  border-color:#00e5ff;
-  background:#0c2428;
-}
-
-.boost-plan input{
-  width:20px;
-  height:20px;
-  accent-color:#00e5ff;
-}
-
-.plan-info{
-  flex:1;
-}
-
-.plan-info strong{
-  display:block;
-  font-size:13px;
-}
-
-.plan-info small{
-  color:#82969c;
-  font-size:10px;
-}
-
-.price{
-  color:#00e5ff;
-  font-weight:900;
   white-space:nowrap;
 }
 
-.boost-note{
-  color:#71858a;
-  font-size:10px;
-  margin-top:9px;
-  line-height:1.4;
-}
 
-/* =========================================
-   BUTTONS
-========================================= */
+/* =====================================================
+   AVATARS
+   ===================================================== */
 
-.action-row{
+.author-avatar{
+  width:43px;
+  height:43px;
+
+  border-radius:50%;
+
   display:grid;
-  grid-template-columns:1fr 1.35fr;
-  gap:10px;
-  margin-top:14px;
+  place-items:center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #00d9ff,
+      #1687ff
+    );
+
+  color:#001018;
+
+  font-size:15px;
+  font-weight:900;
+
+  flex:0 0 auto;
 }
 
-.btn{
-  min-height:52px;
-  border:none;
-  border-radius:14px;
+
+/* =====================================================
+   FILTERS
+   ===================================================== */
+
+.filters{
+  display:flex;
+  gap:8px;
+
+  overflow-x:auto;
+
+  padding-bottom:13px;
+
+  scrollbar-width:none;
+
+  -webkit-overflow-scrolling:touch;
+}
+
+.filters::-webkit-scrollbar{
+  display:none;
+}
+
+.filter{
+  flex:0 0 auto;
+
+  border:1px solid var(--border);
+
+  background:var(--surface);
+
+  color:var(--muted);
+
+  border-radius:999px;
+
+  padding:9px 15px;
+
+  font-size:13px;
+  line-height:1;
+
+  font-weight:700;
+
+  min-height:36px;
+}
+
+.filter.active{
+  color:#001018;
+
+  background:var(--cyan);
+
+  border-color:var(--cyan);
+}
+
+
+/* =====================================================
+   POST CARD
+   ===================================================== */
+
+.post{
+  background:
+    linear-gradient(
+      145deg,
+      rgba(15,30,47,.98),
+      rgba(8,19,31,.98)
+    );
+
+  border:1px solid var(--border);
+
+  border-radius:18px;
+
+  margin-bottom:16px;
+
+  overflow:hidden;
+
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.22);
+}
+
+
+/* =====================================================
+   POST HEADER
+   ===================================================== */
+
+.post-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:15px;
+}
+
+.author{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  min-width:0;
+
+  cursor:pointer;
+}
+
+.author-info{
+  min-width:0;
+}
+
+.author-info strong{
+  display:block;
+
+  font-size:15px;
+  line-height:1.25;
+
+  font-weight:750;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.author-info small{
+  display:block;
+
+  color:var(--muted);
+
+  font-size:12px;
+  line-height:1.3;
+
+  margin-top:3px;
+}
+
+.more{
+  border:0;
+  background:none;
+
+  color:var(--muted);
+
+  font-size:23px;
+
+  padding:5px 3px;
+
+  line-height:1;
+}
+
+
+/* =====================================================
+   MEDIA
+   ===================================================== */
+
+.post-media{
+  width:100%;
+
+  aspect-ratio:16/10;
+
+  background:
+    linear-gradient(
+      135deg,
+      #102f42,
+      #07131e
+    );
+
+  display:grid;
+  place-items:center;
+
+  color:var(--cyan);
+
+  font-size:55px;
+}
+
+.post-media img,
+.post-media video{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+}
+
+
+/* =====================================================
+   POST CONTENT
+   ===================================================== */
+
+.post-body{
+  padding:15px;
+}
+
+.post-text{
+  font-size:16px;
+
+  line-height:1.6;
+
+  white-space:pre-wrap;
+
+  overflow-wrap:anywhere;
+}
+
+.post-location{
+  color:var(--muted);
+
+  font-size:12px;
+
+  margin-top:9px;
+}
+
+.post-tags{
+  color:var(--cyan);
+
+  font-size:13px;
+
+  line-height:1.4;
+
+  margin-top:8px;
+}
+
+.sponsored{
+  display:inline-flex;
+  align-items:center;
+
+  gap:5px;
+
+  color:#ffd66b;
+
+  font-size:11px;
+
+  font-weight:800;
+
+  margin-top:8px;
+}
+
+
+/* =====================================================
+   METRICS
+   ===================================================== */
+
+.metrics{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  gap:8px;
+
+  padding:0 15px 11px;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  line-height:1.3;
+}
+
+.metrics span{
+  white-space:nowrap;
+}
+
+
+/* =====================================================
+   ACTIONS
+   ===================================================== */
+
+.actions{
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  border-top:
+    1px solid rgba(255,255,255,.06);
+}
+
+.action{
+  border:0;
+
+  background:none;
+
+  color:var(--muted);
+
+  padding:12px 4px 13px;
+
+  font-size:13px;
+
+  line-height:1.2;
+
+  font-weight:700;
+
+  min-height:62px;
+}
+
+.action span{
+  display:block;
+
+  font-size:20px;
+
+  line-height:22px;
+
+  margin-bottom:4px;
+}
+
+.action.liked{
+  color:var(--danger);
+}
+
+.action:hover{
+  background:
+    rgba(0,217,255,.04);
+}
+
+.action:active{
+  transform:scale(.97);
+}
+
+
+/* =====================================================
+   COMMENTS
+   ===================================================== */
+
+.comments{
+  display:none;
+
+  padding:13px 15px 15px;
+
+  border-top:
+    1px solid rgba(255,255,255,.06);
+}
+
+.comments.open{
+  display:block;
+}
+
+.comment-list{
+  display:flex;
+  flex-direction:column;
+
+  gap:11px;
+
+  margin-bottom:11px;
+}
+
+.comment{
+  display:flex;
+
+  gap:9px;
+
+  align-items:flex-start;
+}
+
+.comment-avatar{
+  width:31px;
+  height:31px;
+
+  border-radius:50%;
+
+  background:#17364b;
+
+  display:grid;
+  place-items:center;
+
+  color:var(--cyan);
+
+  font-size:12px;
+
+  font-weight:800;
+
+  flex:0 0 auto;
+}
+
+.comment-content{
+  background:#0b1724;
+
+  border-radius:11px;
+
+  padding:8px 10px;
+
+  flex:1;
+
+  min-width:0;
+}
+
+.comment-content strong{
+  font-size:12px;
+}
+
+.comment-content p{
+  color:#dce6ec;
+
+  font-size:13px;
+
+  line-height:1.45;
+
+  margin-top:3px;
+
+  overflow-wrap:anywhere;
+}
+
+.comment-form{
+  display:flex;
+
+  gap:8px;
+}
+
+.comment-form input{
+  flex:1;
+
+  min-width:0;
+
+  background:#07111c;
+
+  border:1px solid var(--border);
+
+  border-radius:11px;
+
+  color:white;
+
+  padding:11px 12px;
+
   font-size:14px;
+
+  outline:none;
+
+  min-height:43px;
+}
+
+.comment-form input:focus{
+  border-color:var(--cyan);
+
+  box-shadow:
+    0 0 0 2px rgba(0,217,255,.08);
+}
+
+.comment-form button{
+  border:0;
+
+  border-radius:11px;
+
+  background:var(--cyan);
+
+  color:#001018;
+
+  padding:0 14px;
+
+  min-height:43px;
+
+  font-size:13px;
+
   font-weight:900;
 }
 
-.btn-draft{
-  background:#202c31;
-  color:#fff;
-  border:1px solid #35464b;
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+
+.empty{
+  text-align:center;
+
+  padding:55px 20px;
+
+  color:var(--muted);
+
+  font-size:14px;
+
+  line-height:1.5;
 }
 
-.btn-post{
-  background:#00d9f5;
-  color:#031015;
-  box-shadow:0 8px 25px rgba(0,229,255,.18);
+.empty strong{
+  display:block;
+
+  color:white;
+
+  font-size:16px;
+
+  margin-bottom:6px;
 }
 
-/* =========================================
-   BOTTOM NAV
-========================================= */
+
+/* =====================================================
+   BOTTOM NAVIGATION
+   ===================================================== */
 
 .bottom-nav{
   position:fixed;
+
   left:0;
   right:0;
   bottom:0;
-  z-index:1000;
 
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+  z-index:100;
 
-  background:rgba(8,15,19,.96);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
+  display:grid;
 
-  border-top:1px solid #1c3941;
+  grid-template-columns:
+    repeat(5,1fr);
 
   padding:
     8px
-    5px
-    calc(10px + env(safe-area-inset-bottom));
+    6px
+    calc(8px + env(safe-area-inset-bottom));
+
+  background:
+    rgba(6,13,21,.97);
+
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+
+  border-top:1px solid var(--border);
 }
 
 .nav-item{
-  flex:1;
-  max-width:100px;
+  border:0;
+
+  background:none;
+
+  color:#8499a7;
+
   text-decoration:none;
-  color:#72868d;
+
   text-align:center;
-  padding:7px 3px;
+
+  padding:7px 2px;
+
   border-radius:12px;
+
+  font-size:11px;
+
+  line-height:1.2;
+
+  font-weight:650;
+
+  min-height:52px;
 }
 
-.nav-item .nav-icon{
+.nav-item span{
   display:block;
-  font-size:20px;
-  line-height:20px;
-}
 
-.nav-item small{
-  display:block;
-  font-size:9px;
-  margin-top:3px;
-  font-weight:700;
+  font-size:21px;
+
+  line-height:22px;
+
+  margin-bottom:3px;
 }
 
 .nav-item.active{
-  color:#00e5ff;
-  background:#0b2229;
+  color:var(--cyan);
+
+  background:
+    rgba(0,217,255,.08);
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+.nav-item:active{
+  transform:scale(.96);
+}
 
-@media(max-width:380px){
 
-  .container{
-    padding-left:11px;
-    padding-right:11px;
+/* =====================================================
+   ANDROID SMALL SCREENS
+   ===================================================== */
+
+@media(max-width:360px){
+
+  .content{
+    padding-left:13px;
+    padding-right:13px;
   }
 
-  .page-title h1{
-    font-size:25px;
+  .hero h1{
+    font-size:27px;
   }
 
-  .brand-text span{
-    display:none;
+  .post-text{
+    font-size:15px;
   }
 
-  .nav-item small{
-    font-size:8px;
+  .metrics{
+    font-size:11px;
   }
 
-  .nav-item .nav-icon{
-    font-size:18px;
+  .action{
+    font-size:12px;
+  }
+
+  .nav-item{
+    font-size:10px;
   }
 
 }
 
-/* =========================================
-   NO HORIZONTAL OVERFLOW
-========================================= */
 
-img,
-input,
-textarea,
-button{
-  max-width:100%;
+/* =====================================================
+   TABLET / DESKTOP
+   ===================================================== */
+
+@media(min-width:700px){
+
+  .content{
+    padding:
+      22px
+      0
+      30px;
+  }
+
+  .topbar{
+    border-radius:0;
+  }
+
 }
 
 </style>
 </head>
 
+
 <body>
 
-<div class="container">
+<div class="app">
 
-  <!-- HEADER -->
-  <header class="header">
 
-    <div class="brand">
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
 
-      <img
-        src="assets/icons/icon-192.png"
-        alt="PostX"
-      >
+<header class="topbar">
 
-      <div class="brand-text">
-        <strong>PostX</strong>
-        <span>Create. Publish. Grow.</span>
-      </div>
+  <div class="brand">
+
+    <img
+      src="assets/icons/icon-192.png"
+      alt="PostX"
+    >
+
+    <div>
+
+      <strong>PostX</strong>
+
+      <small>
+        Social Hub
+      </small>
 
     </div>
 
+  </div>
+
+
+  <div class="header-actions">
+
     <button
-      class="profile"
+      class="icon-btn"
       type="button"
+      onclick="showNotice('Notifications coming soon')"
+      aria-label="Notifications"
+    >
+      🔔
+    </button>
+
+
+    <button
+      class="avatar-btn"
+      type="button"
+      onclick="openMyProfile()"
       aria-label="Profile"
     >
       J
     </button>
 
-  </header>
+  </div>
+
+</header>
 
 
-  <!-- TITLE -->
-  <section class="page-title">
+<!-- =====================================================
+     CONTENT
+     ===================================================== -->
 
-    <div class="eyebrow">
-      POST EVERYWHERE
+<main class="content">
+
+
+<section class="hero">
+
+  <div class="eyebrow">
+    POSTX SOCIAL
+  </div>
+
+  <h1>
+    Discover
+  </h1>
+
+  <p>
+    Connect, discover and engage with people and businesses.
+  </p>
+
+</section>
+
+
+<!-- =====================================================
+     PROFILE VIEWS
+     ===================================================== -->
+
+<div class="profile-card">
+
+  <div class="profile-left">
+
+    <div class="author-avatar">
+      J
     </div>
 
-    <h1>Create your post</h1>
-
-    <p>
-      Write once. Publish to PostX, Facebook and Instagram.
-    </p>
-
-  </section>
-
-
-  <main class="card">
-
-    <!-- =====================================
-         PHOTO / VIDEO
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>📸</span>
-        <strong>Photo / Video</strong>
-      </div>
-
-      <p class="section-help">
-        Your product photo — customers buy what they see.
-      </p>
-
-      <label
-        class="media-upload"
-        for="mediaInput"
-      >
-
-        <div class="media-icon">
-          🖼️
-        </div>
-
-        <strong>
-          Add Photo or Video
-        </strong>
-
-        <small>
-          Tap to upload • JPG, PNG, WEBP, MP4 • Max 50MB
-        </small>
-
-      </label>
-
-      <input
-        type="file"
-        id="mediaInput"
-        accept="image/*,video/*"
-        hidden
-      >
-
-    </section>
-
-
-    <!-- =====================================
-         CAPTION
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>✍️</span>
-        <strong>Caption</strong>
-      </div>
-
-      <div class="caption-wrap">
-
-        <textarea
-          id="caption"
-          maxlength="2200"
-          placeholder="What are you selling today? e.g. Fresh Avocados KSh 200"
-        ></textarea>
-
-        <div class="counter">
-          <span id="captionCount">0</span>/2200
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =====================================
-         STORY
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>📝</span>
-        <strong>
-          Story / Details
-          <small style="color:#6f858c;font-size:10px;">
-            • Optional
-          </small>
-        </strong>
-      </div>
-
-      <input
-        type="text"
-        id="postText"
-        placeholder="Price, delivery, WhatsApp number..."
-      >
-
-    </section>
-
-
-    <!-- =====================================
-         LOCATION
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>📍</span>
-        <strong>
-          Location
-          <small style="color:#6f858c;font-size:10px;">
-            • Optional
-          </small>
-        </strong>
-      </div>
-
-      <input
-        type="text"
-        id="location"
-        placeholder="Add location — Mariakani, Mombasa..."
-      >
-
-    </section>
-
-
-    <!-- =====================================
-         HASHTAGS
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>#️⃣</span>
-        <strong>Hashtags</strong>
-      </div>
-
-      <input
-        type="text"
-        id="hashtags"
-        placeholder="#Mombasa #BusinessKenya #PostX"
-      >
-
-      <small
-        style="
-          display:block;
-          color:#70858b;
-          font-size:10px;
-          margin-top:5px;
-        "
-      >
-        Help people find your post.
-      </small>
-
-    </section>
-
-
-    <!-- =====================================
-         PUBLISH TO
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>🌐</span>
-        <strong>Publish to</strong>
-      </div>
-
-      <p class="section-help">
-        Choose where your post will appear.
-      </p>
-
-      <div class="platform-list">
-
-        <!-- POSTX -->
-
-        <label class="platform-card">
-
-          <input
-            type="checkbox"
-            name="platform"
-            value="postx"
-            checked
-          >
-
-          <span class="platform-icon postx-icon">
-            PX
-          </span>
-
-          <span class="platform-info">
-
-            <strong>PostX</strong>
-
-            <small>
-              Your PostX Social Hub
-            </small>
-
-          </span>
-
-          <span class="check">
-            ✓
-          </span>
-
-        </label>
-
-
-        <!-- FACEBOOK -->
-
-        <label class="platform-card">
-
-          <input
-            type="checkbox"
-            name="platform"
-            value="facebook"
-          >
-
-          <span class="platform-icon facebook-icon">
-            f
-          </span>
-
-          <span class="platform-info">
-
-            <strong>Facebook</strong>
-
-            <small>
-              Your Facebook Page
-            </small>
-
-          </span>
-
-          <span class="check">
-            ✓
-          </span>
-
-        </label>
-
-
-        <!-- INSTAGRAM -->
-
-        <label class="platform-card">
-
-          <input
-            type="checkbox"
-            name="platform"
-            value="instagram"
-          >
-
-          <span class="platform-icon instagram-icon">
-            ◎
-          </span>
-
-          <span class="platform-info">
-
-            <strong>Instagram</strong>
-
-            <small>
-              Your Instagram
-            </small>
-
-          </span>
-
-          <span class="check">
-            ✓
-          </span>
-
-        </label>
-
-      </div>
-
-    </section>
-
-
-    <!-- =====================================
-         PUBLISHING
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="section-title">
-        <span>🚀</span>
-        <strong>Publishing</strong>
-      </div>
-
-      <div class="publish-modes">
-
-        <!-- NOW -->
-
-        <label class="pub-card">
-
-          <input
-            type="radio"
-            name="publishMode"
-            value="now"
-            checked
-          >
-
-          <span class="pub-info">
-
-            <strong>
-              Post now
-            </strong>
-
-            <small>
-              Go live immediately to selected platforms
-            </small>
-
-          </span>
-
-          <span class="now-badge">
-            NOW
-          </span>
-
-        </label>
-
-
-        <!-- SCHEDULE -->
-
-        <label class="pub-card">
-
-          <input
-            type="radio"
-            name="publishMode"
-            value="schedule"
-          >
-
-          <span class="pub-info">
-
-            <strong>
-              Schedule
-            </strong>
-
-            <small>
-              Choose a date and time to publish
-            </small>
-
-          </span>
-
-        </label>
-
-      </div>
-
-
-      <!-- SCHEDULE DATE/TIME -->
+    <div>
 
       <div
-        id="scheduleControls"
-        class="schedule-controls"
-        style="display:none;"
+        class="profile-number"
+        id="profileViews"
       >
-
-        <div class="schedule-grid">
-
-          <div>
-
-            <label for="scheduleDate">
-              Date
-            </label>
-
-            <input
-              type="date"
-              id="scheduleDate"
-            >
-
-          </div>
-
-          <div>
-
-            <label for="scheduleTime">
-              Time
-            </label>
-
-            <input
-              type="time"
-              id="scheduleTime"
-            >
-
-          </div>
-
-        </div>
-
+        0
       </div>
 
-    </section>
-
-
-    <!-- =====================================
-         BOOST
-    ====================================== -->
-
-    <section class="section">
-
-      <div class="boost-card">
-
-        <div class="boost-main">
-
-          <div class="boost-info">
-
-            <strong>
-              ✨ Boost this post
-            </strong>
-
-            <small>
-              Watu wengi wakuone • Optional
-            </small>
-
-          </div>
-
-
-          <label class="toggle">
-
-            <input
-              type="checkbox"
-              id="boostToggle"
-            >
-
-            <span class="slider"></span>
-
-          </label>
-
-        </div>
-
-
-        <!-- BOOST OPTIONS -->
-
-        <div
-          id="boostOptions"
-          class="boost-options"
-        >
-
-          <span class="boost-label">
-            Chagua Boost Plan — Lipa na M-Pesa
-          </span>
-
-
-          <div class="boost-list">
-
-            <!-- KSH 10 -->
-
-            <label class="boost-plan">
-
-              <input
-                type="radio"
-                name="boost"
-                value="10"
-                checked
-              >
-
-              <span class="plan-info">
-
-                <strong>
-                  📍 Mtaa
-                </strong>
-
-                <small>
-                  Mariakani pekee • 1 siku
-                </small>
-
-              </span>
-
-              <span class="price">
-                KSh 10
-              </span>
-
-            </label>
-
-
-            <!-- KSH 30 -->
-
-            <label class="boost-plan">
-
-              <input
-                type="radio"
-                name="boost"
-                value="30"
-              >
-
-              <span class="plan-info">
-
-                <strong>
-                  🏘️ Mji
-                </strong>
-
-                <small>
-                  Kilifi + Mariakani • 3 siku
-                </small>
-
-              </span>
-
-              <span class="price">
-                KSh 30
-              </span>
-
-            </label>
-
-
-            <!-- KSH 50 -->
-
-            <label class="boost-plan">
-
-              <input
-                type="radio"
-                name="boost"
-                value="50"
-              >
-
-              <span class="plan-info">
-
-                <strong>
-                  🌍 Coast
-                </strong>
-
-                <small>
-                  Mombasa hadi Malindi • 7 siku
-                </small>
-
-              </span>
-
-              <span class="price">
-                KSh 50
-              </span>
-
-            </label>
-
-          </div>
-
-
-          <p class="boost-note">
-            ✓ M-Pesa • ✓ Affordable local promotion •
-            Boost is optional
-          </p>
-
-        </div>
-
+      <div class="profile-label">
+        Profile views
       </div>
-
-    </section>
-
-
-    <!-- =====================================
-         ACTIONS
-    ====================================== -->
-
-    <div class="action-row">
-
-      <button
-        type="button"
-        class="btn btn-draft"
-        id="saveDraftBtn"
-      >
-        💾 Save Draft
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-post"
-        id="publishBtn"
-      >
-        🚀 Post Everywhere
-      </button>
 
     </div>
 
-  </main>
+  </div>
+
+
+  <button
+    class="filter"
+    onclick="openMyProfile()"
+  >
+    View profile
+  </button>
 
 </div>
 
 
-<!-- =========================================
+<!-- =====================================================
+     FILTERS
+     ===================================================== -->
+
+<div class="filters">
+
+  <button
+    class="filter active"
+    data-filter="all"
+  >
+    All
+  </button>
+
+  <button
+    class="filter"
+    data-filter="postx"
+  >
+    PostX
+  </button>
+
+  <button
+    class="filter"
+    data-filter="business"
+  >
+    Business
+  </button>
+
+  <button
+    class="filter"
+    data-filter="following"
+  >
+    Following
+  </button>
+
+</div>
+
+
+<!-- =====================================================
+     FEED
+     ===================================================== -->
+
+<section id="feed"></section>
+
+
+</main>
+
+
+<!-- =====================================================
      BOTTOM NAVIGATION
-========================================= -->
+     ===================================================== -->
 
 <nav class="bottom-nav">
 
-  <!-- CREATE -->
-
   <a
+    class="nav-item"
     href="index.html"
+  >
+    <span>＋</span>
+    Create
+  </a>
+
+
+  <a
     class="nav-item active"
-  >
-
-    <span class="nav-icon">
-      ＋
-    </span>
-
-    <small>
-      Create
-    </small>
-
-  </a>
-
-
-  <!-- SOCIAL -->
-
-  <a
     href="feed.html"
-    class="nav-item"
   >
-
-    <span class="nav-icon">
-      ◉
-    </span>
-
-    <small>
-      Social
-    </small>
-
+    <span>⌂</span>
+    Social
   </a>
 
 
-  <!-- MARKETPLACE -->
-
   <a
+    class="nav-item"
     href="marketplace.html"
-    class="nav-item"
   >
-
-    <span class="nav-icon">
-      🛍️
-    </span>
-
-    <small>
-      Marketplace
-    </small>
-
+    <span>🏪</span>
+    Market
   </a>
 
 
-  <!-- INBOX -->
-
   <a
+    class="nav-item"
     href="inbox.html"
-    class="nav-item"
   >
-
-    <span class="nav-icon">
-      💬
-    </span>
-
-    <small>
-      Inbox
-    </small>
-
+    <span>💬</span>
+    Inbox
   </a>
 
 
-  <!-- SETTINGS -->
-
   <a
-    href="settings.html"
     class="nav-item"
+    href="settings.html"
   >
-
-    <span class="nav-icon">
-      ⚙️
-    </span>
-
-    <small>
-      Settings
-    </small>
-
+    <span>⚙</span>
+    Settings
   </a>
 
 </nav>
 
 
+</div>
+
+
 <script>
 
-/* =========================================
-   CAPTION COUNTER
-========================================= */
+/* =====================================================
+   POSTX SOCIAL ENGINE
+   Frontend MVP persistence
+   ===================================================== */
 
-const caption = document.getElementById("caption");
-const captionCount = document.getElementById("captionCount");
+const STORAGE_KEY =
+  "postx_social_data_v1";
 
-if(caption && captionCount){
 
-  caption.addEventListener("input", () => {
+const CURRENT_USER = {
 
-    captionCount.textContent =
-      caption.value.length;
+  id:
+    "current-user",
 
-  });
+  name:
+    "Joseph",
+
+  avatar:
+    "J"
+
+};
+
+
+/* =====================================================
+   DEFAULT DATA
+   ===================================================== */
+
+const DEFAULT_DATA = {
+
+  profileViews:0,
+
+  posts:[
+
+    {
+
+      id:"demo-1",
+
+      authorId:"business-1",
+
+      author:"PostX Demo Store",
+
+      avatar:"P",
+
+      type:"business",
+
+      text:
+        "Welcome to PostX. Create once, publish everywhere and connect with customers.",
+
+      location:"Mariakani",
+
+      tags:"#PostX #Kenya",
+
+      likes:0,
+
+      liked:false,
+
+      views:0,
+
+      comments:[]
+
+    },
+
+
+    {
+
+      id:"demo-2",
+
+      authorId:"user-2",
+
+      author:"PostX Creator",
+
+      avatar:"C",
+
+      type:"postx",
+
+      text:
+        "Your first PostX post is free. Share something with the community.",
+
+      location:"Kilifi",
+
+      tags:"#PostX #Kilifi",
+
+      likes:0,
+
+      liked:false,
+
+      views:0,
+
+      comments:[]
+
+    }
+
+  ]
+
+};
+
+
+/* =====================================================
+   LOAD DATA
+   ===================================================== */
+
+function loadData(){
+
+  try{
+
+    const saved =
+      localStorage.getItem(
+        STORAGE_KEY
+      );
+
+    if(saved){
+
+      const parsed =
+        JSON.parse(saved);
+
+      return {
+
+        ...DEFAULT_DATA,
+
+        ...parsed
+
+      };
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "PostX storage error:",
+      error
+    );
+
+  }
+
+  return structuredClone(
+    DEFAULT_DATA
+  );
 
 }
 
 
-/* =========================================
-   BOOST TOGGLE
-========================================= */
+/* =====================================================
+   SAVE DATA
+   ===================================================== */
 
-const boostToggle =
-  document.getElementById("boostToggle");
+function saveData(){
 
-const boostOptions =
-  document.getElementById("boostOptions");
+  localStorage.setItem(
 
-if(boostToggle && boostOptions){
+    STORAGE_KEY,
 
-  boostToggle.addEventListener("change", () => {
+    JSON.stringify(data)
 
-    boostOptions.classList.toggle(
-      "show",
-      boostToggle.checked
+  );
+
+}
+
+
+/* =====================================================
+   DATA
+   ===================================================== */
+
+let data =
+  loadData();
+
+
+/* =====================================================
+   PROFILE VIEWS
+   ===================================================== */
+
+function renderProfileViews(){
+
+  const element =
+    document.getElementById(
+      "profileViews"
+    );
+
+  if(!element)
+    return;
+
+  element.textContent =
+    data.profileViews || 0;
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+   ===================================================== */
+
+function escapeHTML(value){
+
+  return String(value)
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+/* =====================================================
+   FEED FILTER
+   ===================================================== */
+
+let activeFilter =
+  "all";
+
+
+/* =====================================================
+   RENDER FEED
+   ===================================================== */
+
+function renderFeed(){
+
+  const feed =
+    document.getElementById(
+      "feed"
+    );
+
+  if(!feed)
+    return;
+
+
+  let posts =
+    data.posts || [];
+
+
+  if(activeFilter !== "all"){
+
+    posts =
+      posts.filter(
+        post =>
+          post.type ===
+          activeFilter
+      );
+
+  }
+
+
+  if(!posts.length){
+
+    feed.innerHTML = `
+
+      <div class="empty">
+
+        <strong>
+          No posts here yet
+        </strong>
+
+        Try another filter or create
+        a new post.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  feed.innerHTML =
+    posts
+      .map(renderPost)
+      .join("");
+
+}
+
+
+/* =====================================================
+   POST HTML
+   ===================================================== */
+
+function renderPost(post){
+
+  const comments =
+    post.comments || [];
+
+
+  return `
+
+<article
+  class="post"
+  data-post-id="${escapeHTML(post.id)}"
+>
+
+
+  <div class="post-head">
+
+
+    <div
+      class="author"
+      onclick="viewProfile('${escapeHTML(post.authorId)}')"
+    >
+
+      <div class="author-avatar">
+        ${escapeHTML(post.avatar || "?")}
+      </div>
+
+
+      <div class="author-info">
+
+        <strong>
+          ${escapeHTML(post.author)}
+        </strong>
+
+        <small>
+          PostX ·
+          ${escapeHTML(
+            post.location || "Kenya"
+          )}
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="more"
+      type="button"
+      onclick="showNotice('Post options coming soon')"
+      aria-label="Post options"
+    >
+      ⋯
+    </button>
+
+  </div>
+
+
+  <div class="post-media">
+    ✦
+  </div>
+
+
+  <div class="post-body">
+
+
+    <div class="post-text">
+      ${escapeHTML(
+        post.text || ""
+      )}
+    </div>
+
+
+    ${
+      post.location
+      ?
+      `
+      <div class="post-location">
+        📍
+        ${escapeHTML(post.location)}
+      </div>
+      `
+      :
+      ""
+    }
+
+
+    ${
+      post.tags
+      ?
+      `
+      <div class="post-tags">
+        ${escapeHTML(post.tags)}
+      </div>
+      `
+      :
+      ""
+    }
+
+
+    ${
+      post.boosted
+      ?
+      `
+      <div class="sponsored">
+        🚀 Sponsored
+      </div>
+      `
+      :
+      ""
+    }
+
+
+  </div>
+
+
+  <div class="metrics">
+
+    <span>
+      ❤️ ${post.likes || 0} likes
+    </span>
+
+    <span>
+      💬 ${comments.length} comments
+    </span>
+
+    <span>
+      👁 ${post.views || 0} views
+    </span>
+
+  </div>
+
+
+  <div class="actions">
+
+
+    <button
+      class="action ${post.liked ? "liked" : ""}"
+      type="button"
+      onclick="toggleLike('${escapeHTML(post.id)}')"
+    >
+
+      <span>
+        ${post.liked ? "❤️" : "♡"}
+      </span>
+
+      Like
+
+    </button>
+
+
+    <button
+      class="action"
+      type="button"
+      onclick="toggleComments('${escapeHTML(post.id)}')"
+    >
+
+      <span>
+        💬
+      </span>
+
+      Comment
+
+    </button>
+
+
+    <button
+      class="action"
+      type="button"
+      onclick="sharePost('${escapeHTML(post.id)}')"
+    >
+
+      <span>
+        ↗
+      </span>
+
+      Share
+
+    </button>
+
+
+    <button
+      class="action"
+      type="button"
+      onclick="openPost('${escapeHTML(post.id)}')"
+    >
+
+      <span>
+        👁
+      </span>
+
+      View
+
+    </button>
+
+
+  </div>
+
+
+  <div
+    class="comments"
+    id="comments-${escapeHTML(post.id)}"
+  >
+
+
+    <div class="comment-list">
+
+      ${
+        comments.length
+        ?
+        comments
+          .map(
+            comment => `
+
+<div class="comment">
+
+  <div class="comment-avatar">
+    ${escapeHTML(
+      comment.avatar || "U"
+    )}
+  </div>
+
+
+  <div class="comment-content">
+
+    <strong>
+      ${escapeHTML(
+        comment.name
+      )}
+    </strong>
+
+    <p>
+      ${escapeHTML(
+        comment.text
+      )}
+    </p>
+
+  </div>
+
+</div>
+
+            `
+          )
+          .join("")
+        :
+        `
+        <small style="color:#8499a7">
+          No comments yet. Be the first.
+        </small>
+        `
+      }
+
+    </div>
+
+
+    <form
+      class="comment-form"
+      onsubmit="addComment(event,'${escapeHTML(post.id)}')"
+    >
+
+      <input
+        id="comment-input-${escapeHTML(post.id)}"
+        placeholder="Write a comment..."
+        maxlength="500"
+        autocomplete="off"
+      >
+
+      <button type="submit">
+        Send
+      </button>
+
+    </form>
+
+
+  </div>
+
+
+</article>
+
+`;
+
+}
+
+
+/* =====================================================
+   LIKE
+   ===================================================== */
+
+function toggleLike(postId){
+
+  const post =
+    data.posts.find(
+      item =>
+        item.id === postId
+    );
+
+  if(!post)
+    return;
+
+
+  if(post.liked){
+
+    post.likes =
+      Math.max(
+        0,
+        (post.likes || 0) - 1
+      );
+
+    post.liked =
+      false;
+
+  }else{
+
+    post.likes =
+      (post.likes || 0) + 1;
+
+    post.liked =
+      true;
+
+  }
+
+
+  saveData();
+
+  renderFeed();
+
+}
+
+
+/* =====================================================
+   COMMENTS
+   ===================================================== */
+
+function toggleComments(postId){
+
+  const element =
+    document.getElementById(
+      "comments-" + postId
+    );
+
+  if(!element)
+    return;
+
+
+  element.classList.toggle(
+    "open"
+  );
+
+}
+
+
+/* =====================================================
+   ADD COMMENT
+   ===================================================== */
+
+function addComment(
+  event,
+  postId
+){
+
+  event.preventDefault();
+
+
+  const input =
+    document.getElementById(
+      "comment-input-" +
+      postId
+    );
+
+  if(!input)
+    return;
+
+
+  const text =
+    input.value.trim();
+
+
+  if(!text)
+    return;
+
+
+  const post =
+    data.posts.find(
+      item =>
+        item.id === postId
+    );
+
+
+  if(!post)
+    return;
+
+
+  if(!post.comments){
+
+    post.comments = [];
+
+  }
+
+
+  post.comments.push({
+
+    id:
+      Date.now().toString(),
+
+    userId:
+      CURRENT_USER.id,
+
+    name:
+      CURRENT_USER.name,
+
+    avatar:
+      CURRENT_USER.avatar,
+
+    text:
+      text,
+
+    createdAt:
+      new Date().toISOString()
+
+  });
+
+
+  saveData();
+
+  renderFeed();
+
+
+  setTimeout(() => {
+
+    const box =
+      document.getElementById(
+        "comments-" +
+        postId
+      );
+
+    if(box){
+
+      box.classList.add(
+        "open"
+      );
+
+    }
+
+  },0);
+
+}
+
+
+/* =====================================================
+   OPEN POST / VIEWS
+   ===================================================== */
+
+function openPost(postId){
+
+  const post =
+    data.posts.find(
+      item =>
+        item.id === postId
+    );
+
+  if(!post)
+    return;
+
+
+  post.views =
+    (post.views || 0) + 1;
+
+
+  saveData();
+
+  renderFeed();
+
+
+  showNotice(
+    "Post viewed"
+  );
+
+}
+
+
+/* =====================================================
+   PROFILE VIEW
+   ===================================================== */
+
+function viewProfile(userId){
+
+  if(
+    userId ===
+    CURRENT_USER.id
+  ){
+
+    openMyProfile();
+
+    return;
+
+  }
+
+
+  data.profileViews =
+    (data.profileViews || 0) + 1;
+
+
+  saveData();
+
+  renderProfileViews();
+
+
+  showNotice(
+    "Profile viewed"
+  );
+
+}
+
+
+/* =====================================================
+   MY PROFILE
+   ===================================================== */
+
+function openMyProfile(){
+
+  showNotice(
+    "Profile page coming next"
+  );
+
+}
+
+
+/* =====================================================
+   SHARE
+   ===================================================== */
+
+async function sharePost(postId){
+
+  const post =
+    data.posts.find(
+      item =>
+        item.id === postId
+    );
+
+  if(!post)
+    return;
+
+
+  const shareData = {
+
+    title:
+      "PostX",
+
+    text:
+      post.text ||
+      "Check this PostX post",
+
+    url:
+      window.location.href +
+      "#post-" +
+      postId
+
+  };
+
+
+  try{
+
+    if(
+      navigator.share
+    ){
+
+      await navigator.share(
+        shareData
+      );
+
+    }else{
+
+      await navigator.clipboard.writeText(
+        shareData.url
+      );
+
+      showNotice(
+        "Post link copied"
+      );
+
+    }
+
+  }catch(error){
+
+    /* User cancelled share */
+
+  }
+
+}
+
+
+/* =====================================================
+   FILTERS
+   ===================================================== */
+
+document
+  .querySelectorAll(
+    ".filter[data-filter]"
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(
+            ".filter[data-filter]"
+          )
+          .forEach(item => {
+
+            item.classList.remove(
+              "active"
+            );
+
+          });
+
+
+        button.classList.add(
+          "active"
+        );
+
+
+        activeFilter =
+          button.dataset.filter;
+
+
+        renderFeed();
+
+      }
     );
 
   });
 
-}
+
+/* =====================================================
+   TOAST
+   ===================================================== */
+
+function showNotice(message){
+
+  let toast =
+    document.getElementById(
+      "postxToast"
+    );
 
 
-/* =========================================
-   SCHEDULE TOGGLE
-========================================= */
+  if(!toast){
 
-const publishModes =
-  document.querySelectorAll(
-    'input[name="publishMode"]'
-  );
-
-const scheduleControls =
-  document.getElementById(
-    "scheduleControls"
-  );
-
-publishModes.forEach(input => {
-
-  input.addEventListener("change", () => {
-
-    if(
-      input.value === "schedule" &&
-      input.checked
-    ){
-
-      scheduleControls.style.display =
-        "block";
-
-    }else if(
-      input.value === "now" &&
-      input.checked
-    ){
-
-      scheduleControls.style.display =
-        "none";
-
-    }
-
-  });
-
-});
-
-
-/* =========================================
-   MEDIA PICKER
-========================================= */
-
-const mediaInput =
-  document.getElementById("mediaInput");
-
-if(mediaInput){
-
-  mediaInput.addEventListener(
-    "change",
-    () => {
-
-      if(mediaInput.files.length){
-
-        const file =
-          mediaInput.files[0];
-
-        alert(
-          "Selected: " + file.name
-        );
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================
-   SAVE DRAFT
-========================================= */
-
-const saveDraftBtn =
-  document.getElementById(
-    "saveDraftBtn"
-  );
-
-if(saveDraftBtn){
-
-  saveDraftBtn.addEventListener(
-    "click",
-    () => {
-
-      alert(
-        "Draft saved."
+    toast =
+      document.createElement(
+        "div"
       );
 
-    }
+
+    toast.id =
+      "postxToast";
+
+
+    toast.style.cssText = `
+
+      position:fixed;
+
+      left:50%;
+      bottom:92px;
+
+      transform:
+        translateX(-50%);
+
+      background:#102334;
+
+      color:#fff;
+
+      border:
+        1px solid #00d9ff;
+
+      padding:
+        12px 17px;
+
+      border-radius:
+        999px;
+
+      font-size:13px;
+
+      font-weight:700;
+
+      z-index:300;
+
+      box-shadow:
+        0 8px 30px
+        rgba(0,0,0,.4);
+
+      max-width:
+        calc(100vw - 32px);
+
+      text-align:center;
+
+      white-space:nowrap;
+
+    `;
+
+
+    document.body.appendChild(
+      toast
+    );
+
+  }
+
+
+  toast.textContent =
+    message;
+
+
+  toast.style.display =
+    "block";
+
+
+  clearTimeout(
+    toast._timer
   );
+
+
+  toast._timer =
+    setTimeout(
+      () => {
+
+        toast.style.display =
+          "none";
+
+      },
+      2200
+    );
 
 }
 
 
-/* =========================================
-   POST BUTTON
-========================================= */
+/* =====================================================
+   WHOLE SCREEN SWIPE
+   CREATE → SOCIAL → MARKETPLACE → INBOX → SETTINGS
+   ===================================================== */
 
-const publishBtn =
-  document.getElementById(
-    "publishBtn"
-  );
+const POSTX_PAGES = [
 
-if(publishBtn){
-
-  publishBtn.addEventListener(
-    "click",
-    () => {
-
-      alert(
-        "Your post is ready to publish."
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================
-   WHOLE SCREEN SWIPE NAVIGATION
-========================================= */
-
-const pages = [
   "index.html",
+
   "feed.html",
+
   "marketplace.html",
+
   "inbox.html",
+
   "settings.html"
+
 ];
 
-let startX = 0;
-let startY = 0;
+
+let swipeStartX = 0;
+let swipeStartY = 0;
+
 
 document.addEventListener(
   "touchstart",
   event => {
 
-    if(!event.touches.length) return;
+    if(
+      !event.touches.length
+    )
+      return;
 
-    startX =
+
+    swipeStartX =
       event.touches[0].clientX;
 
-    startY =
+
+    swipeStartY =
       event.touches[0].clientY;
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
+
 
 document.addEventListener(
   "touchend",
   event => {
 
-    if(!event.changedTouches.length) return;
+    if(
+      !event.changedTouches.length
+    )
+      return;
+
 
     const endX =
       event.changedTouches[0].clientX;
 
+
     const endY =
       event.changedTouches[0].clientY;
 
-    const diffX =
-      endX - startX;
 
-    const diffY =
-      endY - startY;
+    const dx =
+      endX -
+      swipeStartX;
 
-    /*
-     * Ignore normal vertical scrolling.
-     */
+
+    const dy =
+      endY -
+      swipeStartY;
+
 
     if(
-      Math.abs(diffX) < 100 ||
-      Math.abs(diffY) > 80
+
+      Math.abs(dx) < 90 ||
+
+      Math.abs(dy) > 100
+
     ){
 
       return;
 
     }
 
-    let current =
-      window.location.pathname
-        .split("/")
-        .pop();
 
-    if(!current){
-      current = "index.html";
+    let file =
+      location.pathname
+        .split("/")
+        .pop()
+        .toLowerCase();
+
+
+    if(!file){
+
+      file =
+        "index.html";
+
     }
+
 
     let index =
-      pages.indexOf(current);
+      POSTX_PAGES.indexOf(
+        file
+      );
+
 
     if(index === -1){
+
       index = 0;
+
     }
 
 
-    /* Swipe LEFT */
+    /* Swipe left */
 
     if(
-      diffX < -100 &&
-      index < pages.length - 1
+
+      dx < -90 &&
+
+      index <
+      POSTX_PAGES.length - 1
+
     ){
 
       window.location.href =
-        pages[index + 1];
+        POSTX_PAGES[index + 1];
 
     }
 
 
-    /* Swipe RIGHT */
+    /* Swipe right */
 
     if(
-      diffX > 100 &&
+
+      dx > 90 &&
+
       index > 0
+
     ){
 
       window.location.href =
-        pages[index - 1];
+        POSTX_PAGES[index - 1];
 
     }
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
+
+
+/* =====================================================
+   START
+   ===================================================== */
+
+renderProfileViews();
+
+renderFeed();
 
 </script>
 
