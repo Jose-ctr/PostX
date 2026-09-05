@@ -1,2386 +1,1482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, viewport-fit=cover"
->
-
-<meta name="theme-color" content="#07111f">
-
-<title>PostX — Social Hub</title>
-
-<style>
-
-/* =====================================================
-   POSTX SOCIAL HUB — ANDROID OPTIMIZED
-   ===================================================== */
-
-:root{
-  --bg:#050b13;
-  --surface:#0b1624;
-  --surface2:#0f1e2f;
-  --border:#1b3448;
-
-  --cyan:#00d9ff;
-  --text:#f4f8fb;
-  --muted:#9bb0bf;
-
-  --danger:#ff5577;
-  --green:#3ee58a;
-}
-
-
-/* =====================================================
-   RESET
-   ===================================================== */
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
-}
-
-html{
-  background:var(--bg);
-  scroll-behavior:smooth;
-}
-
-body{
-  background:
-    radial-gradient(
-      circle at 50% -10%,
-      #12334a 0%,
-      transparent 38%
-    ),
-    var(--bg);
-
-  color:var(--text);
-
-  min-height:100vh;
-
-  overflow-x:hidden;
-
-  padding-bottom:105px;
-
-  -webkit-text-size-adjust:100%;
-
-  touch-action:pan-y;
-}
-
-button,
-input,
-textarea{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-
-a{
-  -webkit-tap-highlight-color:transparent;
-}
-
-
-/* =====================================================
-   APP
-   ===================================================== */
-
-.app{
-  width:100%;
-  max-width:720px;
-  margin:auto;
-}
-
-
-/* =====================================================
-   HEADER
-   ===================================================== */
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  padding:
-    calc(10px + env(safe-area-inset-top))
-    16px
-    12px;
-
-  background:rgba(5,11,19,.92);
-
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-
-  border-bottom:
-    1px solid rgba(0,217,255,.08);
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.brand img{
-  width:43px;
-  height:43px;
-
-  border-radius:12px;
-
-  object-fit:cover;
-}
-
-.brand strong{
-  display:block;
-
-  font-size:19px;
-  font-weight:800;
-
-  letter-spacing:.1px;
-}
-
-.brand small{
-  display:block;
-
-  color:var(--muted);
-
-  font-size:12px;
-
-  margin-top:2px;
-}
-
-.header-actions{
-  display:flex;
-  gap:8px;
-}
-
-.icon-btn,
-.avatar-btn{
-  width:42px;
-  height:42px;
-
-  border-radius:50%;
-
-  border:1px solid var(--border);
-
-  background:var(--surface);
-
-  color:white;
-
-  display:grid;
-  place-items:center;
-}
-
-.icon-btn{
-  font-size:18px;
-}
-
-.avatar-btn{
-  background:
-    linear-gradient(
-      135deg,
-      #00d9ff,
-      #1687ff
-    );
-
-  color:#001018;
-
-  font-size:15px;
-  font-weight:900;
-}
-
-
-/* =====================================================
-   CONTENT
-   ===================================================== */
-
-.content{
-  padding:17px 16px 24px;
-}
-
-
-/* =====================================================
-   HERO
-   ===================================================== */
-
-.hero{
-  padding:8px 2px 18px;
-}
-
-.eyebrow{
-  color:var(--cyan);
-
-  font-size:11px;
-  font-weight:900;
-
-  letter-spacing:1.8px;
-}
-
-.hero h1{
-  font-size:29px;
-  line-height:1.15;
-
-  margin-top:5px;
-
-  font-weight:800;
-}
-
-.hero p{
-  color:var(--muted);
-
-  font-size:14px;
-  line-height:1.5;
-
-  margin-top:6px;
-}
-
-
-/* =====================================================
-   PROFILE VIEWS
-   ===================================================== */
-
-.profile-card{
-  background:
-    linear-gradient(
-      145deg,
-      rgba(15,30,47,.98),
-      rgba(8,19,31,.98)
-    );
-
-  border:1px solid var(--border);
-
-  border-radius:17px;
-
-  padding:15px;
-
-  margin-bottom:17px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  gap:12px;
-}
-
-.profile-left{
-  display:flex;
-  align-items:center;
-  gap:11px;
-
-  min-width:0;
-}
-
-.profile-number{
-  font-size:20px;
-  line-height:1;
-
-  font-weight:900;
-}
-
-.profile-label{
-  color:var(--muted);
-
-  font-size:12px;
-
-  margin-top:4px;
-}
-
-.profile-card .filter{
-  padding:9px 13px;
-
-  font-size:12px;
-
-  white-space:nowrap;
-}
-
-
-/* =====================================================
-   AVATARS
-   ===================================================== */
-
-.author-avatar{
-  width:43px;
-  height:43px;
-
-  border-radius:50%;
-
-  display:grid;
-  place-items:center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #00d9ff,
-      #1687ff
-    );
-
-  color:#001018;
-
-  font-size:15px;
-  font-weight:900;
-
-  flex:0 0 auto;
-}
-
-
-/* =====================================================
-   FILTERS
-   ===================================================== */
-
-.filters{
-  display:flex;
-  gap:8px;
-
-  overflow-x:auto;
-
-  padding-bottom:13px;
-
-  scrollbar-width:none;
-
-  -webkit-overflow-scrolling:touch;
-
-  touch-action:pan-x;
-}
-
-.filters::-webkit-scrollbar{
-  display:none;
-}
-
-.filter{
-  flex:0 0 auto;
-
-  border:1px solid var(--border);
-
-  background:var(--surface);
-
-  color:var(--muted);
-
-  border-radius:999px;
-
-  padding:9px 15px;
-
-  font-size:13px;
-  line-height:1;
-
-  font-weight:700;
-
-  min-height:36px;
-}
-
-.filter.active{
-  color:#001018;
-
-  background:var(--cyan);
-
-  border-color:var(--cyan);
-}
-
-
-/* =====================================================
-   POST CARD
-   ===================================================== */
-
-.post{
-  background:
-    linear-gradient(
-      145deg,
-      rgba(15,30,47,.98),
-      rgba(8,19,31,.98)
-    );
-
-  border:1px solid var(--border);
-
-  border-radius:18px;
-
-  margin-bottom:16px;
-
-  overflow:hidden;
-
-  box-shadow:
-    0 12px 35px rgba(0,0,0,.22);
-}
-
-
-/* =====================================================
-   POST HEADER
-   ===================================================== */
-
-.post-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:15px;
-}
-
-.author{
-  display:flex;
-  align-items:center;
-  gap:10px;
-
-  min-width:0;
-
-  cursor:pointer;
-}
-
-.author-info{
-  min-width:0;
-}
-
-.author-info strong{
-  display:block;
-
-  font-size:15px;
-  line-height:1.25;
-
-  font-weight:750;
-
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.author-info small{
-  display:block;
-
-  color:var(--muted);
-
-  font-size:12px;
-  line-height:1.3;
-
-  margin-top:3px;
-}
-
-.more{
-  border:0;
-  background:none;
-
-  color:var(--muted);
-
-  font-size:23px;
-
-  padding:5px 3px;
-
-  line-height:1;
-}
-
-
-/* =====================================================
-   MEDIA
-   ===================================================== */
-
-.post-media{
-  width:100%;
-
-  aspect-ratio:16/10;
-
-  background:
-    linear-gradient(
-      135deg,
-      #102f42,
-      #07131e
-    );
-
-  display:grid;
-  place-items:center;
-
-  color:var(--cyan);
-
-  font-size:55px;
-}
-
-.post-media img,
-.post-media video{
-  width:100%;
-  height:100%;
-
-  object-fit:cover;
-}
-
-
-/* =====================================================
-   POST CONTENT
-   ===================================================== */
-
-.post-body{
-  padding:15px;
-}
-
-.post-text{
-  font-size:16px;
-
-  line-height:1.6;
-
-  white-space:pre-wrap;
-
-  overflow-wrap:anywhere;
-}
-
-.post-location{
-  color:var(--muted);
-
-  font-size:12px;
-
-  margin-top:9px;
-}
-
-.post-tags{
-  color:var(--cyan);
-
-  font-size:13px;
-
-  line-height:1.4;
-
-  margin-top:8px;
-}
-
-.sponsored{
-  display:inline-flex;
-  align-items:center;
-
-  gap:5px;
-
-  color:#ffd66b;
-
-  font-size:11px;
-
-  font-weight:800;
-
-  margin-top:8px;
-}
-
-
-/* =====================================================
-   METRICS
-   ===================================================== */
-
-.metrics{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  gap:8px;
-
-  padding:0 15px 11px;
-
-  color:var(--muted);
-
-  font-size:12px;
-
-  line-height:1.3;
-}
-
-.metrics span{
-  white-space:nowrap;
-}
-
-
-/* =====================================================
-   ACTIONS
-   ===================================================== */
-
-.actions{
-  display:grid;
-
-  grid-template-columns:
-    repeat(4,1fr);
-
-  border-top:
-    1px solid rgba(255,255,255,.06);
-}
-
-.action{
-  border:0;
-
-  background:none;
-
-  color:var(--muted);
-
-  padding:12px 4px 13px;
-
-  font-size:13px;
-
-  line-height:1.2;
-
-  font-weight:700;
-
-  min-height:62px;
-}
-
-.action span{
-  display:block;
-
-  font-size:20px;
-
-  line-height:22px;
-
-  margin-bottom:4px;
-}
-
-.action.liked{
-  color:var(--danger);
-}
-
-.action:hover{
-  background:
-    rgba(0,217,255,.04);
-}
-
-.action:active{
-  transform:scale(.97);
-}
-
-
-/* =====================================================
-   COMMENTS
-   ===================================================== */
-
-.comments{
-  display:none;
-
-  padding:13px 15px 15px;
-
-  border-top:
-    1px solid rgba(255,255,255,.06);
-}
-
-.comments.open{
-  display:block;
-}
-
-.comment-list{
-  display:flex;
-  flex-direction:column;
-
-  gap:11px;
-
-  margin-bottom:11px;
-}
-
-.comment{
-  display:flex;
-
-  gap:9px;
-
-  align-items:flex-start;
-}
-
-.comment-avatar{
-  width:31px;
-  height:31px;
-
-  border-radius:50%;
-
-  background:#17364b;
-
-  display:grid;
-  place-items:center;
-
-  color:var(--cyan);
-
-  font-size:12px;
-
-  font-weight:800;
-
-  flex:0 0 auto;
-}
-
-.comment-content{
-  background:#0b1724;
-
-  border-radius:11px;
-
-  padding:8px 10px;
-
-  flex:1;
-
-  min-width:0;
-}
-
-.comment-content strong{
-  font-size:12px;
-}
-
-.comment-content p{
-  color:#dce6ec;
-
-  font-size:13px;
-
-  line-height:1.45;
-
-  margin-top:3px;
-
-  overflow-wrap:anywhere;
-}
-
-.comment-form{
-  display:flex;
-
-  gap:8px;
-}
-
-.comment-form input{
-  flex:1;
-
-  min-width:0;
-
-  background:#07111c;
-
-  border:1px solid var(--border);
-
-  border-radius:11px;
-
-  color:white;
-
-  padding:11px 12px;
-
-  font-size:14px;
-
-  outline:none;
-
-  min-height:43px;
-}
-
-.comment-form input:focus{
-  border-color:var(--cyan);
-
-  box-shadow:
-    0 0 0 2px rgba(0,217,255,.08);
-}
-
-.comment-form button{
-  border:0;
-
-  border-radius:11px;
-
-  background:var(--cyan);
-
-  color:#001018;
-
-  padding:0 14px;
-
-  min-height:43px;
-
-  font-size:13px;
-
-  font-weight:900;
-}
-
-
-/* =====================================================
-   EMPTY STATE
-   ===================================================== */
-
-.empty{
-  text-align:center;
-
-  padding:55px 20px;
-
-  color:var(--muted);
-
-  font-size:14px;
-
-  line-height:1.5;
-}
-
-.empty strong{
-  display:block;
-
-  color:white;
-
-  font-size:16px;
-
-  margin-bottom:6px;
-}
-
-
-/* =====================================================
-   BOTTOM NAVIGATION
-   ===================================================== */
-
-.bottom-nav{
-  position:fixed;
-
-  left:0;
-  right:0;
-  bottom:0;
-
-  z-index:100;
-
-  display:grid;
-
-  grid-template-columns:
-    repeat(5,1fr);
-
-  padding:
-    8px
-    6px
-    calc(8px + env(safe-area-inset-bottom));
-
-  background:
-    rgba(6,13,21,.97);
-
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-
-  border-top:1px solid var(--border);
-}
-
-.nav-item{
-  border:0;
-
-  background:none;
-
-  color:#8499a7;
-
-  text-decoration:none;
-
-  text-align:center;
-
-  padding:7px 2px;
-
-  border-radius:12px;
-
-  font-size:11px;
-
-  line-height:1.2;
-
-  font-weight:650;
-
-  min-height:52px;
-}
-
-.nav-item span{
-  display:block;
-
-  font-size:21px;
-
-  line-height:22px;
-
-  margin-bottom:3px;
-}
-
-.nav-item.active{
-  color:var(--cyan);
-
-  background:
-    rgba(0,217,255,.08);
-}
-
-.nav-item:active{
-  transform:scale(.96);
-}
-
-
-/* =====================================================
-   ANDROID SMALL SCREENS
-   ===================================================== */
-
-@media(max-width:360px){
-
-  .content{
-    padding-left:13px;
-    padding-right:13px;
-  }
-
-  .hero h1{
-    font-size:27px;
-  }
-
-  .post-text{
-    font-size:15px;
-  }
-
-  .metrics{
-    font-size:11px;
-  }
-
-  .action{
-    font-size:12px;
-  }
-
-  .nav-item{
-    font-size:10px;
-  }
-
-}
-
-
-/* =====================================================
-   TABLET / DESKTOP
-   ===================================================== */
-
-@media(min-width:700px){
-
-  .content{
-    padding:
-      22px
-      0
-      30px;
-  }
-
-  .topbar{
-    border-radius:0;
-  }
-
-}
-
-</style>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#000000">
+
+  <meta
+    name="description"
+    content="PostX — Create posts, marketplace listings and video stories."
+  >
+
+  <title>Create — PostX</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+
+  <link rel="stylesheet" href="css/style.css?v=10">
+
+  <style>
+    :root {
+      --px-bg: #000000;
+      --px-card: #212528;
+      --px-surface: #4B4F52;
+      --px-border: #555B5E;
+      --px-text: #ffffff;
+      --px-muted: #D0D5D8;
+      --px-lime: #A6FF7F;
+      --px-danger: #ff5c6c;
+      --px-radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      background: var(--px-bg);
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--px-bg);
+      color: var(--px-text);
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+      padding-bottom: 90px;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 14px 14px 30px;
+    }
+
+    /* HEADER */
+
+    .topbar {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--px-text);
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: var(--px-card);
+      border: 1px solid var(--px-border);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-sub {
+      color: var(--px-muted);
+      font-size: 12px;
+      margin-top: -2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--px-border);
+      border-radius: 14px;
+      background: var(--px-card);
+      color: var(--px-text);
+      display: grid;
+      place-items: center;
+      font-size: 19px;
+      text-decoration: none;
+    }
+
+    .icon-btn:active {
+      transform: scale(.96);
+    }
+
+    /* HERO */
+
+    .hero {
+      margin-top: 6px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(27px, 7vw, 38px);
+      line-height: 1.05;
+      letter-spacing: -1px;
+      font-weight: 900;
+    }
+
+    .hero h1 span {
+      color: var(--px-lime);
+    }
+
+    .hero p {
+      margin: 9px 0 0;
+      color: var(--px-muted);
+      font-size: 15px;
+    }
+
+    /* TYPE SELECTOR */
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+
+    .type-btn {
+      min-height: 94px;
+      padding: 12px 8px;
+      border: 1px solid var(--px-border);
+      border-radius: var(--px-radius);
+      background: var(--px-card);
+      color: var(--px-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: .15s ease;
+    }
+
+    .type-btn .icon {
+      font-size: 25px;
+    }
+
+    .type-btn strong {
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .type-btn small {
+      color: var(--px-muted);
+      font-size: 10px;
+    }
+
+    .type-btn.active {
+      border: 2px solid var(--px-lime);
+      background: #171a1b;
+    }
+
+    .type-btn.active small {
+      color: var(--px-lime);
+    }
+
+    .type-btn:active {
+      transform: scale(.98);
+    }
+
+    /* CARD */
+
+    .card {
+      background: var(--px-card);
+      border: 1px solid var(--px-border);
+      border-radius: var(--px-radius);
+      padding: 15px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.28);
+    }
+
+    .card-title {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 850;
+    }
+
+    /* USER */
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 13px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--px-surface);
+      border: 1px solid var(--px-border);
+      font-weight: 900;
+      color: var(--px-lime);
+    }
+
+    .user-name {
+      font-weight: 850;
+      font-size: 15px;
+    }
+
+    .user-label {
+      color: var(--px-muted);
+      font-size: 12px;
+    }
+
+    /* INPUTS */
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      color: var(--px-text);
+      background: #111416;
+      border: 1px solid var(--px-border);
+      border-radius: 14px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 145px;
+      resize: vertical;
+      padding: 14px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    input,
+    select {
+      min-height: 48px;
+      padding: 11px 13px;
+      font-size: 15px;
+    }
+
+    textarea::placeholder,
+    input::placeholder {
+      color: #AEB5B9;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: var(--px-lime);
+      box-shadow: 0 0 0 2px rgba(166,255,127,.12);
+    }
+
+    .field {
+      margin-top: 12px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--px-text);
+    }
+
+    /* MEDIA */
+
+    .media-box {
+      border: 1px dashed #73797c;
+      border-radius: 15px;
+      min-height: 100px;
+      background: #111416;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      margin-top: 12px;
+    }
+
+    .media-box label {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .media-icon {
+      font-size: 29px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .media-main {
+      font-weight: 850;
+      font-size: 14px;
+    }
+
+    .media-sub {
+      display: block;
+      color: var(--px-muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    #mediaInput {
+      display: none;
+    }
+
+    .preview {
+      display: none;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 15px;
+      border: 1px solid var(--px-border);
+      background: #000;
+    }
+
+    .preview img,
+    .preview video {
+      display: block;
+      width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+    }
+
+    /* PRICE */
+
+    .price-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 9px;
+    }
+
+    .price-row select {
+      min-width: 0;
+    }
+
+    /* PLATFORM */
+
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .platform {
+      min-height: 50px;
+      border: 1px solid var(--px-border);
+      border-radius: 13px;
+      background: #111416;
+      color: var(--px-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .platform input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--px-lime);
+    }
+
+    .platform:has(input:checked) {
+      border-color: var(--px-lime);
+      color: var(--px-lime);
+    }
+
+    /* BOOST */
+
+    .boost-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 13px;
+      border: 1px solid var(--px-border);
+      border-radius: 15px;
+      background: #111416;
+    }
+
+    .boost-box input {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--px-lime);
+      flex: 0 0 auto;
+    }
+
+    .boost-title {
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .boost-description {
+      color: var(--px-muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .boost-price {
+      color: var(--px-lime);
+      font-weight: 900;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    /* POST BUTTON */
+
+    .publish-btn {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--px-lime);
+      color: #071006;
+      font-size: 16px;
+      font-weight: 900;
+      margin-top: 4px;
+      box-shadow: 0 6px 20px rgba(166,255,127,.14);
+    }
+
+    .publish-btn:active {
+      transform: scale(.985);
+    }
+
+    .publish-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    /* STATUS */
+
+    .status {
+      display: none;
+      padding: 13px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-weight: 750;
+      border: 1px solid var(--px-border);
+      background: var(--px-card);
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      border-color: var(--px-lime);
+      color: var(--px-lime);
+    }
+
+    .status.error {
+      border-color: var(--px-danger);
+      color: #ff9ca7;
+    }
+
+    /* QUICK LINKS */
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+      margin-top: 5px;
+    }
+
+    .quick-link {
+      min-height: 48px;
+      border: 1px solid var(--px-border);
+      border-radius: 14px;
+      background: var(--px-card);
+      color: var(--px-text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .quick-link:hover {
+      border-color: var(--px-lime);
+    }
+
+    /* BOTTOM NAV */
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 76px;
+      padding:
+        8px
+        max(8px, env(safe-area-inset-right))
+        max(8px, env(safe-area-inset-bottom))
+        max(8px, env(safe-area-inset-left));
+      background: rgba(0,0,0,.96);
+      border-top: 1px solid var(--px-border);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 760px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    .nav-item {
+      min-height: 56px;
+      border-radius: 14px;
+      color: var(--px-muted);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .nav-icon {
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .nav-item.active {
+      color: var(--px-lime);
+      background: #111416;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 420px) {
+      .app {
+        padding-left: 11px;
+        padding-right: 11px;
+      }
+
+      .type-grid {
+        gap: 6px;
+      }
+
+      .type-btn {
+        min-height: 88px;
+      }
+
+      .type-btn small {
+        font-size: 9px;
+      }
+
+      .platforms {
+        gap: 5px;
+      }
+
+      .platform {
+        font-size: 11px;
+      }
+
+      .price-row {
+        grid-template-columns: 95px 1fr;
+      }
+    }
+  </style>
 </head>
-
 
 <body>
 
-<div class="app">
+  <main class="app">
+
+    <!-- HEADER -->
+    <header class="topbar">
+
+      <a class="brand" href="feed.html">
+        <img
+          class="brand-logo"
+          src="assets/icons/icon-192.png"
+          alt="PostX"
+          onerror="this.style.display='none'"
+        >
+
+        <div>
+          <div class="brand-name">PostX</div>
+          <div class="brand-sub">Create everywhere</div>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <a
+          class="icon-btn"
+          href="inbox.html"
+          aria-label="Inbox"
+        >💬</a>
+
+        <a
+          class="icon-btn"
+          href="settings.html"
+          aria-label="Settings"
+        >⚙️</a>
+      </div>
+
+    </header>
 
 
-<!-- =====================================================
-     HEADER
-     ===================================================== -->
-
-<header class="topbar">
-
-  <div class="brand">
-
-    <img
-      src="assets/icons/icon-192.png"
-      alt="PostX"
-    >
-
-    <div>
-
-      <strong>PostX</strong>
-
-      <small>
-        Social Hub
-      </small>
-
-    </div>
-
-  </div>
+    <!-- HERO -->
+    <section class="hero">
+      <h1>Create. <span>Connect.</span> Grow.</h1>
+      <p>
+        Share a post, sell something, or create a video story from one place.
+      </p>
+    </section>
 
 
-  <div class="header-actions">
+    <!-- CREATE TYPE -->
+    <section class="type-grid">
 
-    <button
-      class="icon-btn"
-      type="button"
-      onclick="showNotice('Notifications coming soon')"
-      aria-label="Notifications"
-    >
-      🔔
-    </button>
-
-
-    <button
-      class="avatar-btn"
-      type="button"
-      onclick="openMyProfile()"
-      aria-label="Profile"
-    >
-      J
-    </button>
-
-  </div>
-
-</header>
-
-
-<!-- =====================================================
-     CONTENT
-     ===================================================== -->
-
-<main class="content">
-
-
-<section class="hero">
-
-  <div class="eyebrow">
-    POSTX SOCIAL
-  </div>
-
-  <h1>
-    Discover
-  </h1>
-
-  <p>
-    Connect, discover and engage with people and businesses.
-  </p>
-
-</section>
-
-
-<!-- =====================================================
-     PROFILE VIEWS
-     ===================================================== -->
-
-<div class="profile-card">
-
-  <div class="profile-left">
-
-    <div class="author-avatar">
-      J
-    </div>
-
-    <div>
-
-      <div
-        class="profile-number"
-        id="profileViews"
+      <button
+        class="type-btn active"
+        data-type="post"
+        type="button"
       >
-        0
+        <span class="icon">✍️</span>
+        <strong>Post</strong>
+        <small>Social post</small>
+      </button>
+
+      <button
+        class="type-btn"
+        data-type="market"
+        type="button"
+      >
+        <span class="icon">🛍️</span>
+        <strong>Market</strong>
+        <small>Sell anything</small>
+      </button>
+
+      <button
+        class="type-btn"
+        data-type="story"
+        type="button"
+      >
+        <span class="icon">🎥</span>
+        <strong>Story</strong>
+        <small>Video story</small>
+      </button>
+
+    </section>
+
+
+    <!-- STATUS -->
+    <div
+      id="status"
+      class="status"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+
+    <!-- CREATE CARD -->
+    <section class="card">
+
+      <div class="user-row">
+        <div class="avatar">J</div>
+
+        <div>
+          <div class="user-name">Joseph Mbui</div>
+          <div class="user-label" id="typeLabel">
+            Creating a Post
+          </div>
+        </div>
       </div>
 
-      <div class="profile-label">
-        Profile views
+
+      <!-- CAPTION -->
+      <div class="field">
+        <label
+          class="field-label"
+          for="caption"
+        >
+          What's happening?
+        </label>
+
+        <textarea
+          id="caption"
+          maxlength="2000"
+          placeholder="Share something with your community..."
+        ></textarea>
       </div>
+
+
+      <!-- MEDIA -->
+      <div class="media-box">
+
+        <label for="mediaInput">
+
+          <span class="media-icon">📷</span>
+
+          <span class="media-main">
+            Add photo or video
+          </span>
+
+          <span class="media-sub">
+            Tap to choose media from your phone
+          </span>
+
+        </label>
+
+        <input
+          id="mediaInput"
+          type="file"
+          accept="image/*,video/*"
+        >
+
+      </div>
+
+
+      <!-- PREVIEW -->
+      <div
+        id="preview"
+        class="preview"
+      ></div>
+
+
+      <!-- MARKET FIELDS -->
+      <div id="marketFields" style="display:none;">
+
+        <div class="field">
+
+          <label
+            class="field-label"
+            for="marketTitle"
+          >
+            Product / Service name
+          </label>
+
+          <input
+            id="marketTitle"
+            type="text"
+            maxlength="120"
+            placeholder="e.g. Braids, Laptop, Electrical repair"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label class="field-label">
+            Price
+          </label>
+
+          <div class="price-row">
+
+            <select id="currency">
+              <option value="KES">KES</option>
+            </select>
+
+            <input
+              id="price"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Enter price"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label
+            class="field-label"
+            for="location"
+          >
+            Location
+          </label>
+
+          <input
+            id="location"
+            type="text"
+            maxlength="100"
+            placeholder="e.g. Mariakani, Kilifi"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- PLATFORM -->
+      <div class="field">
+
+        <label class="field-label">
+          Publish to
+        </label>
+
+        <div class="platforms">
+
+          <label class="platform">
+            <input
+              type="checkbox"
+              id="postx"
+              checked
+            >
+            PostX
+          </label>
+
+          <label class="platform">
+            <input
+              type="checkbox"
+              id="facebook"
+            >
+            Facebook
+          </label>
+
+          <label class="platform">
+            <input
+              type="checkbox"
+              id="instagram"
+            >
+            Instagram
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- BOOST -->
+      <div class="field">
+
+        <label class="boost-box">
+
+          <input
+            type="checkbox"
+            id="boost"
+          >
+
+          <span>
+
+            <span class="boost-title">
+              🚀 Boost this post
+            </span>
+
+            <span class="boost-description">
+              Reach more people and increase visibility.
+            </span>
+
+            <span class="boost-price">
+              Everyday Boost — KSh 10
+            </span>
+
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <!-- PUBLISH -->
+      <div class="field">
+
+        <button
+          id="publishBtn"
+          class="publish-btn"
+          type="button"
+        >
+          Publish on PostX
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- QUICK LINKS -->
+    <section class="quick-links">
+
+      <a
+        class="quick-link"
+        href="feed.html"
+      >
+        🏠 View Feed
+      </a>
+
+      <a
+        class="quick-link"
+        href="catalog.html"
+      >
+        🛍️ Marketplace
+      </a>
+
+      <a
+        class="quick-link"
+        href="inbox.html"
+      >
+        💬 Inbox
+      </a>
+
+      <a
+        class="quick-link"
+        href="settings.html"
+      >
+        ⚙️ Settings
+      </a>
+
+    </section>
+
+  </main>
+
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+
+    <div class="nav-inner">
+
+      <a
+        class="nav-item active"
+        href="index.html"
+      >
+        <span class="nav-icon">＋</span>
+        Create
+      </a>
+
+      <a
+        class="nav-item"
+        href="feed.html"
+      >
+        <span class="nav-icon">⌂</span>
+        Home
+      </a>
+
+      <a
+        class="nav-item"
+        href="catalog.html"
+      >
+        <span class="nav-icon">🛍</span>
+        Market
+      </a>
+
+      <a
+        class="nav-item"
+        href="inbox.html"
+      >
+        <span class="nav-icon">💬</span>
+        Inbox
+      </a>
+
+      <a
+        class="nav-item"
+        href="settings.html"
+      >
+        <span class="nav-icon">◉</span>
+        Profile
+      </a>
 
     </div>
 
-  </div>
+  </nav>
 
 
-  <button
-    class="filter"
-    type="button"
-    onclick="openMyProfile()"
-  >
-    View profile
-  </button>
+  <script>
+    (() => {
 
-</div>
+      const typeButtons =
+        document.querySelectorAll(".type-btn");
 
-
-<!-- =====================================================
-     FILTERS
-     ===================================================== -->
+      const marketFields =
+        document.getElementById("marketFields");
 
-<div class="filters">
+      const caption =
+        document.getElementById("caption");
 
-  <button
-    class="filter active"
-    type="button"
-    data-filter="all"
-  >
-    All
-  </button>
+      const marketTitle =
+        document.getElementById("marketTitle");
 
-  <button
-    class="filter"
-    type="button"
-    data-filter="postx"
-  >
-    PostX
-  </button>
+      const price =
+        document.getElementById("price");
 
-  <button
-    class="filter"
-    type="button"
-    data-filter="business"
-  >
-    Business
-  </button>
+      const locationInput =
+        document.getElementById("location");
 
-  <button
-    class="filter"
-    type="button"
-    data-filter="following"
-  >
-    Following
-  </button>
+      const typeLabel =
+        document.getElementById("typeLabel");
 
-</div>
+      const publishBtn =
+        document.getElementById("publishBtn");
 
+      const status =
+        document.getElementById("status");
 
-<!-- =====================================================
-     FEED
-     ===================================================== -->
+      const mediaInput =
+        document.getElementById("mediaInput");
 
-<section id="feed"></section>
+      const preview =
+        document.getElementById("preview");
 
+      const boost =
+        document.getElementById("boost");
 
-</main>
+      let currentType = "post";
 
 
-<!-- =====================================================
-     BOTTOM NAVIGATION
-     ===================================================== -->
+      /* TYPE SWITCH */
 
-<nav class="bottom-nav">
+      function updateType(type) {
 
-  <a
-    class="nav-item"
-    href="index.html"
-  >
-    <span>＋</span>
-    Create
-  </a>
+        currentType = type;
 
+        typeButtons.forEach(btn => {
+          btn.classList.toggle(
+            "active",
+            btn.dataset.type === type
+          );
+        });
 
-  <a
-    class="nav-item active"
-    href="feed.html"
-  >
-    <span>⌂</span>
-    Social
-  </a>
+        if (type === "post") {
 
+          typeLabel.textContent =
+            "Creating a Post";
 
-  <a
-    class="nav-item"
-    href="marketplace.html"
-  >
-    <span>🏪</span>
-    Market
-  </a>
+          caption.placeholder =
+            "Share something with your community...";
 
+          publishBtn.textContent =
+            "Publish on PostX";
 
-  <a
-    class="nav-item"
-    href="inbox.html"
-  >
-    <span>💬</span>
-    Inbox
-  </a>
+          marketFields.style.display =
+            "none";
 
+          mediaInput.accept =
+            "image/*,video/*";
 
-  <a
-    class="nav-item"
-    href="settings.html"
-  >
-    <span>⚙</span>
-    Settings
-  </a>
+        }
 
-</nav>
+        if (type === "market") {
 
+          typeLabel.textContent =
+            "Creating a Marketplace Listing";
 
-</div>
+          caption.placeholder =
+            "Describe your product or service...";
 
+          publishBtn.textContent =
+            "Publish Listing";
 
-<!-- =====================================================
-     POSTX SOCIAL ENGINE
-     ===================================================== -->
+          marketFields.style.display =
+            "block";
 
-<script>
+          mediaInput.accept =
+            "image/*,video/*";
 
-"use strict";
+        }
 
+        if (type === "story") {
 
-/* =====================================================
-   STORAGE
-   ===================================================== */
+          typeLabel.textContent =
+            "Creating a Video Story";
 
-const STORAGE_KEY =
-  "postx_social_data_v1";
+          caption.placeholder =
+            "Add a caption to your story...";
 
+          publishBtn.textContent =
+            "Publish Story";
 
-/* =====================================================
-   CURRENT USER
-   ===================================================== */
+          marketFields.style.display =
+            "none";
 
-const CURRENT_USER = {
+          mediaInput.accept =
+            "video/*";
 
-  id:
-    "current-user",
+        }
 
-  name:
-    "Joseph",
+      }
 
-  avatar:
-    "J"
 
-};
+      typeButtons.forEach(btn => {
 
+        btn.addEventListener(
+          "click",
+          () => updateType(btn.dataset.type)
+        );
 
-/* =====================================================
-   DEFAULT DATA
-   ===================================================== */
+      });
 
-const DEFAULT_DATA = {
 
-  profileViews:0,
+      /* MEDIA PREVIEW */
 
-  posts:[
+      mediaInput.addEventListener(
+        "change",
+        () => {
 
-    {
+          const file =
+            mediaInput.files[0];
 
-      id:
-        "demo-1",
+          preview.innerHTML = "";
 
-      authorId:
-        "business-1",
+          if (!file) {
 
-      author:
-        "PostX Demo Store",
+            preview.style.display =
+              "none";
 
-      avatar:
-        "P",
+            return;
+          }
 
-      type:
-        "business",
+          const url =
+            URL.createObjectURL(file);
 
-      text:
-        "Welcome to PostX. Create once, publish everywhere and connect with customers.",
+          if (file.type.startsWith("image/")) {
 
-      location:
-        "Mariakani",
+            const img =
+              document.createElement("img");
 
-      tags:
-        "#PostX #Kenya",
+            img.src = url;
+            img.alt = "Selected media";
 
-      likes:
-        0,
+            preview.appendChild(img);
 
-      liked:
-        false,
+          } else if (
+            file.type.startsWith("video/")
+          ) {
 
-      views:
-        0,
+            const video =
+              document.createElement("video");
 
-      comments:
-        []
+            video.src = url;
+            video.controls = true;
+            video.playsInline = true;
 
-    },
-
-
-    {
-
-      id:
-        "demo-2",
-
-      authorId:
-        "user-2",
-
-      author:
-        "PostX Creator",
-
-      avatar:
-        "C",
-
-      type:
-        "postx",
-
-      text:
-        "Your first PostX post is free. Share something with the community.",
-
-      location:
-        "Kilifi",
-
-      tags:
-        "#PostX #Kilifi",
-
-      likes:
-        0,
-
-      liked:
-        false,
-
-      views:
-        0,
-
-      comments:
-        []
-
-    }
-
-  ]
-
-};
-
-
-/* =====================================================
-   LOAD DATA
-   ===================================================== */
-
-function loadData(){
-
-  try{
-
-    const saved =
-      localStorage.getItem(
-        STORAGE_KEY
-      );
-
-    if(saved){
-
-      const parsed =
-        JSON.parse(saved);
-
-      return {
-
-        ...structuredClone(DEFAULT_DATA),
-
-        ...parsed,
-
-        posts:
-          Array.isArray(parsed.posts)
-            ? parsed.posts
-            : structuredClone(
-                DEFAULT_DATA.posts
-              )
-
-      };
-
-    }
-
-  }catch(error){
-
-    console.error(
-      "PostX storage error:",
-      error
-    );
-
-  }
-
-  return structuredClone(
-    DEFAULT_DATA
-  );
-
-}
-
-
-/* =====================================================
-   SAVE DATA
-   ===================================================== */
-
-function saveData(){
-
-  try{
-
-    localStorage.setItem(
-
-      STORAGE_KEY,
-
-      JSON.stringify(data)
-
-    );
-
-  }catch(error){
-
-    console.error(
-      "PostX: Unable to save feed data.",
-      error
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   DATA
-   ===================================================== */
-
-let data =
-  loadData();
-
-
-/* =====================================================
-   PROFILE VIEWS
-   ===================================================== */
-
-function renderProfileViews(){
-
-  const element =
-    document.getElementById(
-      "profileViews"
-    );
-
-  if(!element){
-    return;
-  }
-
-  element.textContent =
-    Number(
-      data.profileViews || 0
-    );
-
-}
-
-
-/* =====================================================
-   ESCAPE HTML
-   ===================================================== */
-
-function escapeHTML(value){
-
-  return String(
-    value ?? ""
-  )
-
-  .replaceAll(
-    "&",
-    "&amp;"
-  )
-
-  .replaceAll(
-    "<",
-    "&lt;"
-  )
-
-  .replaceAll(
-    ">",
-    "&gt;"
-  )
-
-  .replaceAll(
-    '"',
-    "&quot;"
-  )
-
-  .replaceAll(
-    "'",
-    "&#039;"
-  );
-
-}
-
-
-/* =====================================================
-   FILTER
-   ===================================================== */
-
-let activeFilter =
-  "all";
-
-
-/* =====================================================
-   RENDER FEED
-   ===================================================== */
-
-function renderFeed(){
-
-  const feed =
-    document.getElementById(
-      "feed"
-    );
-
-  if(!feed){
-    return;
-  }
-
-
-  let posts =
-    Array.isArray(data.posts)
-      ? data.posts
-      : [];
-
-
-  if(activeFilter !== "all"){
-
-    posts =
-      posts.filter(
-        post => {
-
-          if(
-            activeFilter ===
-            "following"
-          ){
-
-            return post.following === true;
+            preview.appendChild(video);
 
           }
 
-          return (
-            post.type ===
-            activeFilter
-          );
+          preview.style.display =
+            "block";
 
         }
       );
 
-  }
 
+      /* STATUS */
 
-  if(!posts.length){
+      function showStatus(
+        message,
+        type = "success"
+      ) {
 
-    feed.innerHTML = `
+        status.textContent =
+          message;
 
-      <div class="empty">
+        status.className =
+          "status show " + type;
 
-        <strong>
-          No posts here yet
-        </strong>
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
 
-        Try another filter or create
-        a new post.
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  feed.innerHTML =
-    posts
-      .map(renderPost)
-      .join("");
-
-}
-
-
-/* =====================================================
-   POST HTML
-   ===================================================== */
-
-function renderPost(post){
-
-  const comments =
-    Array.isArray(post.comments)
-      ? post.comments
-      : [];
-
-
-  const safeId =
-    escapeHTML(
-      post.id
-    );
-
-
-  return `
-
-<article
-  class="post"
-  id="post-${safeId}"
-  data-post-id="${safeId}"
->
-
-
-  <div class="post-head">
-
-
-    <div
-      class="author"
-      onclick="viewProfile('${safeId.replace(/'/g, "\\'")}')"
-    >
-
-      <div class="author-avatar">
-
-        ${escapeHTML(
-          post.avatar || "?"
-        )}
-
-      </div>
-
-
-      <div class="author-info">
-
-        <strong>
-
-          ${escapeHTML(
-            post.author ||
-            "PostX User"
-          )}
-
-        </strong>
-
-
-        <small>
-
-          PostX ·
-          ${escapeHTML(
-            post.location ||
-            "Kenya"
-          )}
-
-        </small>
-
-      </div>
-
-    </div>
-
-
-    <button
-      class="more"
-      type="button"
-      onclick="showNotice('Post options coming soon')"
-      aria-label="Post options"
-    >
-      ⋯
-    </button>
-
-  </div>
-
-
-  <div class="post-media">
-
-    ${
-      post.image
-      ?
-      `
-      <img
-        src="${escapeHTML(post.image)}"
-        alt="Post media"
-        loading="lazy"
-      >
-      `
-      :
-      "✦"
-    }
-
-  </div>
-
-
-  <div class="post-body">
-
-
-    <div class="post-text">
-
-      ${escapeHTML(
-        post.text || ""
-      )}
-
-    </div>
-
-
-    ${
-      post.location
-      ?
-      `
-      <div class="post-location">
-
-        📍
-        ${escapeHTML(
-          post.location
-        )}
-
-      </div>
-      `
-      :
-      ""
-    }
-
-
-    ${
-      post.tags
-      ?
-      `
-      <div class="post-tags">
-
-        ${escapeHTML(
-          post.tags
-        )}
-
-      </div>
-      `
-      :
-      ""
-    }
-
-
-    ${
-      post.boosted
-      ?
-      `
-      <div class="sponsored">
-
-        🚀 Sponsored
-
-      </div>
-      `
-      :
-      ""
-    }
-
-
-  </div>
-
-
-  <div class="metrics">
-
-    <span>
-      ❤️ ${Number(post.likes || 0)} likes
-    </span>
-
-    <span>
-      💬 ${comments.length} comments
-    </span>
-
-    <span>
-      👁 ${Number(post.views || 0)} views
-    </span>
-
-  </div>
-
-
-  <div class="actions">
-
-
-    <button
-      class="action ${post.liked ? "liked" : ""}"
-      type="button"
-      onclick="toggleLike('${safeId.replace(/'/g, "\\'")}')"
-    >
-
-      <span>
-        ${post.liked ? "❤️" : "♡"}
-      </span>
-
-      Like
-
-    </button>
-
-
-    <button
-      class="action"
-      type="button"
-      onclick="toggleComments('${safeId.replace(/'/g, "\\'")}')"
-    >
-
-      <span>
-        💬
-      </span>
-
-      Comment
-
-    </button>
-
-
-    <button
-      class="action"
-      type="button"
-      onclick="sharePost('${safeId.replace(/'/g, "\\'")}')"
-    >
-
-      <span>
-        ↗
-      </span>
-
-      Share
-
-    </button>
-
-
-    <button
-      class="action"
-      type="button"
-      onclick="openPost('${safeId.replace(/'/g, "\\'")}')"
-    >
-
-      <span>
-        👁
-      </span>
-
-      View
-
-    </button>
-
-
-  </div>
-
-
-  <div
-    class="comments"
-    id="comments-${safeId}"
-  >
-
-
-    <div class="comment-list">
-
-      ${
-        comments.length
-        ?
-        comments
-          .map(
-            comment => `
-
-<div class="comment">
-
-  <div class="comment-avatar">
-
-    ${escapeHTML(
-      comment.avatar ||
-      "U"
-    )}
-
-  </div>
-
-
-  <div class="comment-content">
-
-    <strong>
-
-      ${escapeHTML(
-        comment.name ||
-        "PostX User"
-      )}
-
-    </strong>
-
-
-    <p>
-
-      ${escapeHTML(
-        comment.text ||
-        ""
-      )}
-
-    </p>
-
-  </div>
-
-</div>
-
-            `
-          )
-          .join("")
-        :
-        `
-        <small style="color:#8499a7">
-
-          No comments yet.
-          Be the first.
-
-        </small>
-        `
       }
 
-    </div>
 
+      /* PUBLISH */
 
-    <form
-      class="comment-form"
-      onsubmit="addComment(event,'${safeId.replace(/'/g, "\\'")}')"
-    >
+      publishBtn.addEventListener(
+        "click",
+        () => {
 
-      <input
-        id="comment-input-${safeId}"
-        placeholder="Write a comment..."
-        maxlength="500"
-        autocomplete="off"
-      >
+          const text =
+            caption.value.trim();
 
+          const selectedMedia =
+            mediaInput.files[0];
 
-      <button type="submit">
-        Send
-      </button>
+          const postx =
+            document.getElementById(
+              "postx"
+            ).checked;
 
-    </form>
+          const facebook =
+            document.getElementById(
+              "facebook"
+            ).checked;
 
+          const instagram =
+            document.getElementById(
+              "instagram"
+            ).checked;
 
-  </div>
 
+          if (!text && !selectedMedia) {
 
-</article>
-
-`;
-
-}
-
-
-/* =====================================================
-   LIKE
-   ===================================================== */
-
-function toggleLike(postId){
-
-  const post =
-    data.posts.find(
-      item =>
-        item.id ===
-        postId
-    );
-
-  if(!post){
-    return;
-  }
-
-
-  if(post.liked){
-
-    post.likes =
-      Math.max(
-        0,
-        Number(post.likes || 0) - 1
-      );
-
-    post.liked =
-      false;
-
-  }else{
-
-    post.likes =
-      Number(post.likes || 0) + 1;
-
-    post.liked =
-      true;
-
-  }
-
-
-  saveData();
-
-  renderFeed();
-
-}
-
-
-/* =====================================================
-   COMMENTS
-   ===================================================== */
-
-function toggleComments(postId){
-
-  const element =
-    document.getElementById(
-      "comments-" +
-      postId
-    );
-
-  if(!element){
-    return;
-  }
-
-
-  element.classList.toggle(
-    "open"
-  );
-
-}
-
-
-/* =====================================================
-   ADD COMMENT
-   ===================================================== */
-
-function addComment(
-  event,
-  postId
-){
-
-  event.preventDefault();
-
-
-  const input =
-    document.getElementById(
-      "comment-input-" +
-      postId
-    );
-
-  if(!input){
-    return;
-  }
-
-
-  const text =
-    input.value.trim();
-
-
-  if(!text){
-    return;
-  }
-
-
-  const post =
-    data.posts.find(
-      item =>
-        item.id ===
-        postId
-    );
-
-  if(!post){
-    return;
-  }
-
-
-  if(
-    !Array.isArray(
-      post.comments
-    )
-  ){
-
-    post.comments = [];
-
-  }
-
-
-  post.comments.push({
-
-    id:
-      Date.now().toString(),
-
-    userId:
-      CURRENT_USER.id,
-
-    name:
-      CURRENT_USER.name,
-
-    avatar:
-      CURRENT_USER.avatar,
-
-    text:
-      text,
-
-    createdAt:
-      new Date().toISOString()
-
-  });
-
-
-  saveData();
-
-  renderFeed();
-
-
-  setTimeout(() => {
-
-    const box =
-      document.getElementById(
-        "comments-" +
-        postId
-      );
-
-    if(box){
-
-      box.classList.add(
-        "open"
-      );
-
-    }
-
-  },0);
-
-}
-
-
-/* =====================================================
-   OPEN POST / VIEWS
-   ===================================================== */
-
-function openPost(postId){
-
-  const post =
-    data.posts.find(
-      item =>
-        item.id ===
-        postId
-    );
-
-  if(!post){
-    return;
-  }
-
-
-  post.views =
-    Number(
-      post.views || 0
-    ) + 1;
-
-
-  saveData();
-
-  renderFeed();
-
-
-  showNotice(
-    "Post viewed"
-  );
-
-}
-
-
-/* =====================================================
-   PROFILE VIEW
-   ===================================================== */
-
-function viewProfile(userId){
-
-  if(
-    userId ===
-    CURRENT_USER.id
-  ){
-
-    openMyProfile();
-
-    return;
-
-  }
-
-
-  data.profileViews =
-    Number(
-      data.profileViews || 0
-    ) + 1;
-
-
-  saveData();
-
-  renderProfileViews();
-
-
-  showNotice(
-    "Profile viewed"
-  );
-
-}
-
-
-/* =====================================================
-   MY PROFILE
-   ===================================================== */
-
-function openMyProfile(){
-
-  showNotice(
-    "Profile page coming next"
-  );
-
-}
-
-
-/* =====================================================
-   SHARE
-   ===================================================== */
-
-async function sharePost(postId){
-
-  const post =
-    data.posts.find(
-      item =>
-        item.id ===
-        postId
-    );
-
-  if(!post){
-    return;
-  }
-
-
-  const shareData = {
-
-    title:
-      "PostX",
-
-    text:
-      post.text ||
-      "Check this PostX post",
-
-    url:
-      window.location.href +
-      "#post-" +
-      postId
-
-  };
-
-
-  try{
-
-    if(
-      navigator.share
-    ){
-
-      await navigator.share(
-        shareData
-      );
-
-    }else{
-
-      await navigator.clipboard.writeText(
-        shareData.url
-      );
-
-      showNotice(
-        "Post link copied"
-      );
-
-    }
-
-  }catch(error){
-
-    /*
-     * User cancelled
-     * native share.
-     */
-
-  }
-
-}
-
-
-/* =====================================================
-   FILTERS
-   ===================================================== */
-
-document
-  .querySelectorAll(
-    ".filter[data-filter]"
-  )
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        document
-          .querySelectorAll(
-            ".filter[data-filter]"
-          )
-          .forEach(item => {
-
-            item.classList.remove(
-              "active"
+            showStatus(
+              "Add a caption, photo or video before publishing.",
+              "error"
             );
 
-          });
+            return;
+          }
 
 
-        button.classList.add(
-          "active"
-        );
+          if (!postx && !facebook && !instagram) {
+
+            showStatus(
+              "Select at least one platform.",
+              "error"
+            );
+
+            return;
+          }
 
 
-        activeFilter =
-          button.dataset.filter;
+          if (
+            currentType === "story" &&
+            !selectedMedia
+          ) {
+
+            showStatus(
+              "A video is required for a story.",
+              "error"
+            );
+
+            return;
+          }
 
 
-        renderFeed();
+          if (
+            currentType === "market" &&
+            !marketTitle.value.trim()
+          ) {
 
-      }
-    );
+            showStatus(
+              "Enter a product or service name.",
+              "error"
+            );
 
-  });
-
-
-/* =====================================================
-   TOAST
-   ===================================================== */
-
-function showNotice(message){
-
-  let toast =
-    document.getElementById(
-      "postxToast"
-    );
+            return;
+          }
 
 
-  if(!toast){
+          if (
+            currentType === "market" &&
+            price.value &&
+            Number(price.value) < 0
+          ) {
 
-    toast =
-      document.createElement(
-        "div"
+            showStatus(
+              "Enter a valid price.",
+              "error"
+            );
+
+            return;
+          }
+
+
+          const post = {
+
+            id:
+              "px_" +
+              Date.now() +
+              "_" +
+              Math.random()
+                .toString(36)
+                .slice(2, 8),
+
+            type:
+              currentType,
+
+            text:
+              text,
+
+            title:
+              marketTitle.value.trim(),
+
+            price:
+              price.value
+                ? Number(price.value)
+                : 0,
+
+            currency:
+              "KES",
+
+            location:
+              locationInput.value.trim(),
+
+            platforms: {
+              postx,
+              facebook,
+              instagram
+            },
+
+            boosted:
+              boost.checked,
+
+            boostPrice:
+              boost.checked
+                ? 10
+                : 0,
+
+            likes: 0,
+
+            comments: 0,
+
+            views: 0,
+
+            profileViews: 0,
+
+            createdAt:
+              new Date().toISOString()
+
+          };
+
+
+          /*
+           * Local MVP storage.
+           * Backend/API publishing can replace this
+           * later without changing the UI.
+           */
+
+          const storageKey =
+            "postx_social_feed_v1";
+
+          let posts = [];
+
+          try {
+
+            posts =
+              JSON.parse(
+                localStorage.getItem(
+                  storageKey
+                ) || "[]"
+              );
+
+          } catch (error) {
+
+            posts = [];
+
+          }
+
+
+          posts.unshift(post);
+
+
+          localStorage.setItem(
+            storageKey,
+            JSON.stringify(posts)
+          );
+
+
+          /*
+           * Save the selected file reference
+           * for this browser session only.
+           */
+
+          if (selectedMedia) {
+
+            try {
+
+              sessionStorage.setItem(
+                "postx_last_media_name",
+                selectedMedia.name
+              );
+
+            } catch (error) {}
+
+          }
+
+
+          showStatus(
+            currentType === "market"
+              ? "Listing published successfully."
+              : currentType === "story"
+                ? "Story published successfully."
+                : "Post published successfully.",
+            "success"
+          );
+
+
+          /* RESET */
+
+          caption.value = "";
+          marketTitle.value = "";
+          price.value = "";
+          locationInput.value = "";
+          mediaInput.value = "";
+          boost.checked = false;
+
+          preview.innerHTML = "";
+          preview.style.display = "none";
+
+
+          /*
+           * Give the user a moment to see
+           * the success message, then open feed.
+           */
+
+          setTimeout(() => {
+
+            window.location.href =
+              "feed.html";
+
+          }, 700);
+
+        }
       );
 
 
-    toast.id =
-      "postxToast";
+      /* INITIAL STATE */
 
+      updateType("post");
 
-    toast.style.cssText = `
-
-      position:fixed;
-
-      left:50%;
-      bottom:92px;
-
-      transform:
-        translateX(-50%);
-
-      background:#102334;
-
-      color:#fff;
-
-      border:
-        1px solid #00d9ff;
-
-      padding:
-        12px 17px;
-
-      border-radius:
-        999px;
-
-      font-size:13px;
-
-      font-weight:700;
-
-      z-index:300;
-
-      box-shadow:
-        0 8px 30px
-        rgba(0,0,0,.4);
-
-      max-width:
-        calc(100vw - 32px);
-
-      text-align:center;
-
-      white-space:nowrap;
-
-    `;
-
-
-    document.body.appendChild(
-      toast
-    );
-
-  }
-
-
-  toast.textContent =
-    message;
-
-
-  toast.style.display =
-    "block";
-
-
-  clearTimeout(
-    toast._timer
-  );
-
-
-  toast._timer =
-    setTimeout(
-      () => {
-
-        toast.style.display =
-          "none";
-
-      },
-      2200
-    );
-
-}
-
-
-/* =====================================================
-   START
-   ===================================================== */
-
-renderProfileViews();
-
-renderFeed();
-
-</script>
-
-
-<!-- =====================================================
-     POSTX GLOBAL APP CORE
-     Theme • PWA • Navigation • Swipe • Offline
-     ===================================================== -->
-
-<script src="js/app.js"></script>
+    })();
+  </script>
 
 </body>
 </html>
